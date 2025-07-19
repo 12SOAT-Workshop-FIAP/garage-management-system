@@ -1,0 +1,171 @@
+# Garage Management System (DDD Base Project)
+
+## Overview
+
+This project is a robust, scalable, and well-structured base for a Garage/Auto Repair Shop Management System, following Domain-Driven Design (DDD) principles with NestJS, TypeORM, PostgreSQL, and Docker. It is designed for extensibility, testability, and clarity, using the Ubiquitous Language of the automotive repair domain.
+
+---
+
+## Domain Context & Key Activities
+
+The system models the real workflow of a garage, supporting:
+1. **Receive vehicle**
+2. **Register customer request**
+3. **Diagnose problems**
+4. **Generate estimate**
+5. **Obtain customer authorization**
+6. **Execute service**
+7. **Update status**
+8. **Control parts inventory**
+9. **Finalize service**
+10. **Deliver vehicle**
+11. **Store service history**
+
+### Main Entities
+- **Customer**: Registers and manages clients.
+- **Vehicle**: Registers and manages vehicles.
+- **ServiceRequest**: Links customer, vehicle, and requested service/problem.
+- **Diagnostic**: Mechanic's findings and recommendations.
+- **Estimate**: Cost estimate, with items (parts/services).
+- **Authorization**: Customer's approval or rejection of the estimate.
+- **WorkOrder**: Execution of authorized services.
+- **Part**: Parts and consumables.
+- **Inventory**: Stock control and movements.
+- **ServiceHistory**: Historical record of all services performed.
+
+---
+
+## Architecture
+
+### DDD Layers & Folder Structure
+
+```mermaid
+flowchart TD
+  A[Presentation Layer\n(Controllers, DTOs, Modules)] --> B[Application Layer\n(Use Cases, Services, DTOs)]
+  B --> C[Domain Layer\n(Entities, Value Objects, Repositories, Domain Events)]
+  B --> D[Infrastructure Layer\n(TypeORM Repositories, Providers, Mappings)]
+  D --> E[(Database)]
+```
+
+- **domain/**: Entities, value objects, repository interfaces, domain events.
+- **application/**: Use cases (services), input/output DTOs, business logic orchestration.
+- **infrastructure/**: TypeORM repositories, data mappers, external integrations, providers.
+- **presentation/**: NestJS modules, controllers, request/response DTOs, pipes, interceptors.
+
+### Example Structure
+```
+src/
+  modules/
+    customers/
+      domain/
+      application/
+      infrastructure/
+      presentation/
+    vehicles/
+    service-requests/
+    diagnostics/
+    estimates/
+    authorizations/
+    work-orders/
+    parts/
+    inventory/
+    service-history/
+  shared/
+```
+
+---
+
+## Main Workflow (Key Activities)
+
+```mermaid
+sequenceDiagram
+  participant Customer
+  participant Attendant
+  participant Mechanic
+  participant Manager
+  participant System
+  participant Supplier
+
+  Customer->>Attendant: Delivers vehicle (1)
+  Attendant->>System: Register customer request (2)
+  Mechanic->>System: Diagnose problems (3)
+  System->>Attendant: Generate estimate (4)
+  Attendant->>Customer: Present estimate
+  Customer->>Attendant: Authorize service (5)
+  Attendant->>System: Register authorization
+  Mechanic->>System: Execute service (6)
+  System->>Mechanic: Update status (7)
+  System->>Manager: Notify low stock (8)
+  Manager->>Supplier: Order parts
+  Mechanic->>System: Finalize service (9)
+  Attendant->>Customer: Deliver vehicle (10)
+  System->>System: Store history (11)
+```
+
+---
+
+## How to Run Locally
+
+### 1. Clone and Install
+```bash
+git clone <repo-url>
+cd <repo-folder>
+npm install
+```
+
+### 2. Environment & Docker
+```bash
+cp .env.example .env
+npm run docker:up
+```
+- The API will be available at: http://localhost:3000
+- The database (PostgreSQL) will be available at: localhost:5432
+
+### 3. API Documentation (Swagger)
+- Access: http://localhost:3000/api
+- All endpoints, DTOs, and models are documented automatically.
+
+### 4. Useful Commands
+- **Run unit tests:** `npm test`
+- **Run e2e tests:** `npm run test:e2e`
+- **Lint:** `npm run lint`
+- **Format:** `npm run format`
+- **Generate migration:** `npm run migration:generate`
+- **Run migrations:** `npm run migration:run`
+- **Revert migration:** `npm run migration:revert`
+- **Stop Docker:** `npm run docker:down`
+
+---
+
+## Infrastructure Layer (infra/)
+- **infrastructure/repositories/**: TypeORM implementations of repository interfaces, data mappers.
+- **infrastructure/providers/**: External services, adapters, and dependency injection providers.
+- **infrastructure/database/**: TypeORM config, migrations, seeds.
+- **infra is responsible for all persistence, integration, and external concerns.**
+
+---
+
+## Development & Contribution
+- All code is in English, with JSDoc in English and Portuguese for entities and main contracts.
+- DTOs use `class-validator`, `class-transformer`, and `@nestjs/swagger` for validation, transformation, and documentation.
+- Validation is enforced globally via NestJS `ValidationPipe`.
+- All layers are testable and ready for TDD/DDD practices.
+- Use `npm run lint` and `npm run format` before committing.
+- All business logic should be in the application/domain layers, never in controllers or infra.
+
+---
+
+## Patterns & Best Practices
+- **DDD**: Clear separation of concerns, Ubiquitous Language, aggregates, and domain events.
+- **Validation**: All input is validated and sanitized.
+- **Swagger**: API is always documented and up-to-date.
+- **Testing**: Unit and e2e tests are scaffolded and ready.
+- **Docker**: Local development is easy and reproducible.
+- **Prettier/ESLint**: Code style and quality enforced.
+
+---
+
+## Observations
+- This project is a base/scaffolding: no business rules are implemented.
+- Extend modules and entities as needed for your business context.
+- For questions or contributions, open an issue or PR.

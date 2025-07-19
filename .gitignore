@@ -1,0 +1,38 @@
+# Node
+node_modules/
+dist/
+
+# Env
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage/
+
+# Docker
+*.local
+Dockerfile*
+docker-compose*
+
+# TypeORM
+ormconfig.ts
+
+# Editor & System
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Build
+build/
+
+# Misc
+*.tgz
+*.swp 
