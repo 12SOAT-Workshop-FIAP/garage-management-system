@@ -4,6 +4,8 @@ import { Vehicle } from '../../domain/vehicle.entity';
 import { VehicleRepository } from '../../domain/vehicle.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 
+export const VEHICLE_REPOSITORY = Symbol('VehicleRepository');
+
 /**
  * VehicleTypeOrmRepository (Repositório TypeORM de Veículo)
  * TypeORM implementation for VehicleRepository (Veículo).

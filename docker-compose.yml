@@ -8,11 +8,11 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: garage
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,11 +30,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=garage
     ports:
-      - "3000:3000"
-    command: npm run start:prod
-    volumes:
-      - .:/app
-      - /app/node_modules
+      - '3000:3000'
 
 volumes:
-  pgdata: 
+  pgdata:

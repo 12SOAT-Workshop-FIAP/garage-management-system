@@ -3,14 +3,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Vehicle } from '../domain/vehicle.entity';
 import { VehicleController } from './controllers/vehicle.controller';
 import { RegisterVehicleService } from '../application/services/register-vehicle.service';
-import { VehicleTypeOrmRepository } from '../infrastructure/repositories/vehicle.typeorm.repository';
+import {
+  VEHICLE_REPOSITORY,
+  VehicleTypeOrmRepository,
+} from '../infrastructure/repositories/vehicle.typeorm.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Vehicle])],
   controllers: [VehicleController],
   providers: [
     RegisterVehicleService,
-    { provide: 'VehicleRepository', useClass: VehicleTypeOrmRepository },
+    { provide: VEHICLE_REPOSITORY, useClass: VehicleTypeOrmRepository },
   ],
   exports: [],
 })
