@@ -8,11 +8,10 @@ export default new DataSource({
   password: process.env.POSTGRES_PASSWORD || 'postgres',
   database: process.env.POSTGRES_DB || 'garage',
   entities: [
-    'src/modules/**/domain/*.entity.ts'
+    'src/modules/**/domain/*.entity.ts',
+    'src/modules/**/infrastructure/entities/*.entity.ts',
   ],
-  migrations: [
-    'src/migrations/*.ts'
-  ],
+  migrations: ['src/migrations/*.ts'],
   synchronize: false,
-  logging: true
-}); 
+  logging: true,
+});
