@@ -6,10 +6,10 @@ import { IsString, Length, IsInt, Min, Max } from 'class-validator';
  * Data Transfer Object for creating a vehicle (Veículo).
  */
 export class CreateVehicleDto {
-  @ApiProperty({ description: "Vehicle's license plate", example: 'ABC-1234' })
-  @IsString()
-  @Length(7, 10)
-  licensePlate!: string;
+  // @ApiProperty({ description: "Vehicle's license plate", example: 'ABC-1234' })
+  // @IsString()
+  // @Length(7, 10)
+  // licensePlate!: string;
 
   @ApiProperty({ description: "Vehicle's brand", example: 'Toyota' })
   @IsString()

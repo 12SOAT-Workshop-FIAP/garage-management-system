@@ -14,10 +14,7 @@ export class Vehicle {
   id!: string;
 
   @Column()
-  licensePlate!: string;
-
-  @CreateDateColumn()
-  created_at!: Date;
+  name!: string;
 
   // TODO: Add Value Objects and domain methods
 }

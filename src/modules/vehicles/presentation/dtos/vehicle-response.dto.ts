@@ -12,5 +12,5 @@ export class VehicleResponseDto {
 
   @ApiProperty({ description: "Vehicle's license plate" })
   @Expose()
-  licensePlate!: string;
+  name!: string;
 }

@@ -7,5 +7,7 @@ import { WorkOrdersModule } from './modules/work-orders/presentation/work-orders
 
 @Module({
   imports: [TypeOrmModule.forRoot(ormconfig), CustomersModule, VehiclesModule, WorkOrdersModule],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

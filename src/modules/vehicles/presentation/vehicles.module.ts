@@ -2,19 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Vehicle } from '../domain/vehicle.entity';
 import { VehicleController } from './controllers/vehicle.controller';
-import { RegisterVehicleService } from '../application/services/register-vehicle.service';
-import {
-  VEHICLE_REPOSITORY,
-  VehicleTypeOrmRepository,
-} from '../infrastructure/repositories/vehicle.typeorm.repository';
+// import { RegisterVehicleService } from '../application/services/register-vehicle.service';
+import { FindAllVehicleService } from '../application/services/find-all-vehicle.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Vehicle])],
   controllers: [VehicleController],
-  providers: [
-    RegisterVehicleService,
-    { provide: VEHICLE_REPOSITORY, useClass: VehicleTypeOrmRepository },
-  ],
+  providers: [FindAllVehicleService],
   exports: [],
 })
 export class VehiclesModule {}
