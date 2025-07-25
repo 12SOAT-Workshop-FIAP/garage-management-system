@@ -8,9 +8,9 @@ import { Expose } from 'class-transformer';
 export class VehicleResponseDto {
   @ApiProperty({ description: 'Vehicle unique identifier' })
   @Expose()
-  id!: string;
+  id!: number;
 
   @ApiProperty({ description: "Vehicle's license plate" })
   @Expose()
-  name!: string;
+  brand!: string;
 }

@@ -1,17 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Inject, Injectable } from '@nestjs/common';
+import { VehicleRepository } from '@modules/vehicles/domain/vehicle.repository';
+import { Vehicle } from '@modules/vehicles/domain/vehicle';
 
 @Injectable()
 export class FindAllVehicleService {
-  constructor(
-    @InjectRepository(Vehicle)
-    private readonly repo: Repository<Vehicle>,
-  ) {}
+  constructor(private readonly vehicleRepository: VehicleRepository) {}
 
   async execute(): Promise<Vehicle[]> {
-    const vehicle = this.repo.find();
+    const vehicle = this.vehicleRepository.findAll();
     return vehicle;
   }
 }

@@ -8,13 +8,12 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeor
  * @property licensePlate - Vehicle's license plate
  * @property created_at - Creation timestamp
  */
-@Entity('vehicles')
 export class Vehicle {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id!: number;
+  brand: string;
 
-  @Column()
-  name!: string;
-
+  constructor({ brand }: { brand: string }) {
+    this.brand = brand;
+  }
   // TODO: Add Value Objects and domain methods
 }

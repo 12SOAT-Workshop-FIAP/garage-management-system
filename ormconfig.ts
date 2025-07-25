@@ -1,4 +1,4 @@
-import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
+import { VehicleEntity } from '@modules/vehicles/infrastructure/vehicle.entity';
 import { DataSourceOptions } from 'typeorm';
 
 const ormconfig: DataSourceOptions = {
@@ -8,7 +8,7 @@ const ormconfig: DataSourceOptions = {
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD || 'postgres',
   database: process.env.POSTGRES_DB || 'garage',
-  entities: [Vehicle],
+  entities: [VehicleEntity],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,
   logging: true,
