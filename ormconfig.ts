@@ -1,6 +1,6 @@
-import { DataSource } from 'typeorm';
+import { DataSourceOptions } from 'typeorm';
 
-export default new DataSource({
+const ormconfig: DataSourceOptions = {
   type: 'postgres',
   host: process.env.POSTGRES_HOST || 'localhost',
   port: parseInt(process.env.POSTGRES_PORT || '5432', 10),

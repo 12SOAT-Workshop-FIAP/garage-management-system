@@ -4,6 +4,8 @@ import { Customer } from '../../domain/customer.entity';
 import { CustomerRepository } from '../../domain/customer.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 
+export const CUSTOMER_REPOSITORY = Symbol('CustomerRepository');
+
 /**
  * CustomerTypeOrmRepository
  * TypeORM implementation for CustomerRepository

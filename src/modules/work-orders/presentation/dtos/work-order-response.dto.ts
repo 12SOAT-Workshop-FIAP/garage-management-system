@@ -8,9 +8,9 @@ import { Expose } from 'class-transformer';
 export class WorkOrderResponseDto {
   @ApiProperty({ description: 'Work order unique identifier' })
   @Expose()
-  id: string;
+  id!: string;
 
   @ApiProperty({ description: 'Work order description' })
   @Expose()
-  description: string;
+  description!: string;
 }

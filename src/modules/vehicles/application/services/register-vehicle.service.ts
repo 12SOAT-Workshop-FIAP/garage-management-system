@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { VehicleRepository } from '../../domain/vehicle.repository';
 import { RegisterVehicleDto } from '../dtos/register-vehicle.dto';
+import { VEHICLE_REPOSITORY } from '@modules/vehicles/infrastructure/repositories/vehicle.typeorm.repository';
 
 /**
  * RegisterVehicleService (Serviço de registro de Veículo)
@@ -8,7 +9,10 @@ import { RegisterVehicleDto } from '../dtos/register-vehicle.dto';
  */
 @Injectable()
 export class RegisterVehicleService {
-  constructor(private readonly vehicleRepository: VehicleRepository) {}
+  constructor(
+    @Inject(VEHICLE_REPOSITORY)
+    private readonly vehicleRepository: VehicleRepository,
+  ) {}
 
   async execute(_dto: RegisterVehicleDto) {
     // TODO: Implement vehicle registration logic
