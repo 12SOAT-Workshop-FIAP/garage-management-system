@@ -1,12 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Length, IsInt, Min, Max } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID, IsNumber } from 'class-validator';
 
-/**
- * CreateVehicleDto (DTO de criação de Veículo)
- * Data Transfer Object for creating a vehicle (Veículo).
- */
 export class CreateVehicleDto {
-  @ApiProperty({ description: "Vehicle's brand", example: 'Toyota' })
+  @IsNotEmpty()
   @IsString()
   brand!: string;
+
+  @IsNotEmpty()
+  @IsString()
+  model!: string;
+
+  @IsNotEmpty()
+  @IsString()
+  plate!: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  year!: number;
+
+  @IsNotEmpty()
+  @IsUUID()
+  customer_id!: string;
 }

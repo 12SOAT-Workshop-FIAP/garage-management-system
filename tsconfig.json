@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -17,6 +19,7 @@
       "@shared/*": ["src/shared/*"],
       "@modules/*": ["src/modules/*"]
     }
+
   },
   "include": ["src/**/*", "test/**/*", "test"],
   "exclude": ["node_modules", "dist"]

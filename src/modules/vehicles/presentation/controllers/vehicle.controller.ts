@@ -1,45 +1,62 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UsePipes,
+  ValidationPipe,
+  HttpCode,
+} from '@nestjs/common';
 import { CreateVehicleDto } from '../../application/dtos/create-vehicle.dto';
 import { UpdateVehicleDto } from '../../application/dtos/update-vehicle.dto';
-import { VehicleResponseDto } from '../dtos/vehicle-response.dto';
-import { FindAllVehicleService } from '@modules/vehicles/application/services/find-all-vehicle.service';
-import { CreateVehicleService } from '@modules/vehicles/application/services/create-vehicle.service';
+import { VehicleResponseDto } from '../../application/dtos/response-vehicle.dto'
+import { CreateVehicleService } from '../../application/services/create-vehicle.service';
+import { FindVehiclesService } from '../../application/services/find-all-vehicle.service';
+import { UpdateVehicleService } from '../../application/services/update-vehicle.service';
+import { DeleteVehicleService } from '../../application/services/delete-vehicle.service';
 
-@ApiTags('vehicles')
 @Controller('vehicles')
 export class VehicleController {
   constructor(
-    private findAllVehicleService: FindAllVehicleService,
-    private createVehicleService: CreateVehicleService,
+    private readonly createService: CreateVehicleService,
+    private readonly findService: FindVehiclesService,
+    private readonly updateService: UpdateVehicleService,
+    private readonly deleteService: DeleteVehicleService,
   ) {}
+
+@Post()
+@UsePipes(new ValidationPipe({
+  whitelist: true,             // mantém só os campos do DTO
+  forbidNonWhitelisted: false, // desmonta o erro de “property should not exist”
+}))
+async create(@Body() dto: CreateVehicleDto): Promise<VehicleResponseDto> {
+  console.log('🍀 DTO recebida:', dto);  // <— aqui!
+  const vehicle = await this.createService.execute(dto);
+  return new VehicleResponseDto(vehicle);
+}
 
   @Get()
   async findAll(): Promise<VehicleResponseDto[]> {
-    const vehicle = await this.findAllVehicleService.execute();
-    return vehicle;
+    const vehicles = await this.findService.execute();
+    return vehicles.map(vehicle => new VehicleResponseDto(vehicle));
   }
 
-  @Get(':id')
-  findOne(@Param('id') _id: string): VehicleResponseDto {
-    // TODO: Call service
-    return {} as VehicleResponseDto;
-  }
-
-  @Post()
-  async create(@Body() dto: CreateVehicleDto): Promise<VehicleResponseDto> {
-    const vehicle = await this.createVehicleService.execute(dto);
-    return vehicle;
-  }
-
-  @Patch(':id')
-  update(@Param('id') _id: string, @Body() _dto: UpdateVehicleDto): VehicleResponseDto {
-    // TODO: Call service
-    return {} as VehicleResponseDto;
+  @Put(':id')
+  //@UsePipes(new ValidationPipe({ whitelist: true }))
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateVehicleDto,
+  ): Promise<VehicleResponseDto> {
+    const updated = await this.updateService.execute(id, dto);
+    return new VehicleResponseDto(updated);
   }
 
   @Delete(':id')
-  remove(@Param('id') _id: string): void {
-    // TODO: Call service
+  @HttpCode(204)
+  async delete(@Param('id') id: string): Promise<void> {
+    await this.deleteService.execute(id);
   }
 }
