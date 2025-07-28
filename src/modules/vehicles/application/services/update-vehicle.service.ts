@@ -1,19 +1,23 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { VehicleRepository } from '../../domain/vehicle.repository';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
 import { UpdateVehicleDto } from '../dtos/update-vehicle.dto';
-import { Vehicle } from '../../domain/vehicle.entity';
 
 @Injectable()
 export class UpdateVehicleService {
   constructor(
-    @Inject('VehicleRepository')
-    private readonly vehicleRepo: VehicleRepository,
+    @InjectRepository(Vehicle)
+    private readonly ormRepo: Repository<Vehicle>,
   ) {}
 
   async execute(id: string, dto: UpdateVehicleDto): Promise<Vehicle> {
-    const existing = await this.vehicleRepo.findById(id);
-    if (!existing) throw new NotFoundException('Veículo não encontrado');
-
-    return await this.vehicleRepo.update(id, dto);
+    const vehicle = await this.ormRepo.preload({ id, ...dto });
+    if (!vehicle) {
+      throw new NotFoundException(`Vehicle with id ${id} not found`);
+    }
+    return this.ormRepo.save(vehicle);
   }
 }
+

@@ -1,17 +1,20 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { VehicleRepository } from '../../domain/vehicle.repository';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository }             from '@nestjs/typeorm';
+import { Repository }                   from 'typeorm';
+
+import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
 
 @Injectable()
 export class DeleteVehicleService {
   constructor(
-    @Inject('VehicleRepository')
-    private readonly vehicleRepo: VehicleRepository,
+    @InjectRepository(Vehicle)
+    private readonly ormRepo: Repository<Vehicle>,
   ) {}
 
   async execute(id: string): Promise<void> {
-    const existing = await this.vehicleRepo.findById(id);
-    if (!existing) throw new NotFoundException('Veículo não encontrado no sistema GARAGE');
-
-    await this.vehicleRepo.delete(id);
+    const result = await this.ormRepo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Vehicle with id ${id} not found`);
+    }
   }
 }

@@ -19,10 +19,10 @@ import { VehicleRepository } from '../domain/vehicle.repository';
     FindVehiclesService,
     UpdateVehicleService,
     DeleteVehicleService,
-    {
-      provide: 'VehicleRepository',
-      useClass: TypeOrmVehicleRepository,
-    },
+//    {
+//      provide: 'VehicleRepository',
+//      useClass: TypeOrmVehicleRepository,
+//    },
   ],
 })
 export class VehiclesModule {}

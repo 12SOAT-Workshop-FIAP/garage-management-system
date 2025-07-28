@@ -1,8 +1,7 @@
-import { VehicleRepository } from '@modules/vehicles/domain/vehicle.repository';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { CreateVehicleDto } from '../dtos/create-vehicle.dto';
-import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
-import { v4 as uuidv4 } from 'uuid';
+import { VehicleRepository } from '../../domain/vehicle.repository';
+import { Vehicle } from '../../domain/vehicle.entity';
 
 @Injectable()
 export class CreateVehicleService {
@@ -13,14 +12,13 @@ export class CreateVehicleService {
 
   async execute(dto: CreateVehicleDto): Promise<Vehicle> {
     const vehicle = new Vehicle();
-    vehicle.id = uuidv4();
+    // não atribuímos mais `vehicle.id`, o TypeORM fará isso
     vehicle.brand = dto.brand;
     vehicle.model = dto.model;
     vehicle.plate = dto.plate;
     vehicle.year = dto.year;
     vehicle.customer_id = dto.customer_id;
-    vehicle.created_at = new Date();
-
-    return await this.vehicleRepo.create(vehicle);
+    // created_at também será preenchido pelo @CreateDateColumn - nao preciso definir (ver com Fabricio)
+      return this.vehicleRepo.create(vehicle);
   }
 }

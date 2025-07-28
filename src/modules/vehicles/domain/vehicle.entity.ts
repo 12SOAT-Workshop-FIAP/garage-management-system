@@ -8,21 +8,10 @@ import {
 } from 'typeorm';
 import { Customer } from '../../customers/domain/customer.entity';
 
-/**
- * Vehicle (Veículo)
- * Represents a customer's vehicle registered in the garage system.
- *
- * @property id - Unique identifier (UUID)
- * @property brand - Vehicle's brand (ex: Fiat, Ford)
- * @property model - Vehicle's model (ex: Uno, Focus)
- * @property plate - Vehicle's license plate
- * @property year - Year of manufacture
- * @property customer - Associated customer (foreign key)
- * @property created_at - Creation timestamp
- */
 @Entity('vehicles')
 export class Vehicle {
-  @PrimaryGeneratedColumn('uuid')
+  // agora ID numérico sequencial
+  @PrimaryGeneratedColumn()
   id!: string;
 
   @Column()
@@ -31,14 +20,15 @@ export class Vehicle {
   @Column()
   model!: string;
 
-  @Column({ unique: true }) // Para não permitir duplicação de placa
+  @Column({ unique: true })
   plate!: string;
 
   @Column()
   year!: number;
 
-  @Column()
-  customer_id!: string;  // Campo que armazena o ID do cliente (FK - foreing key)
+  // FK continua UUID 
+  @Column('uuid')
+  customer_id!: string;
 
   @ManyToOne(() => Customer)
   @JoinColumn({ name: 'customer_id' })
@@ -46,6 +36,4 @@ export class Vehicle {
 
   @CreateDateColumn()
   created_at!: Date;
-
-  // TODO: Add Value Objects and domain methods
 }
