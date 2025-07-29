@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete, HttpCode } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateCustomerDto } from '../../application/dtos/create-customer.dto';
-import { UpdateCustomerDto } from '../../application/dtos/update-customer.dto';
 import { CustomerResponseDto } from '../dtos/customer-response.dto';
 import { FindAllCustomerService } from '@modules/customers/application/services/find-all-customer.service';
 import { CreateCustomerService } from '@modules/customers/application/services/create-customer.service';
 import { FindOneCustomerService } from '@modules/customers/application/services/find-one-customer.sevice';
 import { UpdateCustomerService } from '@modules/customers/application/services/update-customer.service';
 import { DeleteCustomerService } from '@modules/customers/application/services/delete-customer.service';
+import { CreateCustomerDto } from '@modules/customers/application/dtos/create-customer.dto';
+import { UpdateCustomerDto } from '@modules/customers/application/dtos/update-customer.dto';
 
 @ApiTags('customers')
 @Controller('customers')
