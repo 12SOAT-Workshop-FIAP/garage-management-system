@@ -10,6 +10,7 @@ export class Customer {
   status: boolean;
 
   constructor({
+    id,
     name,
     personType,
     document,
@@ -19,6 +20,7 @@ export class Customer {
     updatedAt,
     status = true,
   }: {
+    id?: number;
     name: string;
     personType: 'INDIVIDUAL' | 'COMPANY';
     document: string;
@@ -28,6 +30,9 @@ export class Customer {
     updatedAt?: Date;
     status: boolean;
   }) {
+    if (id !== undefined) {
+      this.id = id;
+    }
     this.name = name;
     this.personType = personType;
     this.document = document;
