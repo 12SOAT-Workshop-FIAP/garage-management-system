@@ -1,3 +1,4 @@
+import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
@@ -30,6 +31,10 @@ export class CustomerResponseDto {
   @Expose()
   phone!: string;
 
+  @ApiProperty({ description: 'Customer vehicles list' })
+  @Expose()
+  vehicles?: Vehicle[];
+
   @ApiProperty({ description: 'Customer creation date', type: String, format: 'date-time' })
   @Expose()
   createdAt!: Date;
@@ -52,6 +57,7 @@ export class CustomerResponseDto {
     createdAt,
     updatedAt,
     status = true,
+    vehicles,
   }: {
     id: number;
     name: string;
@@ -62,6 +68,7 @@ export class CustomerResponseDto {
     createdAt: Date;
     updatedAt: Date;
     status: boolean;
+    vehicles?: Vehicle[];
   }) {
     this.id = id;
     this.name = name;
@@ -72,5 +79,6 @@ export class CustomerResponseDto {
     this.updatedAt = updatedAt;
     this.email = email;
     this.status = status;
+    this.vehicles = vehicles ?? [];
   }
 }

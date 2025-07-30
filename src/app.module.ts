@@ -6,7 +6,8 @@ import { VehiclesModule } from './modules/vehicles/presentation/vehicles.module'
 import { WorkOrdersModule } from './modules/work-orders/presentation/work-orders.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(ormconfig), CustomersModule, VehiclesModule, WorkOrdersModule],
+  imports: [
+    TypeOrmModule.forRoot(ormconfig), CustomersModule, VehiclesModule, WorkOrdersModule],
   controllers: [],
   providers: [],
 })

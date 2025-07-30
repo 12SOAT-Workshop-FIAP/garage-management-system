@@ -1,3 +1,5 @@
+import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
+
 export class Customer {
   id!: number;
   name: string;
@@ -5,6 +7,7 @@ export class Customer {
   document: string;
   email?: string;
   phone: string;
+  vehicles?: Vehicle[];
   createdAt!: Date;
   updatedAt!: Date;
   status: boolean;
@@ -19,6 +22,7 @@ export class Customer {
     createdAt,
     updatedAt,
     status = true,
+    vehicles,
   }: {
     id?: number;
     name: string;
@@ -29,9 +33,13 @@ export class Customer {
     createdAt?: Date;
     updatedAt?: Date;
     status: boolean;
+    vehicles?: Vehicle[];
   }) {
     if (id !== undefined) {
       this.id = id;
+    }
+    if (vehicles !== undefined) {
+      this.vehicles = vehicles;
     }
     this.name = name;
     this.personType = personType;

@@ -23,18 +23,27 @@ export class CustomerTypeOrmRepository implements CustomerRepository {
       order: {
         id: 'ASC',
       },
+      relations: {
+        vehicles: true,
+      },
     });
     const domainCustomer = customer.map(this.toDomain);
     return domainCustomer;
   }
 
   async findById(id: number): Promise<Customer | null> {
-    const customer = await this.repository.findOne({ where: { id } });
+    const customer = await this.repository.findOne({
+      where: { id },
+      relations: { vehicles: true },
+    });
     return customer ? this.toDomain(customer) : null;
   }
 
   async findByDocument(document: string): Promise<Customer | null> {
-    const customer = await this.repository.findOne({ where: { document } });
+    const customer = await this.repository.findOne({
+      where: { document },
+      relations: { vehicles: true },
+    });
     return customer ? this.toDomain(customer) : null;
   }
 

@@ -1,14 +1,23 @@
-import { VehicleRepository } from '@modules/vehicles/domain/vehicle.repository';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { CreateVehicleDto } from '../dtos/create-vehicle.dto';
-import { Vehicle } from '@modules/vehicles/domain/vehicle';
+import { VehicleRepository } from '../../domain/vehicle.repository';
+import { Vehicle } from '../../domain/vehicle.entity';
 
 @Injectable()
 export class CreateVehicleService {
-  constructor(private readonly vehicleRepository: VehicleRepository) {}
+  constructor(
+    @Inject(VehicleRepository)
+    private readonly vehicleRepo: VehicleRepository,
+  ) {}
 
-  async execute(createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
-    const vehicle = new Vehicle({ brand: createVehicleDto.brand });
-    return await this.vehicleRepository.create(vehicle);
+  async execute(dto: CreateVehicleDto): Promise<Vehicle> {
+    const vehicle = new Vehicle();
+    // não atribuímos mais `vehicle.id`, o TypeORM fará isso
+    vehicle.brand = dto.brand;
+    vehicle.model = dto.model;
+    vehicle.plate = dto.plate;
+    vehicle.year = dto.year;
+    vehicle.customer = dto.customer;
+    return this.vehicleRepo.create(vehicle);
   }
 }

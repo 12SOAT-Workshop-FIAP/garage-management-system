@@ -1,14 +1,10 @@
-import { Vehicle } from './vehicle';
-
-/**
- * VehicleRepository (Repositório de Veículo)
- * Contract for vehicle persistence operations.
- */
+import { Vehicle } from './vehicle.entity';
 
 export abstract class VehicleRepository {
-  abstract findAll(): Promise<Vehicle[]>;
   abstract create(vehicle: Vehicle): Promise<Vehicle>;
-  // findById(id: string): Promise<Vehicle | null>;
-  // save(vehicle: Vehicle): Promise<Vehicle>;
-  // TODO: Add other relevant methods
+  abstract findAll(): Promise<Vehicle[]>;
+  abstract findById(id: string): Promise<Vehicle | null>;
+  abstract findByPlate(plate: string): Promise<Vehicle | null>;
+  abstract update(id: string, data: Partial<Vehicle>): Promise<Vehicle>;
+  abstract delete(id: string): Promise<void>;
 }

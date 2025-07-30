@@ -1,3 +1,4 @@
+import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -5,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Unique,
+  OneToMany,
 } from 'typeorm';
 
 /**
@@ -40,6 +42,9 @@ export class CustomerEntity {
 
   @Column()
   phone!: string;
+
+  @OneToMany(() => Vehicle, (vehicle) => vehicle.customer)
+  vehicles?: Vehicle[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
