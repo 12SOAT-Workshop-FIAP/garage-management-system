@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { CustomerEntity } from './customer.entity';
-import { CustomerRepository } from '../../domain/customer.repository';
+import { CustomerRepository } from '../domain/customer.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Customer } from '@modules/customers/domain/customer';
 import { UpdateCustomerDto } from '@modules/customers/application/dtos/update-customer.dto';
@@ -18,13 +18,18 @@ export class CustomerTypeOrmRepository implements CustomerRepository {
   ) {}
 
   async findAll(): Promise<Customer[] | null> {
-    const customer = await this.repository.find();
+    const customer = await this.repository.find({
+      order: {
+        id: 'ASC',
+      },
+    });
     const domainCustomer = customer.map(this.toDomain);
     return domainCustomer;
   }
 
   async findById(id: number): Promise<Customer | null> {
-    return this.repository.findOne({ where: { id } });
+    const customer = await this.repository.findOne({ where: { id } });
+    return customer ? this.toDomain(customer) : ({} as Customer);
   }
 
   async create(customer: Customer): Promise<Customer> {

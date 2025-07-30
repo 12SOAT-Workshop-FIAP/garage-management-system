@@ -1,4 +1,4 @@
-import { CustomerEntity } from '@modules/customers/infrastructure/repositories/customer.entity';
+import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
 import { VehicleEntity } from '@modules/vehicles/infrastructure/vehicle.entity';
 import { DataSourceOptions } from 'typeorm';
 

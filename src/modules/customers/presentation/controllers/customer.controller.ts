@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Delete,
+  HttpCode,
+  ParseIntPipe,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomerResponseDto } from '../dtos/customer-response.dto';
 import { FindAllCustomerService } from '@modules/customers/application/services/find-all-customer.service';
@@ -22,33 +33,35 @@ export class CustomerController {
 
   @Get()
   async findAll(): Promise<CustomerResponseDto[]> {
-    const customer = await this.findAllCustomerService.execute();
-    return customer ?? [];
+    const customers = await this.findAllCustomerService.execute();
+    return customers ? customers.map((customer) => new CustomerResponseDto({ ...customer })) : [];
   }
 
   @Get(':id')
-  async findById(@Param('id') id: number): Promise<CustomerResponseDto> {
+  async findById(
+    @Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) id: number,
+  ): Promise<CustomerResponseDto> {
     const customer = await this.findeOneCustomerService.execute(id);
-    return customer ?? ({} as CustomerResponseDto);
+    return customer ? new CustomerResponseDto({ ...customer }) : ({} as CustomerResponseDto);
   }
 
   @Post()
   async create(@Body() dto: CreateCustomerDto): Promise<CustomerResponseDto> {
     const customer = await this.createCustomerService.execute(dto);
-    return customer;
+    return new CustomerResponseDto({ ...customer });
   }
 
   @Patch(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) id: number,
     @Body() dto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
     const customer = await this.updateCustomerService.execute(id, dto);
-    return customer ?? ({} as CustomerResponseDto);
+    return customer ? new CustomerResponseDto({ ...customer }) : ({} as CustomerResponseDto);
   }
 
   @Delete(':id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id') id: number): Promise<void> {
     await this.deleteCustomerService.execute(id);
   }

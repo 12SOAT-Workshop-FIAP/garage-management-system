@@ -37,4 +37,40 @@ export class CustomerResponseDto {
   @ApiProperty({ description: 'Customer last update date', type: String, format: 'date-time' })
   @Expose()
   updatedAt!: Date;
+
+  @ApiProperty({ description: 'Customer status', type: 'boolean' })
+  @Expose()
+  status!: boolean;
+
+  constructor({
+    id,
+    name,
+    personType,
+    document,
+    phone,
+    email,
+    createdAt,
+    updatedAt,
+    status = true,
+  }: {
+    id: number;
+    name: string;
+    personType: 'INDIVIDUAL' | 'COMPANY';
+    document: string;
+    phone: string;
+    email?: string;
+    createdAt: Date;
+    updatedAt: Date;
+    status: boolean;
+  }) {
+    this.id = id;
+    this.name = name;
+    this.personType = personType;
+    this.document = document;
+    this.phone = phone;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+    this.email = email;
+    this.status = status;
+  }
 }

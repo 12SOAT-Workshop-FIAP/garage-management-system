@@ -7,7 +7,7 @@ export class FindAllCustomerService {
   constructor(private readonly customerRepository: CustomerRepository) {}
 
   async execute(): Promise<Customer[] | null> {
-    const vehicle = await this.customerRepository.findAll();
-    return vehicle;
+    const customer = await this.customerRepository.findAll();
+    return customer;
   }
 }
