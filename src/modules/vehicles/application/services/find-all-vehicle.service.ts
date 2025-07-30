@@ -1,18 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, Inject } from '@nestjs/common';
 import { Vehicle } from '../../domain/vehicle.entity';
-
-
+import { VehicleRepository } from '../../domain/vehicle.repository'; // IMPORTAR sua interface VehicleRepository
 
 @Injectable()
 export class FindAllVehicleService {
   constructor(
-    @InjectRepository(Vehicle)
-    private readonly ormRepo: Repository<Vehicle>,
+    @Inject('VehicleRepository') 
+    private readonly vehicleRepo: VehicleRepository, 
   ) {}
 
   async execute(): Promise<Vehicle[]> {
-    return this.ormRepo.find({ relations: ['customer'] });
+    return this.vehicleRepo.findAll(); // Chamar o método findAll da minha interface
   }
 }

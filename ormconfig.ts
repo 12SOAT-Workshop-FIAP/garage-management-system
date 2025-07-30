@@ -1,7 +1,8 @@
 // ormconfig.ts
+import { Customer } from 'src/modules/customers/domain/customer.entity';
+import { Vehicle } from 'src/modules/vehicles/domain/vehicle.entity';
 import { DataSourceOptions } from 'typeorm';
-import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
-import { Customer } from '@modules/customers/domain/customer.entity';
+
 
 const ormconfig: DataSourceOptions = {
   type: 'postgres',
