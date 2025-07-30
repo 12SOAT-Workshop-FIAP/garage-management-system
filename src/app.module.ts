@@ -5,14 +5,16 @@ import { CustomersModule } from './modules/customers/presentation/customers.modu
 import { VehiclesModule } from './modules/vehicles/presentation/vehicles.module';
 import { WorkOrdersModule } from './modules/work-orders/presentation/work-orders.module';
 import { ServicesModule } from './modules/services/services.module';
+import { PartsModule } from './modules/parts/presentation/parts.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(ormconfig.options),
+    TypeOrmModule.forRoot(ormconfig),
     CustomersModule,
     VehiclesModule,
     WorkOrdersModule,
     ServicesModule,
+    PartsModule,
     // ... other modules
   ],
 })
