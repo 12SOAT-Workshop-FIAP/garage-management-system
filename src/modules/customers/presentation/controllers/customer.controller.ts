@@ -40,9 +40,9 @@ export class CustomerController {
   @Get(':id')
   async findById(
     @Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) id: number,
-  ): Promise<CustomerResponseDto> {
+  ): Promise<CustomerResponseDto | null> {
     const customer = await this.findeOneCustomerService.execute(id);
-    return customer ? new CustomerResponseDto({ ...customer }) : ({} as CustomerResponseDto);
+    return new CustomerResponseDto({ ...customer });
   }
 
   @Post()
@@ -57,7 +57,7 @@ export class CustomerController {
     @Body() dto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
     const customer = await this.updateCustomerService.execute(id, dto);
-    return customer ? new CustomerResponseDto({ ...customer }) : ({} as CustomerResponseDto);
+    return new CustomerResponseDto({ ...customer });
   }
 
   @Delete(':id')

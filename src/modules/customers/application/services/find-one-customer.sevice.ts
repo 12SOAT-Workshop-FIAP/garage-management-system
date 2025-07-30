@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CustomerRepository } from '@modules/customers/domain/customer.repository';
 import { Customer } from '@modules/customers/domain/customer';
 
@@ -6,8 +6,11 @@ import { Customer } from '@modules/customers/domain/customer';
 export class FindOneCustomerService {
   constructor(private readonly customerRepository: CustomerRepository) {}
 
-  async execute(id: number): Promise<Customer | null> {
+  async execute(id: number): Promise<Customer> {
     const customer = await this.customerRepository.findById(id);
+    if (!customer) {
+      throw new NotFoundException(`Customer with ID ${id} not found`);
+    }
     return customer;
   }
 }
