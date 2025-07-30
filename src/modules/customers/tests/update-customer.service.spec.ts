@@ -15,8 +15,8 @@ describe('UpdateCustomerService', () => {
       delete: jest.fn(),
       findAll: jest.fn(),
       findById: jest.fn(),
+      findByDocument: jest.fn(),
     };
-
     service = new UpdateCustomerService(mockCustomerRepository);
   });
 
@@ -46,13 +46,7 @@ describe('UpdateCustomerService', () => {
     const result = await service.execute(customer.id, dto);
 
     expect(mockCustomerRepository.findById).toHaveBeenCalledWith(customer.id);
-    expect(mockCustomerRepository.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: customer.id,
-        email: dto.email,
-        phone: dto.phone,
-      }),
-    );
+    expect(mockCustomerRepository.update).toHaveBeenCalledWith(customer, dto);
 
     expect(result.email).toBe(dto.email);
     expect(result.phone).toBe(dto.phone);

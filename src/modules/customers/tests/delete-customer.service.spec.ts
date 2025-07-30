@@ -14,6 +14,7 @@ describe('DeleteCustomerService', () => {
       delete: jest.fn(),
       findAll: jest.fn(),
       findById: jest.fn(),
+      findByDocument: jest.fn(),
     };
 
     deleteCustomerService = new DeleteCustomerService(mockCustomerRepository);
@@ -39,7 +40,7 @@ describe('DeleteCustomerService', () => {
     await deleteCustomerService.execute(id);
 
     expect(mockCustomerRepository.findById).toHaveBeenCalledWith(id);
-    expect(mockCustomerRepository.delete).toHaveBeenCalledWith(id);
+    expect(mockCustomerRepository.delete).toHaveBeenCalledWith(activeCustomer);
     expect(mockCustomerRepository.findById).toHaveBeenCalledTimes(1);
     expect(mockCustomerRepository.delete).toHaveBeenCalledTimes(1);
   });

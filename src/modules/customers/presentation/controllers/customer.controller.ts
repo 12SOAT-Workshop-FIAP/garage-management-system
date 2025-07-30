@@ -19,13 +19,15 @@ import { UpdateCustomerService } from '@modules/customers/application/services/u
 import { DeleteCustomerService } from '@modules/customers/application/services/delete-customer.service';
 import { CreateCustomerDto } from '@modules/customers/application/dtos/create-customer.dto';
 import { UpdateCustomerDto } from '@modules/customers/application/dtos/update-customer.dto';
+import { FindByDocumentCustomerService } from '@modules/customers/application/services/find-by-document-customer.service';
 
 @ApiTags('customers')
 @Controller('customers')
 export class CustomerController {
   constructor(
     private findAllCustomerService: FindAllCustomerService,
-    private findeOneCustomerService: FindOneCustomerService,
+    private findOneCustomerService: FindOneCustomerService,
+    private findByDocumentCustomerService: FindByDocumentCustomerService,
     private createCustomerService: CreateCustomerService,
     private updateCustomerService: UpdateCustomerService,
     private deleteCustomerService: DeleteCustomerService,
@@ -41,7 +43,13 @@ export class CustomerController {
   async findById(
     @Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) id: number,
   ): Promise<CustomerResponseDto | null> {
-    const customer = await this.findeOneCustomerService.execute(id);
+    const customer = await this.findOneCustomerService.execute(id);
+    return new CustomerResponseDto({ ...customer });
+  }
+
+  @Get('document/:document')
+  async findByDocument(@Param('document') document: string): Promise<CustomerResponseDto | null> {
+    const customer = await this.findByDocumentCustomerService.execute(document);
     return new CustomerResponseDto({ ...customer });
   }
 

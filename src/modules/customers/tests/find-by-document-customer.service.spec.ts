@@ -1,10 +1,10 @@
 import { NotFoundException } from '@nestjs/common';
-import { FindOneCustomerService } from '../application/services/find-one-customer.sevice';
 import { Customer } from '../domain/customer';
 import { CustomerRepository } from '../domain/customer.repository';
+import { FindByDocumentCustomerService } from '../application/services/find-by-document-customer.service';
 
-describe('FindOneCustomerService', () => {
-  let findOneCustomerService: FindOneCustomerService;
+describe('FindByDocumentCustomerService', () => {
+  let findByDocumentCustomerService: FindByDocumentCustomerService;
   let mockCustomerRepository: jest.Mocked<CustomerRepository>;
 
   beforeEach(() => {
@@ -17,15 +17,15 @@ describe('FindOneCustomerService', () => {
       findByDocument: jest.fn(),
     };
 
-    findOneCustomerService = new FindOneCustomerService(mockCustomerRepository);
+    findByDocumentCustomerService = new FindByDocumentCustomerService(mockCustomerRepository);
   });
 
   it('should be defined', () => {
-    expect(findOneCustomerService).toBeDefined();
+    expect(findByDocumentCustomerService).toBeDefined();
   });
 
   it('should return the customer if exists', async () => {
-    const customerId = 1;
+    const customerDocument = '98765432100';
     const mockCustomer = new Customer({
       id: 2,
       name: 'Maria Oliveira da Silva',
@@ -38,9 +38,9 @@ describe('FindOneCustomerService', () => {
       status: false,
     });
 
-    mockCustomerRepository.findById.mockResolvedValue(mockCustomer);
+    mockCustomerRepository.findByDocument.mockResolvedValue(mockCustomer);
 
-    const result = await findOneCustomerService.execute(customerId);
+    const result = await findByDocumentCustomerService.execute(customerDocument);
 
     if (!result) {
       fail('Expected customer entity, but got null');
@@ -49,18 +49,17 @@ describe('FindOneCustomerService', () => {
     expect(result).toEqual(mockCustomer);
     expect(result).toBeInstanceOf(Customer);
     expect(result.document).toBe('98765432100');
-    expect(mockCustomerRepository.findById).toHaveBeenCalledTimes(1);
+    expect(mockCustomerRepository.findByDocument).toHaveBeenCalledTimes(1);
   });
 
   it('should throw NotFoundException when customer is not found', async () => {
-    const customerId = 15;
+    const customerDocument = '12354-non-exist';
+    mockCustomerRepository.findByDocument.mockResolvedValue(null);
 
-    mockCustomerRepository.findById.mockResolvedValue(null);
-
-    await expect(findOneCustomerService.execute(customerId)).rejects.toThrow(
-      new NotFoundException(`Customer with ID ${customerId} not found`),
+    await expect(findByDocumentCustomerService.execute(customerDocument)).rejects.toThrow(
+      new NotFoundException(`Customer with document ${customerDocument} not found`),
     );
 
-    expect(mockCustomerRepository.findById).toHaveBeenCalledTimes(1);
+    expect(mockCustomerRepository.findByDocument).toHaveBeenCalledTimes(1);
   });
 });

@@ -13,6 +13,7 @@ describe('FindAllCustomersService', () => {
       delete: jest.fn(),
       findAll: jest.fn(),
       findById: jest.fn(),
+      findByDocument: jest.fn(),
     };
 
     findAllCustomerService = new FindAllCustomerService(mockCustomerRepository);

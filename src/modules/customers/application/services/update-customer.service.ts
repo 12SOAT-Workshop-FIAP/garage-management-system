@@ -12,7 +12,11 @@ export class UpdateCustomerService {
   constructor(private readonly customerRepository: CustomerRepository) {}
 
   async execute(id: number, updateCustomerDto: UpdateCustomerDto): Promise<Customer> {
-    const updated = await this.customerRepository.update(id, updateCustomerDto);
+    const oldCustomer = await this.customerRepository.findById(id);
+    if (!oldCustomer || !oldCustomer.status) {
+      throw new NotFoundException(`Customer with ID ${id} not found`);
+    }
+    const updated = await this.customerRepository.update(oldCustomer, updateCustomerDto);
     if (!updated) throw new NotFoundException(`Customer with ID ${id} not found`);
     return updated;
   }

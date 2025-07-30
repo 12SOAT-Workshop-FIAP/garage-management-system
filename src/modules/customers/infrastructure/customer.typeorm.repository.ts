@@ -33,23 +33,25 @@ export class CustomerTypeOrmRepository implements CustomerRepository {
     return customer ? this.toDomain(customer) : null;
   }
 
+  async findByDocument(document: string): Promise<Customer | null> {
+    const customer = await this.repository.findOne({ where: { document } });
+    return customer ? this.toDomain(customer) : null;
+  }
+
   async create(customer: Customer): Promise<Customer> {
     const createdCustomer = this.repository.create(customer);
     const savedCustomer = await this.repository.save(createdCustomer);
     return this.toDomain(savedCustomer);
   }
 
-  async update(id: number, data: UpdateCustomerDto): Promise<Customer | null> {
-    const existing = await this.repository.findOne({ where: { id } });
-    if (!existing) return null;
-
-    const updated = this.repository.merge(existing, data);
+  async update(oldData: CustomerEntity, newData: UpdateCustomerDto): Promise<Customer> {
+    const updated = this.repository.merge(oldData, newData);
     const saved = await this.repository.save(updated);
     return this.toDomain(saved);
   }
 
-  async delete(id: number): Promise<void> {
-    await this.update(id, { status: false });
+  async delete(customer: Customer): Promise<void> {
+    await this.update(customer, { status: false });
   }
 
   private toDomain(entity: CustomerEntity): Customer {

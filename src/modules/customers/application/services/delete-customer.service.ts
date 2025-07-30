@@ -15,6 +15,6 @@ export class DeleteCustomerService {
       throw new NotFoundException(`Customer with ID ${id} not found`);
     }
 
-    await this.customerRepository.delete(id);
+    await this.customerRepository.delete(customer);
   }
 }

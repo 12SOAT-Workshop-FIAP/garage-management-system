@@ -9,6 +9,7 @@ import { UpdateCustomerService } from '../application/services/update-customer.s
 import { DeleteCustomerService } from '../application/services/delete-customer.service';
 import { FindAllCustomerService } from '../application/services/find-all-customer.service';
 import { FindOneCustomerService } from '../application/services/find-one-customer.sevice';
+import { FindByDocumentCustomerService } from '../application/services/find-by-document-customer.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([CustomerEntity])],
@@ -16,6 +17,7 @@ import { FindOneCustomerService } from '../application/services/find-one-custome
   providers: [
     FindAllCustomerService,
     FindOneCustomerService,
+    FindByDocumentCustomerService,
     CreateCustomerService,
     UpdateCustomerService,
     DeleteCustomerService,

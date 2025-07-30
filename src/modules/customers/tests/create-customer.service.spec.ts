@@ -15,6 +15,7 @@ describe('CreateCustomerService', () => {
       delete: jest.fn(),
       findAll: jest.fn(),
       findById: jest.fn(),
+      findByDocument: jest.fn(),
     };
 
     createCustomerService = new CreateCustomerService(mockCustomerRepository);
