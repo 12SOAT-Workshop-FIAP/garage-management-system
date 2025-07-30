@@ -16,9 +16,8 @@ export class CreateVehicleService {
     vehicle.brand = dto.brand;
     vehicle.model = dto.model;
     vehicle.plate = dto.plate;
-    vehicle.year = dto.year;
+    vehicle.year  = dto.year;
     vehicle.customer_id = dto.customer_id;
-    // created_at também será preenchido pelo @CreateDateColumn - nao preciso definir (ver com Fabricio)
       return this.vehicleRepo.create(vehicle);
   }
 }

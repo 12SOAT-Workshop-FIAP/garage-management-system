@@ -26,9 +26,9 @@ export class Vehicle {
   @Column()
   year!: number;
 
-  // FK continua UUID 
-  @Column('uuid')
-  customer_id!: string;
+  // FK com CLIENTE
+  @Column('int')
+  customer_id!: number;
 
   @ManyToOne(() => Customer)
   @JoinColumn({ name: 'customer_id' })

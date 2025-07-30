@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
     "module": "commonjs",
+    "resolveJsonModule": true,
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -16,11 +15,10 @@
     "strict": true,
     "skipLibCheck": true,
     "paths": {
-      "@shared/*": ["src/shared/*"],
-      "@modules/*": ["src/modules/*"]
+      "@shared/": ["src/shared/"],
+      "@modules/": ["src/modules/"]
     }
-
   },
-  "include": ["src/**/*", "test/**/*", "test"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src//", "test//", "test"],
+  "exclude": ["node_modules","dist"]
 }

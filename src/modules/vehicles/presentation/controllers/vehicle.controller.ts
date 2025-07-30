@@ -9,21 +9,27 @@ import {
   UsePipes,
   ValidationPipe,
   HttpCode,
-  ParseUUIDPipe,      // <— importe aqui
+  ParseUUIDPipe, // Importado para validar UUIDs no ID do veículo
 } from '@nestjs/common';
-import { CreateVehicleDto } from '@modules/vehicles/application/dtos/create-vehicle.dto';
-import { UpdateVehicleDto } from '@modules/vehicles/application/dtos/update-vehicle.dto';
-import { VehicleResponseDto } from '@modules/vehicles/application/dtos/response-vehicle.dto';
-import { CreateVehicleService } from '@modules/vehicles/application/services/create-vehicle.service';
-import { FindVehiclesService } from '@modules/vehicles/application/services/find-all-vehicle.service';
-import { UpdateVehicleService } from '@modules/vehicles/application/services/update-vehicle.service';
-import { DeleteVehicleService } from '@modules/vehicles/application/services/delete-vehicle.service';
+
+// Importação dos serviços
+import { CreateVehicleService } from '../../application/services/create-vehicle.service';
+import { FindAllVehicleService } from '../../application/services/find-all-vehicle.service';
+import { UpdateVehicleService } from '../../application/services/update-vehicle.service';
+import { DeleteVehicleService } from '../../application/services/delete-vehicle.service';
+import { FindByIdVehicleService } from '../../application/services/find-by-id-vehicle.service'; 
+
+// Importação dos DTOs
+import { CreateVehicleDto } from '../../application/dtos/create-vehicle.dto';
+import { UpdateVehicleDto } from '../../application/dtos/update-vehicle.dto';
+import { VehicleResponseDto } from '../dtos/vehicle-response.dto';
 
 @Controller('vehicles')
 export class VehicleController {
   constructor(
     private readonly createService: CreateVehicleService,
-    private readonly findService: FindVehiclesService,
+    private readonly findService: FindAllVehicleService, 
+    private readonly findByIdService: FindByIdVehicleService,
     private readonly updateService: UpdateVehicleService,
     private readonly deleteService: DeleteVehicleService,
   ) {}
@@ -35,24 +41,33 @@ export class VehicleController {
     return new VehicleResponseDto(vehicle);
   }
 
-  @Get()
+  @Get() // Endpoint para buscar TODOS os veículos
   async findAll(): Promise<VehicleResponseDto[]> {
     const vehicles = await this.findService.execute();
     return vehicles.map(v => new VehicleResponseDto(v));
   }
 
- @Put(':id')
-async update(
-  @Param('id', new ParseUUIDPipe()) id: string,  // <-- string + ParseUUIDPipe
-  @Body() dto: UpdateVehicleDto,
-): Promise<VehicleResponseDto> {
-  const updated = await this.updateService.execute(id, dto);
-  return new VehicleResponseDto(updated);
-}
+  @Get(':id') // Para buscar um veículo por ID
+  async findById(
+    @Param('id', new ParseUUIDPipe()) id: string, // Garante que o ID da URL é um UUID válido
+  ): Promise<VehicleResponseDto> {
+    const vehicle = await this.findByIdService.execute(id);
+    return new VehicleResponseDto(vehicle);
+  }
 
-@Delete(':id')
-@HttpCode(204)
-async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-  await this.deleteService.execute(id);
-}
+  @Put(':id')
+  @UsePipes(new ValidationPipe({ whitelist: true })) // Adiciona o ValidationPipe para o PUT 
+  async update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: UpdateVehicleDto,
+  ): Promise<VehicleResponseDto> {
+    const updated = await this.updateService.execute(id, dto);
+    return new VehicleResponseDto(updated);
+  }
+
+  @Delete(':id')
+  @HttpCode(204) // Retorna 204 No Content para deleções bem-sucedidas
+  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+    await this.deleteService.execute(id);
+  }
 }
