@@ -8,7 +8,7 @@ import { ServicesModule } from './modules/services/services.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(ormconfig.options),
+    TypeOrmModule.forRoot(ormconfig),
     CustomersModule,
     VehiclesModule,
     WorkOrdersModule,
