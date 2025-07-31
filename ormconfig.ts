@@ -13,6 +13,4 @@ const ormconfig: DataSourceOptions = {
   migrations: ['src/migrations/*.ts'],
   synchronize: false,
   logging: true,
-};
-
-export default ormconfig;
+});
