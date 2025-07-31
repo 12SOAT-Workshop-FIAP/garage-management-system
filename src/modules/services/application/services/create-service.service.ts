@@ -1,12 +1,13 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Service } from '../../domain/service.entity';
+import { Injectable, Inject } from '@nestjs/common';
 import { ServiceRepository } from '../../domain/service.repository';
+import { Service } from '../../domain/service.entity';
+import { SERVICE_REPOSITORY } from '../../infrastructure/repositories/service.typeorm.repository';
 import { CreateServiceDto } from '../dtos/create-service.dto';
 
 @Injectable()
 export class CreateServiceService {
   constructor(
-    @Inject('ServiceRepository')
+    @Inject(SERVICE_REPOSITORY)
     private readonly serviceRepository: ServiceRepository,
   ) {}
 

@@ -1,10 +1,11 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ServiceRepository } from '../../domain/service.repository';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { SERVICE_REPOSITORY } from '../../infrastructure/repositories/service.typeorm.repository';
 
 @Injectable()
 export class DeleteServiceService {
   constructor(
-    @Inject('ServiceRepository')
+    @Inject(SERVICE_REPOSITORY)
     private readonly serviceRepository: ServiceRepository,
   ) {}
 
