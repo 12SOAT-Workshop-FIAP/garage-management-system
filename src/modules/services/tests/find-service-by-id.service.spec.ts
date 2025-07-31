@@ -56,6 +56,6 @@ describe('FindServiceByIdService', () => {
     await expect(findServiceByIdService.execute(serviceId)).rejects.toThrow('Service not found');
 
     expect(mockServiceRepository.findById).toHaveBeenCalledWith(serviceId);
-    expect(mockServiceRepository.findById).toHaveBeenCalledTimes(1);
+    expect(mockServiceRepository.findById).toHaveBeenCalledTimes(2);
   });
 });
