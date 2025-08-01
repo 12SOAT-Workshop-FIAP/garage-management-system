@@ -79,16 +79,6 @@ src/
     inventory/
     service-history/
     cryptography/
-      domain/
-        value-objects/
-      application/
-        services/
-      infrastructure/
-        repositories/
-      presentation/
-        controllers/
-        dtos/
-      tests/
   shared/
 ```
 
