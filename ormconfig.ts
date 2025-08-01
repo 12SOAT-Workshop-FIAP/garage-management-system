@@ -1,6 +1,6 @@
 import { DataSourceOptions } from 'typeorm';
 
-const ormconfig: DataSourceOptions = {
+export const ormconfig: DataSourceOptions = {
   type: 'postgres',
   host: process.env.POSTGRES_HOST || 'localhost',
   port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
@@ -14,4 +14,4 @@ const ormconfig: DataSourceOptions = {
   migrations: ['src/migrations/*.ts'],
   synchronize: false,
   logging: true,
-});
+};
