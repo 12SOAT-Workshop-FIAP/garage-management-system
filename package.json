@@ -14,8 +14,8 @@
     "test:e2e": "jest --config ./jest.config.ts --runInBand",
     "docker:up": "docker-compose up --build -d",
     "docker:down": "docker-compose down",
-    "migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate src/migrations/$(date +%s)-migration",
-    "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run",
+    "migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate src/migrations/migration-$(date +%s) --dataSource ./data-source.ts",
+    "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run --dataSource ./data-source.ts",
     "migration:revert": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:revert"
   },
   "dependencies": {
