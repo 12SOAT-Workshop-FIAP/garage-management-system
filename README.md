@@ -33,6 +33,14 @@ The system models the real workflow of a garage, supporting:
 - **Inventory**: Stock control and movements.
 - **ServiceHistory**: Historical record of all services performed.
 
+### Cryptography Module
+The system includes a robust cryptography module for handling sensitive data:
+- **CPF/CNPJ Validation**: Brazilian tax document validation with encryption
+- **License Plate Validation**: Vehicle license plate validation (Mercosul and old formats)
+- **Secure Encryption**: AES-256-CBC encryption for sensitive data
+- **Hash Operations**: SHA-256 hashing with timing-safe comparison
+- **Value Objects**: Domain-driven design with proper validation and masking
+
 ---
 
 ## Architecture
@@ -70,6 +78,7 @@ src/
     parts/
     inventory/
     service-history/
+    cryptography/
   shared/
 ```
 
@@ -124,6 +133,7 @@ npm run docker:up
 ### 3. API Documentation (Swagger)
 - Access: http://localhost:3000/api
 - All endpoints, DTOs, and models are documented automatically.
+- Cryptography endpoints available at `/cryptography/*`
 
 ### 4. Useful Commands
 - **Run unit tests:** `npm test`
@@ -157,6 +167,9 @@ npm run docker:up
 
 ## Patterns & Best Practices
 - **DDD**: Clear separation of concerns, Ubiquitous Language, aggregates, and domain events.
+- **SOLID**: All modules follow SOLID principles with proper dependency injection.
+- **Value Objects**: Sensitive data is encapsulated in value objects with validation.
+- **Cryptography**: Secure handling of sensitive data with AES-256-CBC encryption.
 - **Validation**: All input is validated and sanitized.
 - **Swagger**: API is always documented and up-to-date.
 - **Testing**: Unit and e2e tests are scaffolded and ready.

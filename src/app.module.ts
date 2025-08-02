@@ -4,7 +4,8 @@ import ormconfig from '../ormconfig';
 import { CustomersModule } from './modules/customers/presentation/customers.module';
 import { VehiclesModule } from './modules/vehicles/presentation/vehicles.module';
 import { WorkOrdersModule } from './modules/work-orders/presentation/work-orders.module';
-import { ServicesModule } from './modules/services/services.module';
+import { ServicesModule } from '@modules/services/services.module';
+import { CryptographyModule } from './modules/cryptography/presentation/cryptography.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ServicesModule } from './modules/services/services.module';
     VehiclesModule,
     WorkOrdersModule,
     ServicesModule,
+    CryptographyModule,
     // ... other modules
   ],
 })
