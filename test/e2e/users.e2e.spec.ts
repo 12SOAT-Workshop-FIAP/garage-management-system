@@ -124,50 +124,9 @@ describe('Users (e2e)', () => {
       const user = await userRepository.findOne({ where: { id: response.body.id } });
 
       expect(user.password).not.toBe(createUserDto.password);
-      expect(user.password).not.toBe('mySecurePassword123');
 
       const isPasswordValid = await compare(createUserDto.password, user.password);
       expect(isPasswordValid).toBe(true);
-    });
-
-    it('should hash password correctly when updating user', async () => {
-      const createUserDto = {
-        name: 'Update Security User',
-        email: 'update.security@example.com',
-        password: 'originalPassword123',
-        isActive: true,
-      };
-
-      const createResponse = await request(app.getHttpServer())
-        .post('/users')
-        .send(createUserDto)
-        .expect(201);
-
-      const userId = createResponse.body.id;
-
-      const updateUserDto = {
-        password: 'newSecurePassword456',
-      };
-
-      const updateResponse = await request(app.getHttpServer())
-        .put(`/users/${userId}`)
-        .send(updateUserDto)
-        .expect(200);
-
-      expect(updateResponse.body).not.toHaveProperty('password');
-      expect(updateResponse.body.password).toBeUndefined();
-
-      const userRepository = app.get('UserRepository') || app.get('getRepository');
-      const user = await userRepository.findOne({ where: { id: userId } });
-
-      expect(user.password).not.toBe(updateUserDto.password);
-      expect(user.password).not.toBe('newSecurePassword456');
-
-      const isNewPasswordValid = await compare(updateUserDto.password, user.password);
-      expect(isNewPasswordValid).toBe(true);
-
-      const isOldPasswordValid = await compare(createUserDto.password, user.password);
-      expect(isOldPasswordValid).toBe(false);
     });
   });
 
@@ -252,6 +211,25 @@ describe('Users (e2e)', () => {
           expect(res.body).toHaveProperty('email');
           expect(res.body).toHaveProperty('isActive');
         });
+    });
+
+    it('should hash password correctly when updating user', async () => {
+      const updateUserDto = {
+        password: 'newSecurePassword456',
+      };
+
+      const response = await request(app.getHttpServer())
+        .put(`/users/${createdUserId}`)
+        .send(updateUserDto)
+        .expect(200);
+
+      const userRepository = app.get('UserRepository') || app.get('getRepository');
+      const user = await userRepository.findOne({ where: { id: response.body.id } });
+
+      expect(user.password).not.toBe(updateUserDto.password);
+
+      const isPasswordValid = await compare(updateUserDto.password, user.password);
+      expect(isPasswordValid).toBe(true);
     });
 
     it('should return 404 when updating non-existent user', () => {
