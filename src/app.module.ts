@@ -9,7 +9,7 @@ import { CryptographyModule } from './modules/cryptography/presentation/cryptogr
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(ormconfig.options),
+    TypeOrmModule.forRoot(ormconfig),
     CustomersModule,
     VehiclesModule,
     WorkOrdersModule,
