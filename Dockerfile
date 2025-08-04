@@ -11,5 +11,6 @@ FROM node:22-alpine
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY package*.json ./
+COPY tsconfig.json ./
 RUN npm install --only=production
-CMD ["node", "dist/src/main.js"] 
+CMD ["node", "-r", "reflect-metadata", "dist/src/main.js"]

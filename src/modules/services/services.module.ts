@@ -6,7 +6,10 @@ import { FindAllServicesService } from './application/services/find-all-services
 import { FindServiceByIdService } from './application/services/find-service-by-id.service';
 import { UpdateServiceService } from './application/services/update-service.service';
 import { Service } from './infrastructure/entities/service.entity';
-import { ServiceTypeOrmRepository } from './infrastructure/repositories/service.typeorm.repository';
+import {
+  ServiceTypeOrmRepository,
+  SERVICE_REPOSITORY,
+} from './infrastructure/repositories/service.typeorm.repository';
 import { ServiceController } from './presentation/controllers/service.controller';
 
 @Module({
@@ -19,7 +22,7 @@ import { ServiceController } from './presentation/controllers/service.controller
     FindAllServicesService,
     FindServiceByIdService,
     {
-      provide: 'ServiceRepository',
+      provide: SERVICE_REPOSITORY,
       useClass: ServiceTypeOrmRepository,
     },
   ],

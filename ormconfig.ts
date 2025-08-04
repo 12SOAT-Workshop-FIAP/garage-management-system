@@ -1,4 +1,6 @@
 import { DataSourceOptions } from 'typeorm';
+import { Service as ServiceEntity } from '@modules/services/infrastructure/entities/service.entity';
+import { User as UserEntity } from '@modules/users/infrastructure/entities/user.entity';
 
 const ormconfig: DataSourceOptions = {
   type: 'postgres',
@@ -7,10 +9,7 @@ const ormconfig: DataSourceOptions = {
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD || 'postgres',
   database: process.env.POSTGRES_DB || 'garage',
-  entities: [
-    'src/modules/**/domain/*.entity.ts',
-    'src/modules/**/infrastructure/entities/*.entity.ts',
-  ],
+  entities: [ServiceEntity, UserEntity],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,
   logging: true,
