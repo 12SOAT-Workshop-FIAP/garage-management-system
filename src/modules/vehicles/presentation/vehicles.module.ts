@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Vehicle } from '../domain/vehicle.entity';
+import { Vehicle } from '../infrastructure/entities/vehicle.entity';
 import { VehicleController } from './controllers/vehicle.controller';
 import { RegisterVehicleService } from '../application/services/register-vehicle.service';
 import {

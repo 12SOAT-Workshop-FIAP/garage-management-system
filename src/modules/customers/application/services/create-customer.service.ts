@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CustomerRepository } from '../../domain/customer.repository';
 import { CreateCustomerDto } from '../dtos/create-customer.dto';
-import { CUSTOMER_REPOSITORY } from '@modules/customers/infrastructure/repositories/customer.typeorm.repository';
+import { CUSTOMER_REPOSITORY } from '../../infrastructure/repositories/customer.typeorm.repository';
 
 /**
  * CreateCustomerService (Serviço de criação de Cliente)

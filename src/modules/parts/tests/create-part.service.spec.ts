@@ -4,6 +4,7 @@ import { CreatePartService } from '../application/services/create-part.service';
 import { PartRepository } from '../domain/part.repository';
 import { Part } from '../domain/part.entity';
 import { CreatePartDto } from '../application/dtos/create-part.dto';
+import { PART_REPOSITORY } from '../infrastructure/repositories/part.typeorm.repository';
 
 describe('CreatePartService', () => {
   let service: CreatePartService;
@@ -25,14 +26,14 @@ describe('CreatePartService', () => {
       providers: [
         CreatePartService,
         {
-          provide: 'PartRepository',
+          provide: PART_REPOSITORY,
           useValue: mockPartRepository,
         },
       ],
     }).compile();
 
     service = module.get<CreatePartService>(CreatePartService);
-    repository = module.get('PartRepository');
+    repository = module.get(PART_REPOSITORY);
   });
 
   afterEach(() => {
@@ -103,6 +104,7 @@ describe('CreatePartService', () => {
       const sparkPlugDto: CreatePartDto = {
         name: 'Vela de Ignição NGK',
         description: 'Vela de ignição NGK Laser Platinum para motores flex 1.0-1.8',
+        partNumber: '', // Empty part number should not trigger conflict check
         category: 'ignicao',
         price: 25.80,
         costPrice: 18.06,
@@ -136,13 +138,20 @@ describe('CreatePartService', () => {
       expect(repository.save).not.toHaveBeenCalled();
     });
 
-    it('should create hydraulic oil with default values when minimal data provided', async () => {
+    it('should create hydraulic oil with provided values', async () => {
       // Arrange
       const hydraulicOilDto: CreatePartDto = {
         name: 'Óleo Hidráulico ATF',
+        description: 'Óleo hidráulico para transmissão automática',
+        partNumber: 'ATF-001',
         category: 'lubrificantes',
         price: 28.90,
         costPrice: 21.45,
+        stockQuantity: 15,
+        minStockLevel: 5,
+        unit: 'liter',
+        supplier: 'Lubricantes S.A.',
+        active: true,
       };
 
       repository.findByPartNumber.mockResolvedValue(null);
@@ -159,10 +168,10 @@ describe('CreatePartService', () => {
           category: hydraulicOilDto.category,
           price: hydraulicOilDto.price,
           costPrice: hydraulicOilDto.costPrice,
-          stockQuantity: 0,
-          minStockLevel: 1,
-          unit: 'piece',
-          active: true,
+          stockQuantity: hydraulicOilDto.stockQuantity,
+          minStockLevel: hydraulicOilDto.minStockLevel,
+          unit: hydraulicOilDto.unit,
+          active: hydraulicOilDto.active,
         })
       );
     });

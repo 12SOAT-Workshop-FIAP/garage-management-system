@@ -4,6 +4,7 @@ import { UpdateStockService } from '../application/services/update-stock.service
 import { PartRepository } from '../domain/part.repository';
 import { Part } from '../domain/part.entity';
 import { UpdateStockDto } from '../application/dtos/update-part.dto';
+import { PART_REPOSITORY } from '../infrastructure/repositories/part.typeorm.repository';
 
 describe('UpdateStockService', () => {
   let service: UpdateStockService;
@@ -25,14 +26,14 @@ describe('UpdateStockService', () => {
       providers: [
         UpdateStockService,
         {
-          provide: 'PartRepository',
+          provide: PART_REPOSITORY,
           useValue: mockPartRepository,
         },
       ],
     }).compile();
 
     service = module.get<UpdateStockService>(UpdateStockService);
-    repository = module.get('PartRepository');
+    repository = module.get(PART_REPOSITORY);
   });
 
   afterEach(() => {
@@ -83,8 +84,7 @@ describe('UpdateStockService', () => {
     it('should increase oil filter stock when receiving new shipment', async () => {
       // Arrange
       const updateStockDto: UpdateStockDto = {
-        quantity: 20,
-        reason: 'Recebimento de mercadoria - Pedido #1245',
+        stockQuantity: 20,
       };
       repository.findById.mockResolvedValue(oilFilterPart);
       repository.save.mockResolvedValue(oilFilterPart);
@@ -102,8 +102,7 @@ describe('UpdateStockService', () => {
     it('should decrease brake fluid stock when used in service', async () => {
       // Arrange
       const updateStockDto: UpdateStockDto = {
-        quantity: -2,
-        reason: 'Utilizado em serviço - OS #789 (troca de fluido de freio)',
+        stockQuantity: -2,
       };
       repository.findById.mockResolvedValue(brakeFluidPart);
       repository.save.mockResolvedValue(brakeFluidPart);
@@ -121,8 +120,7 @@ describe('UpdateStockService', () => {
     it('should adjust stock due to inventory count discrepancy', async () => {
       // Arrange
       const updateStockDto: UpdateStockDto = {
-        quantity: -5,
-        reason: 'Ajuste de inventário - Contagem física 01/2024',
+        stockQuantity: -5,
       };
       repository.findById.mockResolvedValue(oilFilterPart);
       repository.save.mockResolvedValue(oilFilterPart);
@@ -140,8 +138,7 @@ describe('UpdateStockService', () => {
     it('should throw NotFoundException when timing belt part not found', async () => {
       // Arrange
       const updateStockDto: UpdateStockDto = {
-        quantity: 10,
-        reason: 'Reposição de estoque emergencial',
+        stockQuantity: 10,
       };
       repository.findById.mockResolvedValue(null);
 
@@ -161,8 +158,7 @@ describe('UpdateStockService', () => {
         hasStock: jest.fn().mockReturnValue(true),
       } as any;
       const updateStockDto: UpdateStockDto = {
-        quantity: -5,
-        reason: 'Utilizado em múltiplos serviços',
+        stockQuantity: -5,
       };
       repository.findById.mockResolvedValue(criticalStockPart);
 

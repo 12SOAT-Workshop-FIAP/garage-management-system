@@ -1,23 +1,23 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { randomUUID } from 'crypto';
 
 /**
- * Vehicle (Veículo)
+ * Vehicle Domain Entity
  * Represents a vehicle in the garage (Veículo da oficina mecânica).
  *
  * @property id - Unique identifier (UUID)
  * @property licensePlate - Vehicle's license plate
  * @property created_at - Creation timestamp
  */
-@Entity('vehicles')
 export class Vehicle {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id: string;
+  licensePlate: string;
+  created_at: Date;
 
-  @Column()
-  licensePlate!: string;
-
-  @CreateDateColumn()
-  created_at!: Date;
+  constructor(props: { licensePlate: string }, id?: string) {
+    this.id = id ?? randomUUID();
+    this.licensePlate = props.licensePlate;
+    this.created_at = new Date();
+  }
 
   // TODO: Add Value Objects and domain methods
 }

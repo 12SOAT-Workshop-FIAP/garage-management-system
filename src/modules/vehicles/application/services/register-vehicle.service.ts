@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { VehicleRepository } from '../../domain/vehicle.repository';
 import { RegisterVehicleDto } from '../dtos/register-vehicle.dto';
-import { VEHICLE_REPOSITORY } from '@modules/vehicles/infrastructure/repositories/vehicle.typeorm.repository';
+import { VEHICLE_REPOSITORY } from '../../infrastructure/repositories/vehicle.typeorm.repository';
 
 /**
  * RegisterVehicleService (Serviço de registro de Veículo)

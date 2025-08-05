@@ -1,33 +1,30 @@
-import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
-import { Part } from '../../domain/part.entity';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PartRepository } from '../../domain/part.repository';
+import { PART_REPOSITORY } from '../../infrastructure/repositories/part.typeorm.repository';
 import { UpdateStockDto } from '../dtos/update-part.dto';
+import { Part } from '../../domain/part.entity';
 
 @Injectable()
 export class UpdateStockService {
   constructor(
-    @Inject('PartRepository')
+    @Inject(PART_REPOSITORY)
     private readonly partRepository: PartRepository,
   ) {}
 
   async execute(id: string, updateStockDto: UpdateStockDto): Promise<Part> {
     const part = await this.partRepository.findById(id);
+    
     if (!part) {
       throw new NotFoundException(`Part with ID ${id} not found`);
     }
 
-    const newQuantity = part.stockQuantity + updateStockDto.quantity;
-
-    // Check if the operation would result in negative stock
-    if (newQuantity < 0) {
-      throw new BadRequestException(
-        `Cannot reduce stock by ${Math.abs(updateStockDto.quantity)}. Current stock: ${part.stockQuantity}`
-      );
+    // Check if the update would result in negative stock
+    const newStockQuantity = part.stockQuantity + updateStockDto.stockQuantity;
+    if (newStockQuantity < 0) {
+      throw new BadRequestException('Stock quantity cannot be negative');
     }
 
-    // Update stock using entity method
-    part.updateStock(updateStockDto.quantity);
-
+    part.updateStock(updateStockDto.stockQuantity);
     return await this.partRepository.save(part);
   }
 }

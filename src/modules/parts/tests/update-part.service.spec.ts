@@ -4,6 +4,7 @@ import { UpdatePartService } from '../application/services/update-part.service';
 import { PartRepository } from '../domain/part.repository';
 import { Part } from '../domain/part.entity';
 import { UpdatePartDto } from '../application/dtos/update-part.dto';
+import { PART_REPOSITORY } from '../infrastructure/repositories/part.typeorm.repository';
 
 describe('UpdatePartService', () => {
   let service: UpdatePartService;
@@ -25,14 +26,14 @@ describe('UpdatePartService', () => {
       providers: [
         UpdatePartService,
         {
-          provide: 'PartRepository',
+          provide: PART_REPOSITORY,
           useValue: mockPartRepository,
         },
       ],
     }).compile();
 
     service = module.get<UpdatePartService>(UpdatePartService);
-    repository = module.get('PartRepository');
+    repository = module.get(PART_REPOSITORY);
   });
 
   afterEach(() => {

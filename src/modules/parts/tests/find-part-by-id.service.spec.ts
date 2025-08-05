@@ -3,6 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 import { FindPartByIdService } from '../application/services/find-part-by-id.service';
 import { PartRepository } from '../domain/part.repository';
 import { Part } from '../domain/part.entity';
+import { PART_REPOSITORY } from '../infrastructure/repositories/part.typeorm.repository';
 
 describe('FindPartByIdService', () => {
   let service: FindPartByIdService;
@@ -24,14 +25,14 @@ describe('FindPartByIdService', () => {
       providers: [
         FindPartByIdService,
         {
-          provide: 'PartRepository',
+          provide: PART_REPOSITORY,
           useValue: mockPartRepository,
         },
       ],
     }).compile();
 
     service = module.get<FindPartByIdService>(FindPartByIdService);
-    repository = module.get('PartRepository');
+    repository = module.get(PART_REPOSITORY);
   });
 
   afterEach(() => {

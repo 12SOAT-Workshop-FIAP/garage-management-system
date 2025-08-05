@@ -1,96 +1,111 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Part } from '../../domain/part.entity';
+import { Part as PartEntity } from '../../domain/part.entity';
 import { PartRepository } from '../../domain/part.repository';
+import { Part as TypeOrmPart } from '../entities/part.entity';
+
+export const PART_REPOSITORY = Symbol('PartRepository');
 
 @Injectable()
-export class PartTypeormRepository implements PartRepository {
+export class PartTypeOrmRepository implements PartRepository {
   constructor(
-    @InjectRepository(Part)
-    private readonly repository: Repository<Part>,
+    @InjectRepository(TypeOrmPart)
+    private readonly repository: Repository<TypeOrmPart>,
   ) {}
 
-  async findById(id: string): Promise<Part | null> {
-    const part = await this.repository.findOne({ where: { id } });
-    return part || null;
+  async create(part: PartEntity): Promise<void> {
+    const newPart = this.repository.create(part);
+    await this.repository.save(newPart);
   }
 
-  async findAll(filters?: {
-    category?: string;
-    active?: boolean;
-    lowStock?: boolean;
-    name?: string;
-  }): Promise<Part[]> {
-    const queryBuilder = this.repository.createQueryBuilder('part');
-
-    if (filters?.category) {
-      queryBuilder.andWhere('part.category = :category', { category: filters.category });
-    }
-
-    if (filters?.active !== undefined) {
-      queryBuilder.andWhere('part.active = :active', { active: filters.active });
-    }
-
-    if (filters?.name) {
-      queryBuilder.andWhere('part.name ILIKE :name', { name: `%${filters.name}%` });
-    }
-
-    if (filters?.lowStock) {
-      queryBuilder.andWhere('part.stockQuantity <= part.minStockLevel');
-    }
-
-    return await queryBuilder.orderBy('part.name', 'ASC').getMany();
-  }
-
-  async findByPartNumber(partNumber: string): Promise<Part | null> {
-    const part = await this.repository.findOne({ where: { partNumber } });
-    return part || null;
-  }
-
-  async findByCategory(category: string): Promise<Part[]> {
-    return await this.repository.find({
-      where: { category, active: true },
-      order: { name: 'ASC' },
-    });
-  }
-
-  async findLowStockParts(): Promise<Part[]> {
-    return await this.repository
-      .createQueryBuilder('part')
-      .where('part.stockQuantity <= part.minStockLevel')
-      .andWhere('part.active = :active', { active: true })
-      .orderBy('part.name', 'ASC')
-      .getMany();
-  }
-
-  async save(part: Part): Promise<Part> {
-    return await this.repository.save(part);
+  async update(part: PartEntity): Promise<void> {
+    await this.repository.save(part);
   }
 
   async delete(id: string): Promise<void> {
     await this.repository.delete(id);
   }
 
-  async count(filters?: {
-    category?: string;
-    active?: boolean;
-    lowStock?: boolean;
-  }): Promise<number> {
-    const queryBuilder = this.repository.createQueryBuilder('part');
+  async findAll(): Promise<PartEntity[]> {
+    const parts = await this.repository.find();
+    return parts.map((part) => this.toDomain(part));
+  }
 
-    if (filters?.category) {
-      queryBuilder.andWhere('part.category = :category', { category: filters.category });
+  async findById(id: string): Promise<PartEntity | null> {
+    const part = await this.repository.findOne({ where: { id } });
+    if (!part) {
+      return null;
     }
+    return this.toDomain(part);
+  }
 
-    if (filters?.active !== undefined) {
-      queryBuilder.andWhere('part.active = :active', { active: filters.active });
+  async save(part: PartEntity): Promise<PartEntity> {
+    const entity = this.repository.create({
+      id: part.id,
+      name: part.name,
+      description: part.description,
+      partNumber: part.partNumber,
+      category: part.category,
+      price: part.price,
+      costPrice: part.costPrice,
+      stockQuantity: part.stockQuantity,
+      minStockLevel: part.minStockLevel,
+      unit: part.unit,
+      supplier: part.supplier,
+      active: part.active,
+      createdAt: part.createdAt,
+      updatedAt: part.updatedAt,
+    });
+    
+    const saved = await this.repository.save(entity);
+    return this.toDomain(saved);
+  }
+
+  async findByPartNumber(partNumber: string): Promise<PartEntity | null> {
+    const part = await this.repository.findOne({ where: { partNumber } });
+    if (!part) {
+      return null;
     }
+    return this.toDomain(part);
+  }
 
-    if (filters?.lowStock) {
-      queryBuilder.andWhere('part.stockQuantity <= part.minStockLevel');
-    }
+  async findLowStockParts(): Promise<PartEntity[]> {
+    const parts = await this.repository
+      .createQueryBuilder('part')
+      .where('part.stockQuantity <= part.minStockLevel')
+      .getMany();
+    
+    return parts.map((part) => this.toDomain(part));
+  }
 
-    return await queryBuilder.getCount();
+  async findByCategory(category: string): Promise<PartEntity[]> {
+    const parts = await this.repository.find({ where: { category } });
+    return parts.map((part) => this.toDomain(part));
+  }
+
+  private toDomain(part: TypeOrmPart): PartEntity {
+    const partEntity = new PartEntity(
+      {
+        name: part.name,
+        description: part.description,
+        partNumber: part.partNumber,
+        category: part.category,
+        price: part.price,
+        costPrice: part.costPrice,
+        stockQuantity: part.stockQuantity,
+        minStockLevel: part.minStockLevel,
+        unit: part.unit,
+        supplier: part.supplier,
+        active: part.active,
+      },
+      part.id,
+    );
+
+    // Re-assigning properties to ensure they are correctly set
+    partEntity.createdAt = part.createdAt;
+    partEntity.updatedAt = part.updatedAt;
+
+    return partEntity;
   }
 }

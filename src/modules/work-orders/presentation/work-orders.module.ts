@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { WorkOrder } from '../domain/work-order.entity';
+import { WorkOrder } from '../infrastructure/entities/work-order.entity';
 import { WorkOrderController } from './controllers/work-order.controller';
 import { CreateWorkOrderService } from '../application/services/create-work-order.service';
 import {

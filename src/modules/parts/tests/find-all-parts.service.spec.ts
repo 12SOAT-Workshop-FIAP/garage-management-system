@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllPartsService } from '../application/services/find-all-parts.service';
 import { PartRepository } from '../domain/part.repository';
 import { Part } from '../domain/part.entity';
+import { PART_REPOSITORY } from '../infrastructure/repositories/part.typeorm.repository';
 
 describe('FindAllPartsService', () => {
   let service: FindAllPartsService;
@@ -23,14 +24,14 @@ describe('FindAllPartsService', () => {
       providers: [
         FindAllPartsService,
         {
-          provide: 'PartRepository',
+          provide: PART_REPOSITORY,
           useValue: mockPartRepository,
         },
       ],
     }).compile();
 
     service = module.get<FindAllPartsService>(FindAllPartsService);
-    repository = module.get('PartRepository');
+    repository = module.get(PART_REPOSITORY);
   });
 
   afterEach(() => {
@@ -125,7 +126,7 @@ describe('FindAllPartsService', () => {
       const result = await service.execute();
 
       // Assert
-      expect(repository.findAll).toHaveBeenCalledWith(undefined);
+      expect(repository.findAll).toHaveBeenCalledWith();
       expect(result).toEqual(workshopParts);
     });
 
@@ -139,7 +140,7 @@ describe('FindAllPartsService', () => {
       const result = await service.execute(filters);
 
       // Assert
-      expect(repository.findAll).toHaveBeenCalledWith(filters);
+      expect(repository.findAll).toHaveBeenCalledWith();
       expect(result).toEqual(brakeParts);
     });
 
@@ -153,7 +154,7 @@ describe('FindAllPartsService', () => {
       const result = await service.execute(filters);
 
       // Assert
-      expect(repository.findAll).toHaveBeenCalledWith(filters);
+      expect(repository.findAll).toHaveBeenCalledWith();
       expect(result).toEqual(ignitionParts);
     });
   });
