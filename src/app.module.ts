@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import ormconfig from '../ormconfig';
+import { PartsModule } from './modules/parts/parts.module';
 import { CustomersModule } from './modules/customers/presentation/customers.module';
+import { ServicesModule } from './modules/services/services.module';
 import { VehiclesModule } from './modules/vehicles/presentation/vehicles.module';
 import { WorkOrdersModule } from './modules/work-orders/presentation/work-orders.module';
-import { CryptographyModule } from './modules/cryptography/presentation/cryptography.module';
-import { ServicesModule } from './modules/services/services.module';
-import { UsersModule } from './modules/users/users.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -14,14 +12,22 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(ormconfig),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.POSTGRES_HOST || 'localhost',
+      port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+      username: process.env.POSTGRES_USER || 'postgres',
+      password: process.env.POSTGRES_PASSWORD || 'postgres',
+      database: process.env.POSTGRES_DB || 'garage',
+      autoLoadEntities: true,
+      synchronize: false,
+      logging: true,
+    }),
+    PartsModule,
     CustomersModule,
+    ServicesModule,
     VehiclesModule,
     WorkOrdersModule,
-    ServicesModule,
-    CryptographyModule,
-    UsersModule,
-    // ... other modules
   ],
 })
-export class AppModule {}
+export class AppModule { }
