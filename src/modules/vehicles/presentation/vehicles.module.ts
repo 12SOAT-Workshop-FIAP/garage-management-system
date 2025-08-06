@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Vehicle } from '../infrastructure/entities/vehicle.entity';
 import { VehicleController } from './controllers/vehicle.controller';
 
 // Importação dos serviços de aplicação
@@ -16,6 +15,7 @@ import { TypeOrmVehicleRepository } from '../infrastructure/vehicle-typeorm.repo
 
 // IMPORTAÇÃO DA INTERFACE VehicleRepository (necessária para tipagem em 'exports')
 import { VehicleRepository } from '../domain/vehicle.repository';
+import { Vehicle } from '../domain/vehicle.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Vehicle])],

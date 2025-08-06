@@ -1,6 +1,12 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { join } from 'path';
 import * as dotenv from 'dotenv';
+import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
+import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
+import { Service } from '@modules/services/infrastructure/entities/service.entity';
+import { User } from '@modules/users/infrastructure/entities/user.entity';
+import { WorkOrder } from '@modules/work-orders/infrastructure/entities/work-order.entity';
+import { Part } from '@modules/parts/infrastructure/entities/part.entity';
 
 dotenv.config();
 
@@ -11,13 +17,13 @@ export const ormconfig: DataSourceOptions = {
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD || 'postgres',
   database: process.env.POSTGRES_DB || 'garage',
-  
-  entities: [join(__dirname, 'src', '**', '*.entity.ts')],
+
+  entities: [Vehicle, CustomerEntity, Service, User, WorkOrder, Part],
+  // validar melhor forma de utilizar entities: [join(__dirname, 'src', '**', '*.entity.ts')],
   migrations: [join(__dirname, 'src', 'migrations', '*.ts')],
 
   synchronize: false,
   logging: true,
 };
 
-const dataSource = new DataSource(ormconfig);
-export default dataSource;
+export const dataSource = new DataSource(ormconfig);
