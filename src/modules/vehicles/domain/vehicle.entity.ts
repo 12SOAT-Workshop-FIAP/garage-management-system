@@ -1,23 +1,27 @@
-import { randomUUID } from 'crypto';
+import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
 
-/**
- * Vehicle Domain Entity
- * Represents a vehicle in the garage (Veículo da oficina mecânica).
- *
- * @property id - Unique identifier (UUID)
- * @property licensePlate - Vehicle's license plate
- * @property created_at - Creation timestamp
- */
+@Entity('vehicles')
 export class Vehicle {
-  id: string;
-  licensePlate: string;
-  created_at: Date;
+  // agora ID numérico sequencial
+  @PrimaryGeneratedColumn()
+  id!: string;
 
-  constructor(props: { licensePlate: string }, id?: string) {
-    this.id = id ?? randomUUID();
-    this.licensePlate = props.licensePlate;
-    this.created_at = new Date();
-  }
+  @Column()
+  brand!: string;
 
-  // TODO: Add Value Objects and domain methods
+  @Column()
+  model!: string;
+
+  @Column({ unique: true })
+  plate!: string;
+
+  @Column()
+  year!: number;
+
+  @ManyToOne(() => CustomerEntity, (customer) => customer.vehicles)
+  customer!: CustomerEntity;
+
+  @CreateDateColumn()
+  created_at!: Date;
 }

@@ -1,7 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CustomerRepository } from '../../domain/customer.repository';
 import { CreateCustomerDto } from '../dtos/create-customer.dto';
-import { CUSTOMER_REPOSITORY } from '../../infrastructure/repositories/customer.typeorm.repository';
+import { Customer } from '@modules/customers/domain/customer';
 
 /**
  * CreateCustomerService (Serviço de criação de Cliente)
@@ -9,13 +9,10 @@ import { CUSTOMER_REPOSITORY } from '../../infrastructure/repositories/customer.
  */
 @Injectable()
 export class CreateCustomerService {
-  constructor(
-    @Inject(CUSTOMER_REPOSITORY)
-    private readonly customerRepository: CustomerRepository,
-  ) {}
+  constructor(private readonly customerRepository: CustomerRepository) {}
 
-  async execute(_dto: CreateCustomerDto) {
-    // TODO: Implement customer creation logic
-    return null;
+  async execute(createCustomerDto: CreateCustomerDto): Promise<Customer> {
+    const customer = new Customer({ ...createCustomerDto });
+    return await this.customerRepository.create(customer);
   }
 }

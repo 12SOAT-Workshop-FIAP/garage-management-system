@@ -1,19 +1,27 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Customer } from '../infrastructure/entities/customer.entity';
+import { CustomerEntity } from '../infrastructure/customer.entity';
 import { CustomerController } from './controllers/customer.controller';
 import { CreateCustomerService } from '../application/services/create-customer.service';
-import {
-  CUSTOMER_REPOSITORY,
-  CustomerTypeOrmRepository,
-} from '../infrastructure/repositories/customer.typeorm.repository';
+import { CustomerTypeOrmRepository } from '../infrastructure/customer.typeorm.repository';
+import { CustomerRepository } from '../domain/customer.repository';
+import { UpdateCustomerService } from '../application/services/update-customer.service';
+import { DeleteCustomerService } from '../application/services/delete-customer.service';
+import { FindAllCustomerService } from '../application/services/find-all-customer.service';
+import { FindOneCustomerService } from '../application/services/find-one-customer.sevice';
+import { FindByDocumentCustomerService } from '../application/services/find-by-document-customer.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Customer])],
+  imports: [TypeOrmModule.forFeature([CustomerEntity])],
   controllers: [CustomerController],
   providers: [
+    FindAllCustomerService,
+    FindOneCustomerService,
+    FindByDocumentCustomerService,
     CreateCustomerService,
-    { provide: CUSTOMER_REPOSITORY, useClass: CustomerTypeOrmRepository },
+    UpdateCustomerService,
+    DeleteCustomerService,
+    { provide: CustomerRepository, useClass: CustomerTypeOrmRepository },
   ],
   exports: [],
 })

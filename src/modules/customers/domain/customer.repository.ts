@@ -1,10 +1,16 @@
-import { Customer } from './customer.entity';
+import { CreateCustomerDto } from '../application/dtos/create-customer.dto';
+import { UpdateCustomerDto } from '../application/dtos/update-customer.dto';
+import { Customer } from './customer';
 
 /**
  * CustomerRepository
  * Contract for customer persistence operations.
  */
-export interface CustomerRepository {
-  findById(id: string): Promise<Customer | null>;
-  save(customer: Customer): Promise<Customer>;
+export abstract class CustomerRepository {
+  abstract findAll(): Promise<Customer[] | null>;
+  abstract findById(id: number): Promise<Customer | null>;
+  abstract findByDocument(document: string): Promise<Customer | null>;
+  abstract create(customer: CreateCustomerDto): Promise<Customer>;
+  abstract update(oldCustomer: Customer, data: UpdateCustomerDto): Promise<Customer | null>;
+  abstract delete(customer: Customer): Promise<void>;
 }

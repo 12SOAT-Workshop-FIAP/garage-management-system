@@ -6,7 +6,7 @@ dotenv.config();
 
 export const ormconfig: DataSourceOptions = {
   type: 'postgres',
-  host: process.env.POSTGRES_HOST || 'localhost',
+  host: process.env.POSTGRES_HOST || 'host.docker.internal',
   port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD || 'postgres',
