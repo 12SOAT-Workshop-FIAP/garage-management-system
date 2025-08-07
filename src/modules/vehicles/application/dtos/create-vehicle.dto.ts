@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsString, IsNumber, IsInt } from 'class-validator';
 
 export class CreateVehicleDto {
   @ApiProperty({ description: "Vehicle's brand", nullable: false })
@@ -17,13 +18,15 @@ export class CreateVehicleDto {
   @IsString()
   plate!: string;
 
-  @ApiProperty({ description: "Year of the vehicle", nullable: false })
+  @ApiProperty({ description: 'Year of the vehicle', example: 2021 })
   @IsNotEmpty()
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
   year!: number;
 
-  @ApiProperty({ description: "ID of the customer", nullable: false })
+  @ApiProperty({ description: 'ID of the existing customer', example: 42 })
   @IsNotEmpty()
-  @IsNumber()
-  customer_id!: number;
+  @Type(() => Number)
+  @IsInt()
+  customer!: number;
 }

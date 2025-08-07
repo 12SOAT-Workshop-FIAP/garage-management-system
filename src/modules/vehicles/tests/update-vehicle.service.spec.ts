@@ -23,7 +23,6 @@ describe('UpdateVehicleService', () => {
       year: 2010,
       customer: {} as any,
       created_at: new Date(),
-      customer_id: 0
     };
 
     const dto = {

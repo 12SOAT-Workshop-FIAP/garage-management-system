@@ -16,7 +16,7 @@ export class TypeOrmVehicleRepository implements VehicleRepository {
   }
 
   async findAll(): Promise<Vehicle[]> {
-    return await this.ormRepo.find();
+    return await this.ormRepo.find({ relations: { customer: true } });
   }
 
   async findById(id: number): Promise<Vehicle | null> {

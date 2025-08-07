@@ -14,9 +14,14 @@ describe('FindAllVehicleService', () => {
   it('deve retornar todos os veículos', async () => {
     const vehicles: Vehicle[] = [
       {
-        id: 1, brand: 'Fiat', model: 'Uno', plate: 'AAA-1234', year: 2010, customer: {} as any, created_at: new Date(),
-        customer_id: 0
-      }
+        id: 1,
+        brand: 'Fiat',
+        model: 'Uno',
+        plate: 'AAA-1234',
+        year: 2010,
+        customer: {} as any,
+        created_at: new Date(),
+      },
     ];
 
     vehicleRepo.findAll.mockResolvedValue(vehicles);
