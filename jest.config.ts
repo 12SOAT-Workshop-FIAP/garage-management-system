@@ -3,9 +3,12 @@ export default {
   rootDir: '.',
   testRegex: '.*\\.spec\\.ts$',
   testEnvironment: 'node',
-  preset: 'ts-jest',
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
   collectCoverageFrom: ['src/**/*.ts', '!src/main.ts', '!src/**/tests/**', '!src/**/dtos/**'],
   coverageDirectory: './coverage',
   coverageReporters: ['text', 'lcov'],
   setupFilesAfterEnv: [],
+  transform: {
+    '^.+\\.ts$': 'ts-jest',
+  },
 };

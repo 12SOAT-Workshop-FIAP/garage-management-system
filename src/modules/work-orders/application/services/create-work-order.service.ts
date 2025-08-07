@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { CreateWorkOrderDto } from '../dtos/create-work-order.dto';
-import { WORK_ORDER_REPOSITORY } from '@modules/work-orders/infrastructure/repositories/work-order.typeorm.repository';
+import { WORK_ORDER_REPOSITORY } from '../../infrastructure/repositories/work-order.typeorm.repository';
 
 /**
  * CreateWorkOrderService (Serviço de criação de Ordem de Serviço)

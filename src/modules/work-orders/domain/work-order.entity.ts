@@ -1,23 +1,23 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { randomUUID } from 'crypto';
 
 /**
- * WorkOrder (Ordem de Serviço)
+ * WorkOrder Domain Entity
  * Represents a work order in the garage (Ordem de Serviço da oficina mecânica).
  *
  * @property id - Unique identifier (UUID)
  * @property description - Work order description
  * @property created_at - Creation timestamp
  */
-@Entity('work_orders')
 export class WorkOrder {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id: string;
+  description: string;
+  created_at: Date;
 
-  @Column()
-  description!: string;
-
-  @CreateDateColumn()
-  created_at!: Date;
+  constructor(props: { description: string }, id?: string) {
+    this.id = id ?? randomUUID();
+    this.description = props.description;
+    this.created_at = new Date();
+  }
 
   // TODO: Add Value Objects and domain methods
 }

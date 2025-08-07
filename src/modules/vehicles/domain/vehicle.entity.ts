@@ -1,23 +1,27 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
 
-/**
- * Vehicle (Veículo)
- * Represents a vehicle in the garage (Veículo da oficina mecânica).
- *
- * @property id - Unique identifier (UUID)
- * @property licensePlate - Vehicle's license plate
- * @property created_at - Creation timestamp
- */
 @Entity('vehicles')
 export class Vehicle {
-  @PrimaryGeneratedColumn('uuid')
+  // agora ID numérico sequencial
+  @PrimaryGeneratedColumn()
   id!: string;
 
   @Column()
-  licensePlate!: string;
+  brand!: string;
+
+  @Column()
+  model!: string;
+
+  @Column({ unique: true })
+  plate!: string;
+
+  @Column()
+  year!: number;
+
+  @ManyToOne(() => CustomerEntity, (customer) => customer.vehicles)
+  customer!: CustomerEntity;
 
   @CreateDateColumn()
   created_at!: Date;
-
-  // TODO: Add Value Objects and domain methods
 }

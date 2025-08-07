@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import ormconfig from '../ormconfig';
+import { PartsModule } from './modules/parts/parts.module';
 import { CustomersModule } from './modules/customers/presentation/customers.module';
+import { ServicesModule } from './modules/services/services.module';
 import { VehiclesModule } from './modules/vehicles/presentation/vehicles.module';
 import { WorkOrdersModule } from './modules/work-orders/presentation/work-orders.module';
-import { CryptographyModule } from './modules/cryptography/presentation/cryptography.module';
-import { ServicesModule } from './modules/services/services.module';
-import { UsersModule } from './modules/users/users.module';
 import { ConfigModule } from '@nestjs/config';
+import { ormconfig } from '../ormconfig';
 
 @Module({
   imports: [
@@ -19,9 +18,9 @@ import { ConfigModule } from '@nestjs/config';
     VehiclesModule,
     WorkOrdersModule,
     ServicesModule,
-    CryptographyModule,
-    UsersModule,
-    // ... other modules
+    PartsModule,
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
