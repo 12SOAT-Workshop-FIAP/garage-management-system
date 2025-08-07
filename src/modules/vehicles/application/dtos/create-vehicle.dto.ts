@@ -1,6 +1,3 @@
-//Ele especifica quais campos são esperados, seus tipos e, possivelmente, regras de validação
-
-import { Customer } from '@modules/customers/domain/customer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 
@@ -9,10 +6,24 @@ export class CreateVehicleDto {
   @IsNotEmpty()
   @IsString()
   brand!: string;
-  @IsNotEmpty() @IsString() model!: string;
-  @IsNotEmpty() @IsString() plate!: string;
-  @IsNotEmpty() @IsNumber() year!: number;
 
-  // FK da classe cliente
-  @IsNotEmpty() @IsNumber() customer!: Customer;
+  @ApiProperty({ description: "Vehicle's model", nullable: false })
+  @IsNotEmpty()
+  @IsString()
+  model!: string;
+
+  @ApiProperty({ description: "Vehicle's license plate", nullable: false })
+  @IsNotEmpty()
+  @IsString()
+  plate!: string;
+
+  @ApiProperty({ description: "Year of the vehicle", nullable: false })
+  @IsNotEmpty()
+  @IsNumber()
+  year!: number;
+
+  @ApiProperty({ description: "ID of the customer", nullable: false })
+  @IsNotEmpty()
+  @IsNumber()
+  customer_id!: number;
 }

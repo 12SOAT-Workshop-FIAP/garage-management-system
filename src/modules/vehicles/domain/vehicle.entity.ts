@@ -1,11 +1,10 @@
 import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity('vehicles')
 export class Vehicle {
-  // agora ID numérico sequencial
   @PrimaryGeneratedColumn()
-  id!: string;
+  id!: number;
 
   @Column()
   brand!: string;
@@ -18,8 +17,14 @@ export class Vehicle {
 
   @Column()
   year!: number;
+  
+  // chave estrangeira
+  @Column()
+  customer_id!: number;
 
-  @ManyToOne(() => CustomerEntity, (customer) => customer.vehicles)
+  @ManyToOne(() => CustomerEntity)
+  // decorador para vincular a coluna
+  @JoinColumn({ name: 'customer_id' })
   customer!: CustomerEntity;
 
   @CreateDateColumn()

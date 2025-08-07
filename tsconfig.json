@@ -4,7 +4,6 @@
     "resolveJsonModule": true,
     "declaration": true,
     "removeComments": true,
-    "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,

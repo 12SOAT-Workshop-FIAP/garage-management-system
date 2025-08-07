@@ -49,7 +49,7 @@ export class VehicleController {
 
   @Get(':id') // Para buscar um veículo por ID
   async findById(
-    @Param('id', new ParseUUIDPipe()) id: string, // Garante que o ID da URL é um UUID válido
+    @Param('id', new ParseUUIDPipe()) id: number, // Garante que o ID da URL é um UUID válido
   ): Promise<VehicleResponseDto> {
     const vehicle = await this.findByIdService.execute(id);
     return new VehicleResponseDto(vehicle);
@@ -58,7 +58,7 @@ export class VehicleController {
   @Put(':id')
   @UsePipes(new ValidationPipe({ whitelist: true })) // Adiciona o ValidationPipe para o PUT 
   async update(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id', new ParseUUIDPipe()) id: number,
     @Body() dto: UpdateVehicleDto,
   ): Promise<VehicleResponseDto> {
     const updated = await this.updateService.execute(id, dto);
@@ -67,7 +67,7 @@ export class VehicleController {
 
   @Delete(':id')
   @HttpCode(204) // Retorna 204 No Content para deleções bem-sucedidas
-  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+  async delete(@Param('id', new ParseUUIDPipe()) id: number): Promise<void> {
     await this.deleteService.execute(id);
   }
 }

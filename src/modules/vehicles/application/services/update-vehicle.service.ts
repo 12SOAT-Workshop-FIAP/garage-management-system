@@ -10,14 +10,13 @@ export class UpdateVehicleService {
     private readonly vehicleRepo: VehicleRepository,
   ) {}
 
-  async execute(id: string, dto: UpdateVehicleDto): Promise<Vehicle> {
+  async execute(id: number, dto: UpdateVehicleDto): Promise<Vehicle> {
     const existingVehicle = await this.vehicleRepo.findById(id); // Usar findById da minha interface
 
     if (!existingVehicle) {
       throw new NotFoundException(`Vehicle with ID "${id}" not found.`);
     }
 
-    // O método 'update' do VehicleRepository já recebe id e Partial<Vehicle>
     return this.vehicleRepo.update(id, dto); // Chamar update() da sua interface
   }
 }

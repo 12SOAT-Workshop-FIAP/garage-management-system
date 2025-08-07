@@ -6,7 +6,7 @@ import { Customer } from '@modules/customers/domain/customer';
 export class VehicleResponseDto {
   @ApiProperty({ description: 'Vehicle unique identifier' })
   @Expose()
-  id!: string;
+  id!: number;
 
   @ApiProperty({ description: "Vehicle's license plate" })
   @Expose()
@@ -33,12 +33,12 @@ export class VehicleResponseDto {
   created_at!: Date;
 
   constructor(vehicle: Vehicle) {
-    this.id = vehicle.id;
+    this.id = vehicle.id; 
     this.brand = vehicle.brand;
     this.model = vehicle.model;
     this.plate = vehicle.plate;
     this.year = vehicle.year;
-    this.customer = vehicle.customer; // UUID
+    this.customer = vehicle.customer;
     this.created_at = vehicle.created_at;
   }
 }
