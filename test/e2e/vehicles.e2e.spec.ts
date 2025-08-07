@@ -21,7 +21,7 @@ describe('Vehicles (e2e)', () => {
           port: 5432,
           username: 'postgres',
           password: 'postgres',
-          database: 'teste_db',
+          database: 'test_db',
           entities: [Vehicle, CustomerEntity],
           synchronize: true,
           dropSchema: true,
@@ -44,8 +44,7 @@ describe('Vehicles (e2e)', () => {
 
     await app.init();
 
-    // Cria um cliente com todos os campos obrigatórios
-    const uniqueDocument = `12345678901${Date.now()}`;
+    const uniqueDocument = `${Date.now()}`; // valor único e válido
     const uniqueEmail = `cliente${Date.now()}@teste.com`;
 
     const createCustomerResponse = await request(app.getHttpServer())
@@ -53,13 +52,16 @@ describe('Vehicles (e2e)', () => {
       .send({
         name: 'Cliente Padrão',
         personType: 'INDIVIDUAL',
-        document: '12345678901',
+        document: uniqueDocument, // <--- aqui foi a correção
         email: uniqueEmail,
         phone: '123456789',
         status: true,
       });
 
-    // Se o teste para criar cliente falhar, a execução vai parar aqui, o que é útil para depurar
+    if (createCustomerResponse.status !== 201) {
+      console.log('Erro ao criar cliente:', createCustomerResponse.body);
+    }
+
     expect(createCustomerResponse.status).toBe(201);
     createdCustomerId = createCustomerResponse.body.id;
   });
@@ -73,7 +75,7 @@ describe('Vehicles (e2e)', () => {
       const dto = {
         brand: 'Fiat',
         model: 'Uno',
-        plate: `ABC-1234${Date.now()}`,
+        plate: `ABC-${Date.now()}`,
         year: 2012,
         customer_id: createdCustomerId,
       };
@@ -82,10 +84,6 @@ describe('Vehicles (e2e)', () => {
         .post('/vehicles')
         .send(dto)
         .expect(201)
-        .catch((err) => {
-          console.error('Erro no POST /vehicles. Resposta da API:', err.response.body);
-          throw err;
-        })
         .then((res) => {
           expect(res.body).toHaveProperty('id');
           expect(res.body.brand).toBe(dto.brand);
