@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Vehicle } from '../../domain/vehicle.entity';
 import { VehicleRepository } from '../../domain/vehicle.repository'; // IMPORTAR minha interface VehicleRepository
 import { UpdateVehicleDto } from '../dtos/update-vehicle.dto'; // Meu DTO de atualização
+import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
 
 @Injectable()
 export class UpdateVehicleService {
@@ -17,6 +18,9 @@ export class UpdateVehicleService {
       throw new NotFoundException(`Vehicle with ID "${id}" not found.`);
     }
 
-    return this.vehicleRepo.update(id, dto); // Chamar update() da sua interface
+    return this.vehicleRepo.update(id, {
+      ...dto,
+      customer: dto.customer ? ({ id: dto.customer } as CustomerEntity) : undefined,
+    }); // Chamar update() da sua interface
   }
 }

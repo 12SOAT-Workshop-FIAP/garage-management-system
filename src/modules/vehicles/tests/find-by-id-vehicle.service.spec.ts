@@ -20,14 +20,12 @@ describe('FindByIdVehicleService', () => {
       year: 2010,
       customer: {} as any,
       created_at: new Date(),
-      customer_id: 0
     };
 
     vehicleRepo.findById.mockResolvedValue(vehicle);
 
-const result = await service.execute(1);
-expect(result).toEqual(vehicle);
-expect(vehicleRepo.findById).toHaveBeenCalledWith(1);
-
+    const result = await service.execute(1);
+    expect(result).toEqual(vehicle);
+    expect(vehicleRepo.findById).toHaveBeenCalledWith(1);
   });
 });

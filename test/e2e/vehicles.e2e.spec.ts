@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
 import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
 import { CustomersModule } from '@modules/customers/presentation/customers.module';
 import { VehiclesModule } from '@modules/vehicles/presentation/vehicles.module';
+import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
 
 describe('Vehicles (e2e)', () => {
   let app: INestApplication;
@@ -71,13 +71,13 @@ describe('Vehicles (e2e)', () => {
   });
 
   describe('POST /vehicles', () => {
-    it('deve criar um veículo com sucesso', async () => {
+    it('deve criar um veículo com sucesso e retornar customer dentro do response', async () => {
       const dto = {
         brand: 'Fiat',
         model: 'Uno',
         plate: `ABC-${Date.now()}`,
         year: 2012,
-        customer_id: createdCustomerId,
+        customer: createdCustomerId,
       };
 
       await request(app.getHttpServer())
@@ -97,39 +97,38 @@ describe('Vehicles (e2e)', () => {
         model: '',
         plate: '',
         year: -1,
-        customer_id: 'invalid' as any,
+        customer: 'invalid' as any,
       };
 
       return request(app.getHttpServer()).post('/vehicles').send(dto).expect(400);
     });
 
     it('deve falhar com campos obrigatórios ausentes', () => {
-      return request(app.getHttpServer())
-        .post('/vehicles')
-        .send({ brand: 'Fiat' })
-        .expect(400);
+      return request(app.getHttpServer()).post('/vehicles').send({ brand: 'Fiat' }).expect(400);
     });
   });
 
   describe('GET /vehicles', () => {
-    it('deve retornar todos os veículos', async () => {
-      return request(app.getHttpServer())
-        .get('/vehicles')
-        .expect(200)
-        .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-        });
+    it('deve retornar todos os veículos com relação de customer', async () => {
+      const res = await request(app.getHttpServer()).get('/vehicles').expect(200);
+
+      expect(Array.isArray(res.body)).toBe(true);
+      res.body.forEach((veh: any) => {
+        expect(veh).toHaveProperty('customer');
+        expect(veh.customer).toHaveProperty('id');
+      });
     });
   });
 
   describe('GET /vehicles/:id', () => {
-    it('deve retornar um veículo específico', async () => {
-      return request(app.getHttpServer())
+    it('deve retornar um veículo específico com customer', async () => {
+      const res = await request(app.getHttpServer())
         .get(`/vehicles/${createdVehicleId}`)
-        .expect(200)
-        .expect((res) => {
-          expect(res.body.id).toBe(createdVehicleId);
-        });
+        .expect(200);
+
+      expect(res.body.id).toBe(createdVehicleId);
+      expect(res.body.customer).toBeDefined();
+      expect(res.body.customer.id).toBe(createdCustomerId);
     });
 
     it('deve retornar 404 para um veículo inexistente', () => {
@@ -138,19 +137,20 @@ describe('Vehicles (e2e)', () => {
   });
 
   describe('PUT /vehicles/:id', () => {
-    it('deve atualizar um veículo', () => {
+    it('deve atualizar um veículo e manter relação de customer', async () => {
       const dto = {
         model: 'Uno Mille',
         year: 2015,
       };
 
-      return request(app.getHttpServer())
+      const res = await request(app.getHttpServer())
         .put(`/vehicles/${createdVehicleId}`)
         .send(dto)
-        .expect(200)
-        .expect((res) => {
-          expect(res.body.model).toBe(dto.model);
-        });
+        .expect(200);
+
+      expect(res.body.model).toBe(dto.model);
+      expect(res.body.customer).toBeDefined();
+      expect(res.body.customer.id).toBe(createdCustomerId);
     });
 
     it('deve retornar 404 ao atualizar veículo inexistente', () => {
@@ -163,9 +163,7 @@ describe('Vehicles (e2e)', () => {
 
   describe('DELETE /vehicles/:id', () => {
     it('deve remover um veículo', () => {
-      return request(app.getHttpServer())
-        .delete(`/vehicles/${createdVehicleId}`)
-        .expect(204);
+      return request(app.getHttpServer()).delete(`/vehicles/${createdVehicleId}`).expect(204);
     });
 
     it('deve retornar 404 ao remover veículo inexistente', () => {
@@ -173,3 +171,4 @@ describe('Vehicles (e2e)', () => {
     });
   });
 });
+
