@@ -9,7 +9,7 @@ export class DeleteVehicleService {
     private readonly vehicleRepo: VehicleRepository,
   ) {}
 
-  async execute(id: string): Promise<void> {
+  async execute(id: number): Promise<void> {
     const existingVehicle = await this.vehicleRepo.findById(id); // Usar findById da minha interface
 
     if (!existingVehicle) {

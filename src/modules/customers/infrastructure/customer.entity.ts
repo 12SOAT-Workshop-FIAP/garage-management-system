@@ -31,7 +31,7 @@ export class CustomerEntity {
   @Column()
   name!: string;
 
-  @Column({ name: 'person_type', type: 'enum', enum: ['INDIVIDUAL', 'COMPANY'] })
+  @Column({ name: 'person_type', type: 'text' })
   personType!: 'INDIVIDUAL' | 'COMPANY';
 
   @Column()

@@ -3,9 +3,8 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } f
 
 @Entity('vehicles')
 export class Vehicle {
-  // agora ID numérico sequencial
   @PrimaryGeneratedColumn()
-  id!: string;
+  id!: number;
 
   @Column()
   brand!: string;
@@ -19,7 +18,7 @@ export class Vehicle {
   @Column()
   year!: number;
 
-  @ManyToOne(() => CustomerEntity, (customer) => customer.vehicles)
+  @ManyToOne(() => CustomerEntity, (customer) => customer.vehicles, { onDelete: 'CASCADE' })
   customer!: CustomerEntity;
 
   @CreateDateColumn()

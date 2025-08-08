@@ -1651,6 +1651,7 @@
   integrity sha512-DCEI6t5i1NmAZp6pFonpD5m7i6aFrpofcp4LA2i8IIq60Jyo28hamKBxNrZcyOwVOZkgsRp9O2sXWBWP8MnvIQ==
 
 "@unrs/resolver-binding-win32-x64-msvc@1.11.1":
+"@unrs/resolver-binding-linux-arm64-gnu@1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@unrs/resolver-binding-win32-x64-msvc/-/resolver-binding-win32-x64-msvc-1.11.1.tgz#538b1e103bf8d9864e7b85cc96fa8d6fb6c40777"
   integrity sha512-lrW200hZdbfRtztbygyaq/6jP6AKE8qQN2KvPcJ+x7wiD038YtnYtZ82IMNJ69GJibV7bwL3y9FgK+5w/pYt6g==
@@ -2818,6 +2819,10 @@ expect@^30.0.0, expect@30.0.5:
   resolved "https://registry.npmjs.org/expect/-/expect-30.0.5.tgz"
   integrity sha512-P0te2pt+hHI5qLJkIR+iMvS+lYUZml8rKKsohVHAGY+uClp9XVbdyYNJOIjSRpHVp8s8YqxJCiHUkSYZGr8rtQ==
 expect@30.0.5, expect@^30.0.0:
+  version "30.0.5"
+  resolved "https://registry.npmjs.org/expect/-/expect-30.0.5.tgz"
+  integrity sha512-P0te2pt+hHI5qLJkIR+iMvS+lYUZml8rKKsohVHAGY+uClp9XVbdyYNJOIjSRpHVp8s8YqxJCiHUkSYZGr8rtQ==
+expect@^30.0.0, expect@30.0.5:
   version "30.0.5"
   resolved "https://registry.npmjs.org/expect/-/expect-30.0.5.tgz"
   integrity sha512-P0te2pt+hHI5qLJkIR+iMvS+lYUZml8rKKsohVHAGY+uClp9XVbdyYNJOIjSRpHVp8s8YqxJCiHUkSYZGr8rtQ==
