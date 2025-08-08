@@ -33,10 +33,18 @@ export class CreateWorkOrderWithCustomerIdentificationService {
     }
 
     try {
-      // Create new work order with the basic structure available
+      // Create new work order with the complete structure
       const workOrder = new WorkOrder({
-        description: `${dto.description}\n\nCustomer ID: ${customer.id}\nVehicle ID: ${dto.vehicleId}${dto.diagnosis ? `\nDiagnosis: ${dto.diagnosis}` : ''}${dto.estimatedCost ? `\nEstimated Cost: ${dto.estimatedCost}` : ''}`
+        customerId: customer.id.toString(),
+        vehicleId: dto.vehicleId,
+        description: dto.description,
+        estimatedCost: dto.estimatedCost,
+        diagnosis: dto.diagnosis,
       });
+
+      if (dto.estimatedCompletionDate) {
+        workOrder.estimatedCompletionDate = dto.estimatedCompletionDate;
+      }
 
       // Save work order
       const savedWorkOrder = await this.workOrderRepository.save(workOrder);
