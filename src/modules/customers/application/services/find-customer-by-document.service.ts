@@ -1,29 +1,36 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { CustomerRepository } from '@modules/customers/domain/customer.repository';
-import { Customer } from '@modules/customers/domain/customer';
+import { CustomerRepository } from '../../domain/customer.repository';
+import { Customer } from '../../domain/customer';
+import { FindCustomerByDocumentDto } from '../dtos/find-customer-by-document.dto';
 import { CpfValidator } from '../../../../shared/validators/cpf.validator';
 import { CnpjValidator } from '../../../../shared/validators/cnpj.validator';
 
+/**
+ * FindCustomerByDocumentService
+ * Application service for finding customers by CPF/CNPJ document.
+ */
 @Injectable()
-export class FindByDocumentCustomerService {
+export class FindCustomerByDocumentService {
   private cpfValidator = new CpfValidator();
   private cnpjValidator = new CnpjValidator();
 
   constructor(private readonly customerRepository: CustomerRepository) {}
 
-  async execute(document: string): Promise<Customer> {
-    // Clean document (remove formatting)
-    const cleanDocument = document.replace(/[^\d]/g, '');
+  async execute(dto: FindCustomerByDocumentDto): Promise<Customer> {
+    const cleanDocument = dto.getCleanDocument();
     
     // Validate document format
     if (!this.isValidDocument(cleanDocument)) {
-      throw new BadRequestException('Invalid CPF or CNPJ format or checksum');
+      throw new BadRequestException('Invalid document format or checksum');
     }
 
+    // Find customer by document
     const customer = await this.customerRepository.findByDocument(cleanDocument);
+    
     if (!customer) {
       throw new NotFoundException(`Customer not found with document: ${this.maskDocument(cleanDocument)}`);
     }
+
     return customer;
   }
 
