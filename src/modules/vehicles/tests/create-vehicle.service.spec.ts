@@ -34,7 +34,7 @@ describe('Vehicle Application Services (Unit Tests)', () => {
     model: 'Palio',
     plate: 'ABC-1234',
     year: 2010,
-    customer_id: mockCustomerId,
+    customer: { id: mockCustomerId } as any,
     created_at: new Date(),
     updated_at: new Date(),
   });
@@ -43,10 +43,10 @@ describe('Vehicle Application Services (Unit Tests)', () => {
     const repoProvider = {
       provide: 'VehicleRepository', // Continua sendo o token de injeção
       useValue: {
-        create: jest.fn(),
         findAll: jest.fn(),
         findById: jest.fn(),
-        findByPlate: jest.fn(), // Ver com o Fabricio se precico criar na SERVICE o findByPlate
+        findByCustomerId: jest.fn(),
+        save: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
       },
@@ -79,7 +79,7 @@ describe('Vehicle Application Services (Unit Tests)', () => {
         model: 'Focus',
         plate: 'ZZZ-9999',
         year: 2015,
-        customer_id: 123,
+        customer: { id: 123 } as any,
       };
 
       const expectedVehicle = Object.assign(new Vehicle(), {
@@ -88,7 +88,7 @@ describe('Vehicle Application Services (Unit Tests)', () => {
         model: dto.model,
         plate: dto.plate,
         year: dto.year,
-        customer_id: dto.customer_id,
+        customer: dto.customer,
         created_at: new Date(),
         updated_at: new Date(),
       });
