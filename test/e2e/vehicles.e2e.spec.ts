@@ -16,12 +16,8 @@ describe('Vehicles (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: 'localhost',
-          port: 5432,
-          username: 'postgres',
-          password: 'postgres',
-          database: 'test_db',
+          type: 'sqlite',
+          database: ':memory:',
           entities: [Vehicle, CustomerEntity],
           synchronize: true,
           dropSchema: true,
@@ -44,23 +40,18 @@ describe('Vehicles (e2e)', () => {
 
     await app.init();
 
-    const uniqueDocument = `${Date.now()}`; // valor único e válido
+    // Cria um cliente para relacionar ao veículo
+    const uniqueDocument = `12345678910`;
     const uniqueEmail = `cliente${Date.now()}@teste.com`;
 
-    const createCustomerResponse = await request(app.getHttpServer())
-      .post('/customers')
-      .send({
-        name: 'Cliente Padrão',
-        personType: 'INDIVIDUAL',
-        document: uniqueDocument, // <--- aqui foi a correção
-        email: uniqueEmail,
-        phone: '123456789',
-        status: true,
-      });
-
-    if (createCustomerResponse.status !== 201) {
-      console.log('Erro ao criar cliente:', createCustomerResponse.body);
-    }
+    const createCustomerResponse = await request(app.getHttpServer()).post('/customers').send({
+      name: 'Cliente Padrão',
+      personType: 'INDIVIDUAL',
+      document: uniqueDocument,
+      email: uniqueEmail,
+      phone: '5518996787172',
+      status: true,
+    });
 
     expect(createCustomerResponse.status).toBe(201);
     createdCustomerId = createCustomerResponse.body.id;
@@ -75,20 +66,18 @@ describe('Vehicles (e2e)', () => {
       const dto = {
         brand: 'Fiat',
         model: 'Uno',
-        plate: `ABC-${Date.now()}`,
+        plate: `ABC-1234${Date.now()}`,
         year: 2012,
         customer: createdCustomerId,
       };
 
-      await request(app.getHttpServer())
-        .post('/vehicles')
-        .send(dto)
-        .expect(201)
-        .then((res) => {
-          expect(res.body).toHaveProperty('id');
-          expect(res.body.brand).toBe(dto.brand);
-          createdVehicleId = res.body.id;
-        });
+      const res = await request(app.getHttpServer()).post('/vehicles').send(dto).expect(201);
+
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.brand).toBe(dto.brand);
+      expect(res.body.customer).toBeDefined();
+      expect(res.body.customer.id).toBe(createdCustomerId);
+      createdVehicleId = res.body.id;
     });
 
     it('deve falhar com dados inválidos', () => {
@@ -171,4 +160,3 @@ describe('Vehicles (e2e)', () => {
     });
   });
 });
-
