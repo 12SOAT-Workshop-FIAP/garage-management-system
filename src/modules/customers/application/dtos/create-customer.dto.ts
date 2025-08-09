@@ -3,12 +3,13 @@ import {
   IsString,
   IsOptional,
   Length,
-  Matches,
   IsPhoneNumber,
   IsEmail,
   IsBoolean,
+  Validate,
   IsEnum,
 } from 'class-validator';
+import { DocumentValidator } from '../../../../shared/validators/document.validator';
 
 /**
  * CreateCustomerDto
@@ -20,15 +21,20 @@ export class CreateCustomerDto {
   @Length(2, 100)
   name!: string;
 
-  @ApiProperty({ enum: ['INDIVIDUAL', 'COMPANY'], description: 'Type of person' })
+  @ApiProperty({ 
+    enum: ['INDIVIDUAL', 'COMPANY'], 
+    description: 'Type of person - INDIVIDUAL for CPF, COMPANY for CNPJ',
+    example: 'INDIVIDUAL'
+  })
   @IsEnum(['INDIVIDUAL', 'COMPANY'])
   personType!: 'INDIVIDUAL' | 'COMPANY';
 
-  @ApiProperty({ description: 'CPF (11 digits) or CNPJ (14 digits)' })
-  @IsString()
-  @Matches(/^\d{11}$|^\d{14}$/, {
-    message: 'document must be a valid CPF (11 digits) or CNPJ (14 digits)',
+  @ApiProperty({ 
+    description: 'CPF (11 digits for INDIVIDUAL) or CNPJ (14 digits for COMPANY). Can include formatting.',
+    example: '123.456.789-00'
   })
+  @IsString()
+  @Validate(DocumentValidator)
   document!: string;
 
   @ApiProperty({ description: 'Customer phone number in E.164 format (e.g. +5511999999999)' })

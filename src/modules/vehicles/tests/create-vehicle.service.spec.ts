@@ -42,42 +42,73 @@ describe('CreateVehicleService', () => {
     };
 
     const mockCustomer = { id: dto.customer, name: 'John Doe' } as CustomerEntity;
-
-    const expectedVehicle: Vehicle = {
-      id: 1,
+    const mockVehicle = {
+      id: 123,
       brand: dto.brand,
       model: dto.model,
       plate: dto.plate,
       year: dto.year,
       customer: mockCustomer,
       created_at: new Date(),
-    };
+      updated_at: new Date(),
+    } as Vehicle;
 
     customerRepo.findById.mockResolvedValue(mockCustomer);
-    repo.create.mockResolvedValue(expectedVehicle);
+    repo.create.mockResolvedValue(mockVehicle);
 
     const result = await service.execute(dto);
 
     expect(customerRepo.findById).toHaveBeenCalledWith(dto.customer);
     expect(repo.create).toHaveBeenCalledWith(expect.any(Vehicle));
-    expect(result).toEqual(expectedVehicle);
+    expect(result).toEqual(mockVehicle);
   });
 
-  it('deve lançar NotFoundException se o cliente não for encontrado', async () => {
+  it('deve lançar erro quando customer não existe', async () => {
     const dto: CreateVehicleDto = {
       brand: 'Fiat',
       model: 'Uno',
       plate: 'AAA-1234',
       year: 2010,
-      customer: 999, // Non-existent customer
+      customer: 999,
     };
 
-    // Simulate that the customer was not found by returning null
     customerRepo.findById.mockResolvedValue(null);
 
-    // We expect the service to reject with a NotFoundException
-    await expect(service.execute(dto)).rejects.toThrow(
-      new NotFoundException(`Customer with id ${dto.customer} not found`),
-    );
+    await expect(service.execute(dto)).rejects.toThrow(NotFoundException);
+    expect(customerRepo.findById).toHaveBeenCalledWith(dto.customer);
+    expect(repo.create).not.toHaveBeenCalled();
+  });
+
+  it('deve criar veículo com dados válidos', async () => {
+    const dto: CreateVehicleDto = {
+      brand: 'Toyota',
+      model: 'Corolla',
+      plate: 'XYZ-9876',
+      year: 2020,
+      customer: 456,
+    };
+
+    const mockCustomer = { id: dto.customer, name: 'Jane Smith' } as CustomerEntity;
+    const mockVehicle = {
+      id: 456,
+      brand: dto.brand,
+      model: dto.model,
+      plate: dto.plate,
+      year: dto.year,
+      customer: mockCustomer,
+      created_at: new Date(),
+      updated_at: new Date(),
+    } as Vehicle;
+
+    customerRepo.findById.mockResolvedValue(mockCustomer);
+    repo.create.mockResolvedValue(mockVehicle);
+
+    const result = await service.execute(dto);
+
+    expect(result.brand).toBe(dto.brand);
+    expect(result.model).toBe(dto.model);
+    expect(result.plate).toBe(dto.plate);
+    expect(result.year).toBe(dto.year);
+    expect(result.customer).toEqual(mockCustomer);
   });
 });

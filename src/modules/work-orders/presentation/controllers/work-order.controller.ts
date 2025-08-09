@@ -1,9 +1,11 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete, Query, ParseUUIDPipe, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateWorkOrderDto } from '../../application/dtos/create-work-order.dto';
+import { CreateWorkOrderDto as CreateWorkOrderWithCustomerDto } from '../../application/dtos/create-work-order-with-customer-identification.dto';
 import { UpdateWorkOrderDto } from '../../application/dtos/update-work-order.dto';
 import { WorkOrderResponseDto } from '../dtos/work-order-response.dto';
 import { CreateWorkOrderService } from '../../application/services/create-work-order.service';
+import { CreateWorkOrderWithCustomerIdentificationService } from '../../application/services/create-work-order-with-customer-identification.service';
 import { UpdateWorkOrderService } from '../../application/services/update-work-order.service';
 import { FindWorkOrderService } from '../../application/services/find-work-order.service';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
@@ -13,6 +15,7 @@ import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 export class WorkOrderController {
   constructor(
     private readonly createWorkOrderService: CreateWorkOrderService,
+    private readonly createWorkOrderWithCustomerIdentificationService: CreateWorkOrderWithCustomerIdentificationService,
     private readonly updateWorkOrderService: UpdateWorkOrderService,
     private readonly findWorkOrderService: FindWorkOrderService,
   ) {}
@@ -24,6 +27,23 @@ export class WorkOrderController {
   async create(@Body() dto: CreateWorkOrderDto): Promise<WorkOrderResponseDto> {
     const workOrder = await this.createWorkOrderService.execute(dto);
     return WorkOrderResponseDto.fromDomain(workOrder);
+  }
+
+  @Post('with-customer-identification')
+  @ApiOperation({ 
+    summary: 'Create a new work order with customer identification by CPF/CNPJ',
+    description: 'Allows creating work orders by providing customer CPF/CNPJ instead of customer ID'
+  })
+  @ApiResponse({ 
+    status: HttpStatus.CREATED, 
+    description: 'Work order created successfully with customer identification', 
+    type: WorkOrderResponseDto 
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data or document format' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Customer not found with provided document' })
+  async createWithCustomerIdentification(@Body() dto: CreateWorkOrderWithCustomerDto): Promise<WorkOrderResponseDto> {
+    const result = await this.createWorkOrderWithCustomerIdentificationService.execute(dto);
+    return WorkOrderResponseDto.fromDomain(result.workOrder);
   }
 
   @Get()
