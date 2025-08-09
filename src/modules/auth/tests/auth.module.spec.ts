@@ -56,3 +56,4 @@ describe('AuthModule', () => {
     expect(guard).toBeInstanceOf(JwtAuthGuard);
   });
 });
+

@@ -15,6 +15,10 @@ export class TypeOrmVehicleRepository implements VehicleRepository {
     return await this.ormRepo.save(vehicle);
   }
 
+  async save(vehicle: Vehicle): Promise<Vehicle> {
+    return await this.ormRepo.save(vehicle);
+  }
+
   async findAll(): Promise<Vehicle[]> {
     return await this.ormRepo.find({ relations: { customer: true } });
   }
@@ -25,6 +29,13 @@ export class TypeOrmVehicleRepository implements VehicleRepository {
 
   async findByPlate(plate: string): Promise<Vehicle | null> {
     return await this.ormRepo.findOne({ where: { plate }, relations: { customer: true } });
+  }
+
+  async findByCustomerId(customerId: number): Promise<Vehicle[]> {
+    return await this.ormRepo.find({ 
+      where: { customer: { id: customerId } }, 
+      relations: { customer: true } 
+    });
   }
 
   async update(id: number, data: Partial<Vehicle>): Promise<Vehicle> {

@@ -3,7 +3,6 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
   ServiceTypeOrmRepository,
-  SERVICE_REPOSITORY,
 } from '../infrastructure/repositories/service.typeorm.repository';
 import { Service as TypeOrmService } from '../infrastructure/entities/service.entity';
 import { Service as ServiceEntity } from '../domain/service.entity';
@@ -48,14 +47,10 @@ describe('ServiceTypeOrmRepository', () => {
             findOne: jest.fn(),
           },
         },
-        {
-          provide: SERVICE_REPOSITORY,
-          useClass: ServiceTypeOrmRepository,
-        },
       ],
     }).compile();
 
-    repository = module.get<ServiceTypeOrmRepository>(SERVICE_REPOSITORY);
+    repository = module.get<ServiceTypeOrmRepository>(ServiceTypeOrmRepository);
     typeOrmRepository = module.get(getRepositoryToken(TypeOrmService));
   });
 

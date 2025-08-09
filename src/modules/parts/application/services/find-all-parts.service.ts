@@ -1,7 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Part } from '../../domain/part.entity';
 import { PartRepository } from '../../domain/part.repository';
-import { PART_REPOSITORY } from '../../infrastructure/repositories/part.typeorm.repository';
 
 export interface FindAllPartsFilters {
   category?: string;
@@ -12,7 +11,6 @@ export interface FindAllPartsFilters {
 @Injectable()
 export class FindAllPartsService {
   constructor(
-    @Inject(PART_REPOSITORY)
     private readonly partRepository: PartRepository,
   ) {}
 

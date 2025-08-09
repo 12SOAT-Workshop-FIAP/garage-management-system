@@ -6,12 +6,10 @@ import { FindAllUsersService } from './application/services/find-all-users.servi
 import { FindUserByIdService } from './application/services/find-user-by-id.service';
 import { UpdateUserService } from './application/services/update-user.service';
 import { User } from './infrastructure/entities/user.entity';
-import {
-  USER_REPOSITORY,
-  UserTypeOrmRepository,
-} from './infrastructure/repositories/user.typeorm.repository';
+import { UserTypeOrmRepository } from './infrastructure/repositories/user.typeorm.repository';
 import { UserController } from './presentation/controllers/user.controller';
 import { HashPasswordPipe } from '../../pipes/hash-password.pipe';
+import { UserRepository } from './domain/user.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
@@ -24,13 +22,13 @@ import { HashPasswordPipe } from '../../pipes/hash-password.pipe';
     FindUserByIdService,
     HashPasswordPipe,
     {
-      provide: USER_REPOSITORY,
+      provide: UserRepository,
       useClass: UserTypeOrmRepository,
     },
   ],
   exports: [
     {
-      provide: USER_REPOSITORY,
+      provide: UserRepository,
       useClass: UserTypeOrmRepository,
     },
   ],

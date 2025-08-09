@@ -1,13 +1,13 @@
 import { Part } from './part.entity';
 
-export interface PartRepository {
-  create(part: Part): Promise<void>;
-  update(part: Part): Promise<void>;
-  delete(id: string): Promise<void>;
-  findAll(): Promise<Part[]>;
-  findById(id: string): Promise<Part | null>;
-  save(part: Part): Promise<Part>;
-  findByPartNumber(partNumber: string): Promise<Part | null>;
-  findLowStockParts(): Promise<Part[]>;
-  findByCategory(category: string): Promise<Part[]>;
+export abstract class PartRepository {
+  abstract create(part: Part): Promise<void>;
+  abstract update(part: Part): Promise<void>;
+  abstract delete(id: string): Promise<void>;
+  abstract findAll(): Promise<Part[]>;
+  abstract findById(id: string): Promise<Part | null>;
+  abstract save(part: Part): Promise<Part>;
+  abstract findByPartNumber(partNumber: string): Promise<Part | null>;
+  abstract findLowStockParts(): Promise<Part[]>;
+  abstract findByCategory(category: string): Promise<Part[]>;
 }

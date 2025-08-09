@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { FindByDocumentCustomerService } from '../find-by-document-customer.service';
-import { CustomerRepository } from '../../../domain/customer.repository';
-import { Customer } from '../../../domain/customer';
+import { FindByDocumentCustomerService } from '../application/services/find-by-document-customer.service';
+import { CustomerRepository } from '../domain/customer.repository';
+import { Customer } from '../domain/customer';
 
 describe('FindByDocumentCustomerService', () => {
   let service: FindByDocumentCustomerService;

@@ -3,8 +3,8 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { UsersModule } from '../../src/modules/users/users.module';
-import { User } from '../../src/modules/users/infrastructure/entities/user.entity';
+import { UsersModule } from '../../users.module';
+import { User } from '../../infrastructure/entities/user.entity';
 import { compare } from 'bcrypt';
 
 describe('Users (e2e)', () => {

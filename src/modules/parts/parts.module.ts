@@ -7,11 +7,9 @@ import { FindPartByIdService } from './application/services/find-part-by-id.serv
 import { UpdatePartService } from './application/services/update-part.service';
 import { UpdateStockService } from './application/services/update-stock.service';
 import { Part } from './infrastructure/entities/part.entity';
-import {
-  PartTypeOrmRepository,
-  PART_REPOSITORY,
-} from './infrastructure/repositories/part.typeorm.repository';
+import { PartTypeOrmRepository } from './infrastructure/repositories/part.typeorm.repository';
 import { PartController } from './presentation/controllers/part.controller';
+import { PartRepository } from './domain/part.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Part])],
@@ -24,7 +22,7 @@ import { PartController } from './presentation/controllers/part.controller';
     FindAllPartsService,
     FindPartByIdService,
     {
-      provide: PART_REPOSITORY,
+      provide: PartRepository,
       useClass: PartTypeOrmRepository,
     },
   ],

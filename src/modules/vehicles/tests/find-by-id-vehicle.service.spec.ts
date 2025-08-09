@@ -20,6 +20,10 @@ describe('FindByIdVehicleService', () => {
       year: 2010,
       customer: {} as any,
       created_at: new Date(),
+      updated_at: new Date(),
+      formatLicensePlate: jest.fn(),
+      getLicensePlateType: jest.fn(),
+      getMaskedPlate: jest.fn(),
     };
 
     vehicleRepo.findById.mockResolvedValue(vehicle);
@@ -29,3 +33,4 @@ describe('FindByIdVehicleService', () => {
     expect(vehicleRepo.findById).toHaveBeenCalledWith(1);
   });
 });
+

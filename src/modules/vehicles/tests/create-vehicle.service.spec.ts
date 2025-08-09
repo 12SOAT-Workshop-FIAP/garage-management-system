@@ -15,6 +15,13 @@ describe('CreateVehicleService', () => {
   beforeEach(async () => {
     const repoMock: jest.Mocked<VehicleRepository> = {
       create: jest.fn(),
+      save: jest.fn(),
+      findByPlate: jest.fn(),
+      findById: jest.fn(),
+      findAll: jest.fn(),
+      findByCustomerId: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
     } as any;
     const repoCustomerMock: jest.Mocked<CustomerRepository> = {
       findById: jest.fn(),
@@ -38,10 +45,10 @@ describe('CreateVehicleService', () => {
       model: 'Uno',
       plate: 'AAA-1234',
       year: 2010,
-      customer: 123,
+      customerId: 123,
     };
 
-    const mockCustomer = { id: dto.customer, name: 'John Doe' } as CustomerEntity;
+    const mockCustomer = { id: dto.customerId, name: 'John Doe' } as CustomerEntity;
     const mockVehicle = {
       id: 123,
       brand: dto.brand,
@@ -54,12 +61,13 @@ describe('CreateVehicleService', () => {
     } as Vehicle;
 
     customerRepo.findById.mockResolvedValue(mockCustomer);
-    repo.create.mockResolvedValue(mockVehicle);
+    repo.findByPlate.mockResolvedValue(null); // No existing vehicle with same plate
+    repo.save.mockResolvedValue(mockVehicle);
 
     const result = await service.execute(dto);
 
-    expect(customerRepo.findById).toHaveBeenCalledWith(dto.customer);
-    expect(repo.create).toHaveBeenCalledWith(expect.any(Vehicle));
+    expect(customerRepo.findById).toHaveBeenCalledWith(dto.customerId);
+    expect(repo.save).toHaveBeenCalledWith(expect.any(Vehicle));
     expect(result).toEqual(mockVehicle);
   });
 
@@ -69,14 +77,14 @@ describe('CreateVehicleService', () => {
       model: 'Uno',
       plate: 'AAA-1234',
       year: 2010,
-      customer: 999,
+      customerId: 999,
     };
 
     customerRepo.findById.mockResolvedValue(null);
 
     await expect(service.execute(dto)).rejects.toThrow(NotFoundException);
-    expect(customerRepo.findById).toHaveBeenCalledWith(dto.customer);
-    expect(repo.create).not.toHaveBeenCalled();
+    expect(customerRepo.findById).toHaveBeenCalledWith(dto.customerId);
+    expect(repo.save).not.toHaveBeenCalled();
   });
 
   it('deve criar veículo com dados válidos', async () => {
@@ -85,10 +93,10 @@ describe('CreateVehicleService', () => {
       model: 'Corolla',
       plate: 'XYZ-9876',
       year: 2020,
-      customer: 456,
+      customerId: 456,
     };
 
-    const mockCustomer = { id: dto.customer, name: 'Jane Smith' } as CustomerEntity;
+    const mockCustomer = { id: dto.customerId, name: 'Jane Smith' } as CustomerEntity;
     const mockVehicle = {
       id: 456,
       brand: dto.brand,
@@ -101,7 +109,8 @@ describe('CreateVehicleService', () => {
     } as Vehicle;
 
     customerRepo.findById.mockResolvedValue(mockCustomer);
-    repo.create.mockResolvedValue(mockVehicle);
+    repo.findByPlate.mockResolvedValue(null);
+    repo.save.mockResolvedValue(mockVehicle);
 
     const result = await service.execute(dto);
 
@@ -112,3 +121,4 @@ describe('CreateVehicleService', () => {
     expect(result.customer).toEqual(mockCustomer);
   });
 });
+

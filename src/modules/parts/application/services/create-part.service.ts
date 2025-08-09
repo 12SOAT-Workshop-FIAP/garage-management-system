@@ -1,13 +1,11 @@
-import { Inject, Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { Part } from '../../domain/part.entity';
 import { PartRepository } from '../../domain/part.repository';
 import { CreatePartDto } from '../dtos/create-part.dto';
-import { PART_REPOSITORY } from '../../infrastructure/repositories/part.typeorm.repository';
 
 @Injectable()
 export class CreatePartService {
   constructor(
-    @Inject(PART_REPOSITORY)
     private readonly partRepository: PartRepository,
   ) {}
 

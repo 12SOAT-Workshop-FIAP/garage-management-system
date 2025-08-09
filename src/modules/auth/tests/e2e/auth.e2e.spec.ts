@@ -5,9 +5,9 @@ import { ConfigModule } from '@nestjs/config';
 import * as request from 'supertest';
 import * as cookieParser from 'cookie-parser';
 
-import { AuthModule } from '../../src/modules/auth/auth.module';
-import { UsersModule } from '../../src/modules/users/users.module';
-import { User } from '../../src/modules/users/infrastructure/entities/user.entity';
+import { AuthModule } from '../../auth.module';
+import { UsersModule } from '../../../users/users.module';
+import { User } from '../../../users/infrastructure/entities/user.entity';
 
 function getCookie(cookiesHeader: string | string[] | undefined, name: string): string | undefined {
   if (!cookiesHeader) return undefined;
