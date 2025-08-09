@@ -1,8 +1,7 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { WorkOrder } from '../../domain/work-order.entity';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
-import { WORK_ORDER_REPOSITORY } from '../../infrastructure/repositories/work-order.typeorm.repository';
 
 /**
  * FindWorkOrderService (Serviço de busca de Ordem de Serviço)
@@ -11,7 +10,6 @@ import { WORK_ORDER_REPOSITORY } from '../../infrastructure/repositories/work-or
 @Injectable()
 export class FindWorkOrderService {
   constructor(
-    @Inject(WORK_ORDER_REPOSITORY)
     private readonly workOrderRepository: WorkOrderRepository,
   ) {}
 

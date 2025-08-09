@@ -1,9 +1,8 @@
-import { Inject, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { CreateWorkOrderDto } from '../dtos/create-work-order-with-customer-identification.dto';
 import { WorkOrder } from '../../domain/work-order.entity';
 import { FindByDocumentCustomerService } from '../../../customers/application/services/find-by-document-customer.service';
-import { WORK_ORDER_REPOSITORY } from '../../infrastructure/repositories/work-order.typeorm.repository';
 
 /**
  * CreateWorkOrderWithCustomerIdentificationService
@@ -12,7 +11,6 @@ import { WORK_ORDER_REPOSITORY } from '../../infrastructure/repositories/work-or
 @Injectable()
 export class CreateWorkOrderWithCustomerIdentificationService {
   constructor(
-    @Inject(WORK_ORDER_REPOSITORY)
     private readonly workOrderRepository: WorkOrderRepository,
     private readonly findByDocumentCustomerService: FindByDocumentCustomerService,
   ) {}
