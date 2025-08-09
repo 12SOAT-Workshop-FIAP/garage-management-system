@@ -24,5 +24,6 @@ import { ServiceController } from './presentation/controllers/service.controller
       useClass: ServiceTypeOrmRepository,
     },
   ],
+  exports: [ServiceRepository],
 })
 export class ServicesModule {}

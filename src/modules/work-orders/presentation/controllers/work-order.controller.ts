@@ -1,13 +1,26 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, Query, ParseUUIDPipe, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Query, ParseUUIDPipe, HttpStatus, Put } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateWorkOrderDto } from '../../application/dtos/create-work-order.dto';
 import { CreateWorkOrderDto as CreateWorkOrderWithCustomerDto } from '../../application/dtos/create-work-order-with-customer-identification.dto';
 import { UpdateWorkOrderDto } from '../../application/dtos/update-work-order.dto';
+import { 
+  CreateWorkOrderWithServicesDto, 
+  AddServiceToWorkOrderDto, 
+  UpdateWorkOrderServiceDto, 
+  CompleteServiceDto 
+} from '../../application/dtos/work-order-services.dto';
 import { WorkOrderResponseDto } from '../dtos/work-order-response.dto';
+import { 
+  WorkOrderDetailedResponseDto, 
+  WorkOrderCostBreakdownResponseDto 
+} from '../dtos/work-order-detailed-response.dto';
 import { CreateWorkOrderService } from '../../application/services/create-work-order.service';
 import { CreateWorkOrderWithCustomerIdentificationService } from '../../application/services/create-work-order-with-customer-identification.service';
 import { UpdateWorkOrderService } from '../../application/services/update-work-order.service';
 import { FindWorkOrderService } from '../../application/services/find-work-order.service';
+import { CreateWorkOrderWithServicesService } from '../../application/services/create-work-order-with-services.service';
+import { AddServiceToWorkOrderService } from '../../application/services/add-service-to-work-order.service';
+import { ManageWorkOrderServicesService } from '../../application/services/manage-work-order-services.service';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 
 @ApiTags('work-orders')
@@ -18,6 +31,9 @@ export class WorkOrderController {
     private readonly createWorkOrderWithCustomerIdentificationService: CreateWorkOrderWithCustomerIdentificationService,
     private readonly updateWorkOrderService: UpdateWorkOrderService,
     private readonly findWorkOrderService: FindWorkOrderService,
+    private readonly createWorkOrderWithServicesService: CreateWorkOrderWithServicesService,
+    private readonly addServiceToWorkOrderService: AddServiceToWorkOrderService,
+    private readonly manageWorkOrderServicesService: ManageWorkOrderServicesService,
   ) {}
 
   @Post()
@@ -115,6 +131,116 @@ export class WorkOrderController {
   async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateWorkOrderDto): Promise<WorkOrderResponseDto> {
     const workOrder = await this.updateWorkOrderService.execute(id, dto);
     return WorkOrderResponseDto.fromDomain(workOrder);
+  }
+
+  // ===== NEW SERVICES-RELATED ENDPOINTS =====
+
+  @Post('with-services')
+  @ApiOperation({ summary: 'Create work order with services included' })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Work order with services created successfully', type: WorkOrderDetailedResponseDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
+  async createWithServices(@Body() dto: CreateWorkOrderWithServicesDto): Promise<WorkOrderDetailedResponseDto> {
+    const workOrder = await this.createWorkOrderWithServicesService.execute(dto);
+    return new WorkOrderDetailedResponseDto(workOrder);
+  }
+
+  @Get(':id/detailed')
+  @ApiOperation({ summary: 'Get work order with all services details' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Work order details retrieved successfully', type: WorkOrderDetailedResponseDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
+  async getDetailed(@Param('id', ParseUUIDPipe) id: string): Promise<WorkOrderDetailedResponseDto> {
+    const workOrder = await this.findWorkOrderService.findById(id);
+    return new WorkOrderDetailedResponseDto(workOrder);
+  }
+
+  @Get(':id/cost-breakdown')
+  @ApiOperation({ summary: 'Get work order cost breakdown' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Cost breakdown retrieved successfully', type: WorkOrderCostBreakdownResponseDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
+  async getCostBreakdown(@Param('id', ParseUUIDPipe) id: string): Promise<WorkOrderCostBreakdownResponseDto> {
+    const workOrder = await this.findWorkOrderService.findById(id);
+    return new WorkOrderCostBreakdownResponseDto(workOrder);
+  }
+
+  @Post(':id/services')
+  @ApiOperation({ summary: 'Add service to work order' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Service added successfully', type: WorkOrderDetailedResponseDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or service not found' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data or operation not allowed' })
+  async addService(@Param('id', ParseUUIDPipe) id: string, @Body() dto: AddServiceToWorkOrderDto): Promise<WorkOrderDetailedResponseDto> {
+    const workOrder = await this.addServiceToWorkOrderService.execute(id, dto);
+    return new WorkOrderDetailedResponseDto(workOrder);
+  }
+
+  @Put(':id/services/:serviceId')
+  @ApiOperation({ summary: 'Update service in work order' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiParam({ name: 'serviceId', description: 'Service ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Service updated successfully', type: WorkOrderDetailedResponseDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or service not found' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
+  async updateService(
+    @Param('id', ParseUUIDPipe) id: string, 
+    @Param('serviceId') serviceId: string,
+    @Body() dto: UpdateWorkOrderServiceDto
+  ): Promise<WorkOrderDetailedResponseDto> {
+    const workOrder = await this.manageWorkOrderServicesService.updateService(id, serviceId, dto);
+    return new WorkOrderDetailedResponseDto(workOrder);
+  }
+
+  @Delete(':id/services/:serviceId')
+  @ApiOperation({ summary: 'Remove service from work order' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiParam({ name: 'serviceId', description: 'Service ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Service removed successfully', type: WorkOrderDetailedResponseDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or service not found' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Operation not allowed' })
+  async removeService(@Param('id', ParseUUIDPipe) id: string, @Param('serviceId') serviceId: string): Promise<WorkOrderDetailedResponseDto> {
+    const workOrder = await this.manageWorkOrderServicesService.removeService(id, serviceId);
+    return new WorkOrderDetailedResponseDto(workOrder);
+  }
+
+  @Post(':id/services/:serviceId/start')
+  @ApiOperation({ summary: 'Start service execution' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiParam({ name: 'serviceId', description: 'Service ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Service started successfully', type: WorkOrderDetailedResponseDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or service not found' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Service cannot be started' })
+  async startService(@Param('id', ParseUUIDPipe) id: string, @Param('serviceId') serviceId: string): Promise<WorkOrderDetailedResponseDto> {
+    const workOrder = await this.manageWorkOrderServicesService.startService(id, serviceId);
+    return new WorkOrderDetailedResponseDto(workOrder);
+  }
+
+  @Post(':id/services/:serviceId/complete')
+  @ApiOperation({ summary: 'Complete service execution' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiParam({ name: 'serviceId', description: 'Service ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Service completed successfully', type: WorkOrderDetailedResponseDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or service not found' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Service cannot be completed' })
+  async completeService(
+    @Param('id', ParseUUIDPipe) id: string, 
+    @Param('serviceId') serviceId: string,
+    @Body() dto: CompleteServiceDto
+  ): Promise<WorkOrderDetailedResponseDto> {
+    const workOrder = await this.manageWorkOrderServicesService.completeService(id, serviceId, dto);
+    return new WorkOrderDetailedResponseDto(workOrder);
+  }
+
+  @Post(':id/services/:serviceId/cancel')
+  @ApiOperation({ summary: 'Cancel service' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiParam({ name: 'serviceId', description: 'Service ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Service cancelled successfully', type: WorkOrderDetailedResponseDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or service not found' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Service cannot be cancelled' })
+  async cancelService(@Param('id', ParseUUIDPipe) id: string, @Param('serviceId') serviceId: string): Promise<WorkOrderDetailedResponseDto> {
+    const workOrder = await this.manageWorkOrderServicesService.cancelService(id, serviceId);
+    return new WorkOrderDetailedResponseDto(workOrder);
   }
 
   @Delete(':id')
