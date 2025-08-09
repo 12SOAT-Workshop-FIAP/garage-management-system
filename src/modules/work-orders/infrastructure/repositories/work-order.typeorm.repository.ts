@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { WorkOrder as WorkOrderDomain } from '../../domain/work-order.entity';
-import { WorkOrder as WorkOrderEntity } from '../entities/work-order.entity';
+import { WorkOrderORM } from '../work-order.orm';
 import { WorkOrderRepository } from '../../domain/work-order.repository';
+import { WorkOrderStatus } from '../../domain/work-order-status.enum';
+import { WorkOrderMapper } from '../work-order.mapper';
 import { InjectRepository } from '@nestjs/typeorm';
 
 export const WORK_ORDER_REPOSITORY = Symbol('WorkOrderRepository');
@@ -14,33 +16,71 @@ export const WORK_ORDER_REPOSITORY = Symbol('WorkOrderRepository');
 @Injectable()
 export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
   constructor(
-    @InjectRepository(WorkOrderEntity)
-    private readonly repository: Repository<WorkOrderEntity>,
+    @InjectRepository(WorkOrderORM)
+    private readonly repository: Repository<WorkOrderORM>,
   ) {}
 
   async findById(id: string): Promise<WorkOrderDomain | null> {
     const entity = await this.repository.findOne({ where: { id } });
     if (!entity) return null;
     
-    // Convert TypeORM entity to Domain entity
-    return new WorkOrderDomain({
-      description: entity.description
-    }, entity.id);
+    return WorkOrderMapper.toDomain(entity);
+  }
+
+  async findAll(): Promise<WorkOrderDomain[]> {
+    const entities = await this.repository.find({
+      order: { createdAt: 'DESC' },
+    });
+    
+    return WorkOrderMapper.toDomainArray(entities);
+  }
+
+  async findByCustomerId(customerId: string): Promise<WorkOrderDomain[]> {
+    const entities = await this.repository.find({
+      where: { customerId },
+      order: { createdAt: 'DESC' },
+    });
+    
+    return WorkOrderMapper.toDomainArray(entities);
+  }
+
+  async findByVehicleId(vehicleId: string): Promise<WorkOrderDomain[]> {
+    const entities = await this.repository.find({
+      where: { vehicleId },
+      order: { createdAt: 'DESC' },
+    });
+    
+    return WorkOrderMapper.toDomainArray(entities);
+  }
+
+  async findByStatus(status: WorkOrderStatus): Promise<WorkOrderDomain[]> {
+    const entities = await this.repository.find({
+      where: { status },
+      order: { createdAt: 'DESC' },
+    });
+    
+    return WorkOrderMapper.toDomainArray(entities);
+  }
+
+  async findByDateRange(startDate: Date, endDate: Date): Promise<WorkOrderDomain[]> {
+    const entities = await this.repository.find({
+      where: {
+        createdAt: Between(startDate, endDate),
+      },
+      order: { createdAt: 'DESC' },
+    });
+    
+    return WorkOrderMapper.toDomainArray(entities);
   }
 
   async save(workOrder: WorkOrderDomain): Promise<WorkOrderDomain> {
-    // Convert Domain entity to TypeORM entity
-    const entity = this.repository.create({
-      id: workOrder.id,
-      description: workOrder.description,
-      created_at: workOrder.created_at
-    });
-    
+    const entity = WorkOrderMapper.toORM(workOrder);
     const saved = await this.repository.save(entity);
     
-    // Convert back to Domain entity
-    return new WorkOrderDomain({
-      description: saved.description
-    }, saved.id);
+    return WorkOrderMapper.toDomain(saved);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.repository.delete(id);
   }
 }
