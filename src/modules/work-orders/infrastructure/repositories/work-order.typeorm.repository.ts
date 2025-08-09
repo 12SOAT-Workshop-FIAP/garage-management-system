@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Repository, Between } from 'typeorm';
 import { WorkOrder as WorkOrderDomain } from '../../domain/work-order.entity';
-import { WorkOrderORM } from '../work-order.orm';
+import { WorkOrderORM } from '../entities/work-order.entity';
 import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 import { WorkOrderMapper } from '../work-order.mapper';

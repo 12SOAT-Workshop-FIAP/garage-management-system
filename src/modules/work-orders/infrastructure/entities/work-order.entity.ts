@@ -1,17 +1,66 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { WorkOrderStatus } from '../../domain/work-order-status.enum';
+import { WorkOrderServiceORM } from './work-order-service.entity';
 
 /**
- * WorkOrder TypeORM Entity
- * Database representation of a work order
+ * WorkOrderORM (Entidade TypeORM de Ordem de Serviço)
+ * TypeORM entity for work order persistence.
  */
 @Entity('work_orders')
-export class WorkOrder {
+export class WorkOrderORM {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
+  @Column('uuid')
+  customerId!: string;
+
+  @Column('uuid')
+  vehicleId!: string;
+
+  @Column('text')
   description!: string;
 
+  @Column({
+    type: 'enum',
+    enum: WorkOrderStatus,
+    default: WorkOrderStatus.PENDING,
+  })
+  status!: WorkOrderStatus;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  estimatedCost!: number;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  actualCost?: number;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  laborCost?: number;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  partsCost?: number;
+
+  @Column('text', { nullable: true })
+  diagnosis?: string;
+
+  @Column('text', { nullable: true })
+  technicianNotes?: string;
+
+  @Column('boolean', { default: false })
+  customerApproval!: boolean;
+
+  @Column('uuid', { nullable: true })
+  assignedTechnicianId?: string;
+
   @CreateDateColumn()
-  created_at!: Date;
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
+
+  // Relacionamento com serviços da ordem de serviço
+  @OneToMany(() => WorkOrderServiceORM, (service) => service.workOrder, {
+    cascade: true,
+    eager: false,
+  })
+  services!: WorkOrderServiceORM[];
 }

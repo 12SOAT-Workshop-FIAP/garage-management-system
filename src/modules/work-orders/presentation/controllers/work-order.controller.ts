@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete, Query, ParseUUIDPipe, HttpStatus, Put } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateWorkOrderDto } from '../../application/dtos/create-work-order.dto';
-import { CreateWorkOrderDto as CreateWorkOrderWithCustomerDto } from '../../application/dtos/create-work-order-with-customer-identification.dto';
+import { CreateWorkOrderWithCustomerDto } from '../../application/dtos/create-work-order-with-customer-identification.dto';
 import { UpdateWorkOrderDto } from '../../application/dtos/update-work-order.dto';
 import { 
   CreateWorkOrderWithServicesDto, 

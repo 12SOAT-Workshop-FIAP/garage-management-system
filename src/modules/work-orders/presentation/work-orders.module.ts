@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { WorkOrderORM } from '../infrastructure/work-order.orm';
+import { WorkOrderORM } from '../infrastructure/entities/work-order.entity';
+import { WorkOrderServiceORM } from '../infrastructure/entities/work-order-service.entity';
 import { WorkOrderController } from './controllers/work-order.controller';
 import { CreateWorkOrderService } from '../application/services/create-work-order.service';
 import { CreateWorkOrderWithCustomerIdentificationService } from '../application/services/create-work-order-with-customer-identification.service';
@@ -16,7 +17,7 @@ import { ServicesModule } from '../../services/services.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([WorkOrderORM]),
+    TypeOrmModule.forFeature([WorkOrderORM, WorkOrderServiceORM]),
     CustomersModule,
     ServicesModule,
   ],

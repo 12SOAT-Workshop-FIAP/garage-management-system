@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { WorkOrderStatus } from '../domain/work-order-status.enum';
+import { WorkOrderServiceORM } from './work-order-service.orm';
 
 /**
  * WorkOrderORM (Entidade TypeORM de Ordem de Serviço)
@@ -58,4 +59,7 @@ export class WorkOrderORM {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @OneToMany(() => WorkOrderServiceORM, service => service.workOrder, { cascade: true })
+  services!: WorkOrderServiceORM[];
 }
