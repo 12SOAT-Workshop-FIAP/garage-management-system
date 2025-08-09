@@ -5,8 +5,6 @@ import { Service as ServiceEntity } from '../../domain/service.entity';
 import { ServiceRepository } from '../../domain/service.repository';
 import { Service as TypeOrmService } from '../entities/service.entity';
 
-export const SERVICE_REPOSITORY = Symbol('ServiceRepository');
-
 @Injectable()
 export class ServiceTypeOrmRepository implements ServiceRepository {
   constructor(

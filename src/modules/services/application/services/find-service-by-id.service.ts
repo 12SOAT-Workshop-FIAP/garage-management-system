@@ -1,12 +1,10 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ServiceRepository } from '../../domain/service.repository';
 import { Service } from '../../domain/service.entity';
-import { SERVICE_REPOSITORY } from '../../infrastructure/repositories/service.typeorm.repository';
 
 @Injectable()
 export class FindServiceByIdService {
   constructor(
-    @Inject(SERVICE_REPOSITORY)
     private readonly serviceRepository: ServiceRepository,
   ) {}
 

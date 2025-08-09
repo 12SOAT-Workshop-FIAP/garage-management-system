@@ -5,8 +5,6 @@ import { User as UserEntity } from '../../domain/user.entity';
 import { UserRepository } from '../../domain/user.repository';
 import { User as TypeOrmUser } from '../entities/user.entity';
 
-export const USER_REPOSITORY = Symbol('UserRepository');
-
 @Injectable()
 export class UserTypeOrmRepository implements UserRepository {
   constructor(

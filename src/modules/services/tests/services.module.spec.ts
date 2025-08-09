@@ -8,7 +8,6 @@ import { FindServiceByIdService } from '../application/services/find-service-by-
 import { ServiceController } from '../presentation/controllers/service.controller';
 import {
   ServiceTypeOrmRepository,
-  SERVICE_REPOSITORY,
 } from '../infrastructure/repositories/service.typeorm.repository';
 
 describe('ServicesModule', () => {
@@ -34,7 +33,6 @@ describe('ServicesModule', () => {
     expect(FindServiceByIdService).toBeDefined();
     expect(ServiceController).toBeDefined();
     expect(ServiceTypeOrmRepository).toBeDefined();
-    expect(SERVICE_REPOSITORY).toBeDefined();
   });
 
   it('should have proper class inheritance and structure', () => {

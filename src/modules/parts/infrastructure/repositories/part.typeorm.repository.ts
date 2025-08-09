@@ -5,8 +5,6 @@ import { Part as PartEntity } from '../../domain/part.entity';
 import { PartRepository } from '../../domain/part.repository';
 import { Part as TypeOrmPart } from '../entities/part.entity';
 
-export const PART_REPOSITORY = Symbol('PartRepository');
-
 @Injectable()
 export class PartTypeOrmRepository implements PartRepository {
   constructor(

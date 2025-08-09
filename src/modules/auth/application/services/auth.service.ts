@@ -1,8 +1,7 @@
-import { Injectable, UnauthorizedException, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserRepository } from '../../../users/domain/user.repository';
-import { USER_REPOSITORY } from '../../../users/infrastructure/repositories/user.typeorm.repository';
 import { LoginDto } from '../dtos/login.dto';
 import { AuthResponseDto } from '../dtos/auth-response.dto';
 import { JwtPayload } from '../../domain/jwt-payload.interface';
@@ -17,7 +16,6 @@ export class AuthService {
   private readonly refreshTokenStore = new Map<string, RefreshTokenPayload>(); // In-memory store for refresh tokens
 
   constructor(
-    @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,

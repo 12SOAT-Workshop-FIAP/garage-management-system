@@ -1,13 +1,11 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PartRepository } from '../../domain/part.repository';
-import { PART_REPOSITORY } from '../../infrastructure/repositories/part.typeorm.repository';
 import { UpdateStockDto } from '../dtos/update-part.dto';
 import { Part } from '../../domain/part.entity';
 
 @Injectable()
 export class UpdateStockService {
   constructor(
-    @Inject(PART_REPOSITORY)
     private readonly partRepository: PartRepository,
   ) {}
 
