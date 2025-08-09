@@ -50,7 +50,9 @@ export class Part {
 
   // Domain methods
   updateStock(quantity: number): void {
-    this.stockQuantity = quantity;
+    // quantity here represents a delta: positive (entry) or negative (consumption)
+    this.stockQuantity = this.stockQuantity + quantity;
+    this.updatedAt = new Date();
   }
 
   isLowStock(): boolean {
