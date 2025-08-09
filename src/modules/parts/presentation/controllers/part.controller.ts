@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Patch,
 } from '@nestjs/common';
 import { CreatePartDto } from '../../application/dtos/create-part.dto';
 import { UpdatePartDto } from '../../application/dtos/update-part.dto';
@@ -17,6 +18,8 @@ import { FindAllPartsService } from '../../application/services/find-all-parts.s
 import { FindPartByIdService } from '../../application/services/find-part-by-id.service';
 import { UpdatePartService } from '../../application/services/update-part.service';
 import { PartResponseDto } from '../dtos/part-response.dto';
+import { UpdateStockService } from '../../application/services/update-stock.service';
+import { UpdateStockDto } from '../../application/dtos/update-part.dto';
 
 @Controller('parts')
 export class PartController {
@@ -26,6 +29,7 @@ export class PartController {
     private readonly deletePart: DeletePartService,
     private readonly findAllParts: FindAllPartsService,
     private readonly findPartById: FindPartByIdService,
+    private readonly updateStockService: UpdateStockService,
   ) {}
 
   @Post()
@@ -54,5 +58,11 @@ export class PartController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
     await this.deletePart.execute(id);
+  }
+
+  @Patch(':id/stock')
+  async updateStock(@Param('id') id: string, @Body() dto: UpdateStockDto) {
+    const part = await this.updateStockService.execute(id, dto);
+    return new PartResponseDto(part);
   }
 }
