@@ -1,0 +1,298 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import * as request from 'supertest';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { CustomersModule } from '../../presentation/customers.module';
+import { CustomerEntity } from '../../infrastructure/customer.entity';
+import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
+
+const INVALID_CPF = '12345678909';
+const INVALID_CNPJ = '12345678000100';
+
+describe('Customers (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [
+        TypeOrmModule.forRoot({
+          type: 'sqlite',
+          database: ':memory:',
+          entities: [CustomerEntity, Vehicle],
+          synchronize: true,
+          dropSchema: true,
+          logging: false,
+        }),
+        CustomersModule,
+      ],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
+
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  function generateValidCpf(): string {
+    const randomDigits = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10));
+    const calcDigit = (base: number[]) => {
+      const factorStart = base.length + 1;
+      const sum = base.reduce((acc, num, idx) => acc + num * (factorStart - idx), 0);
+      const remainder = sum % 11;
+      return remainder < 2 ? 0 : 11 - remainder;
+    };
+    const d1 = calcDigit(randomDigits);
+    const d2 = calcDigit([...randomDigits, d1]);
+    return [...randomDigits, d1, d2].join('');
+  }
+
+  function generateValidCnpj(): string {
+    const base = Array.from({ length: 12 }, (_, i) =>
+      i < 8 ? Math.floor(Math.random() * 10) : i <= 10 ? 0 : 1,
+    );
+    const calcDigit = (nums: number[]) => {
+      const multipliers =
+        nums.length === 12
+          ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+          : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+      const sum = nums.reduce((acc, n, i) => acc + n * multipliers[i], 0);
+      const remainder = sum % 11;
+      return remainder < 2 ? 0 : 11 - remainder;
+    };
+    const d1 = calcDigit(base);
+    const d2 = calcDigit([...base, d1]);
+    return [...base, d1, d2].join('');
+  }
+
+  describe('POST /customers', () => {
+    it('should create a new customer successfully (CPF)', async () => {
+      const cpf = generateValidCpf();
+      const createDto = {
+        name: 'John Doe',
+        personType: 'INDIVIDUAL',
+        document: cpf,
+        phone: '+5511999999999',
+        email: 'john@example.com',
+        status: true,
+      };
+
+      const res = await request(app.getHttpServer()).post('/customers').send(createDto).expect(201);
+
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.name).toBe(createDto.name);
+      expect(res.body.personType).toBe(createDto.personType);
+    });
+
+    it('should fail with invalid document', () => {
+      const invalidDto = {
+        name: 'Invalid Doc',
+        personType: 'INDIVIDUAL',
+        document: INVALID_CPF,
+        phone: '+5511888888888',
+      };
+
+      return request(app.getHttpServer()).post('/customers').send(invalidDto).expect(400);
+    });
+  });
+
+  describe('GET /customers', () => {
+    it('should return all customers', async () => {
+      const cpf = generateValidCpf();
+      await request(app.getHttpServer())
+        .post('/customers')
+        .send({
+          name: 'List Seed',
+          personType: 'INDIVIDUAL',
+          document: cpf,
+          phone: '+5511911111111',
+        })
+        .expect(201);
+
+      const res = await request(app.getHttpServer()).get('/customers').expect(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body[0]).toHaveProperty('id');
+      expect(res.body[0]).toHaveProperty('name');
+    });
+  });
+
+  describe('GET /customers/:id', () => {
+    it('should return a customer by id', async () => {
+      // Arrange: create a customer
+      const cpf = generateValidCpf();
+      const create = await request(app.getHttpServer())
+        .post('/customers')
+        .send({
+          name: 'Find One',
+          personType: 'INDIVIDUAL',
+          document: cpf,
+          phone: '+5511922222222',
+        })
+        .expect(201);
+
+      const id = create.body.id;
+
+      const res = await request(app.getHttpServer()).get(`/customers/${id}`).expect(200);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.id).toBe(id);
+    });
+  });
+
+  describe('GET /customers/document/:document', () => {
+    it('should return customer by document (CPF)', async () => {
+      const cpf = generateValidCpf();
+      await request(app.getHttpServer())
+        .post('/customers')
+        .send({
+          name: 'By Document',
+          personType: 'INDIVIDUAL',
+          document: cpf,
+          phone: '+5511933333333',
+        })
+        .expect(201);
+
+      const res = await request(app.getHttpServer()).get(`/customers/document/${cpf}`).expect(200);
+
+      expect(res.body).toHaveProperty('id');
+      expect(res.body).toHaveProperty('name');
+    });
+  });
+
+  describe('POST /customers (COMPANY)', () => {
+    it('should create a new company customer successfully (CNPJ)', async () => {
+      const cnpj = generateValidCnpj();
+      const createDto = {
+        name: 'ACME LTDA',
+        personType: 'COMPANY',
+        document: cnpj,
+        phone: '+5511999888777',
+        email: 'contato@acme.com',
+        status: true,
+      };
+
+      const res = await request(app.getHttpServer()).post('/customers').send(createDto).expect(201);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.name).toBe(createDto.name);
+      expect(res.body.personType).toBe('COMPANY');
+    });
+
+    it('should fail with invalid CNPJ', () => {
+      const invalidDto = {
+        name: 'Bad Company',
+        personType: 'COMPANY',
+        document: INVALID_CNPJ,
+        phone: '+551188887777',
+      };
+      return request(app.getHttpServer()).post('/customers').send(invalidDto).expect(400);
+    });
+  });
+
+  describe('GET /customers/document/:document (CNPJ)', () => {
+    it('should return company by CNPJ', async () => {
+      const cnpj = generateValidCnpj();
+      await request(app.getHttpServer())
+        .post('/customers')
+        .send({
+          name: 'CNPJ Lookup',
+          personType: 'COMPANY',
+          document: cnpj,
+          phone: '+5511977777777',
+        })
+        .expect(201);
+
+      const res = await request(app.getHttpServer()).get(`/customers/document/${cnpj}`).expect(200);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.personType).toBe('COMPANY');
+      expect(res.body).toHaveProperty('name');
+    });
+  });
+
+  describe('PATCH /customers/:id (COMPANY)', () => {
+    it('should update a company customer successfully', async () => {
+      const cnpj = generateValidCnpj();
+      const create = await request(app.getHttpServer())
+        .post('/customers')
+        .send({
+          name: 'To Update Co',
+          personType: 'COMPANY',
+          document: cnpj,
+          phone: '+5511966666666',
+        })
+        .expect(201);
+      const id = create.body.id;
+
+      const updateDto = { name: 'Updated Co', email: 'financeiro@co.com' };
+      const res = await request(app.getHttpServer())
+        .patch(`/customers/${id}`)
+        .send(updateDto)
+        .expect(200);
+      expect(res.body.name).toBe(updateDto.name);
+      expect(res.body.email).toBe(updateDto.email);
+      expect(res.body.personType).toBe('COMPANY');
+    });
+  });
+
+  describe('PATCH /customers/:id', () => {
+    it('should update a customer successfully', async () => {
+      // Arrange: create a customer
+      const cpf = generateValidCpf();
+      const create = await request(app.getHttpServer())
+        .post('/customers')
+        .send({
+          name: 'To Update',
+          personType: 'INDIVIDUAL',
+          document: cpf,
+          phone: '+5511944444444',
+        })
+        .expect(201);
+      const id = create.body.id;
+
+      const updateDto = {
+        name: 'John Updated',
+        email: 'john.updated@example.com',
+      };
+
+      const res = await request(app.getHttpServer())
+        .patch(`/customers/${id}`)
+        .send(updateDto)
+        .expect(200);
+
+      expect(res.body.name).toBe(updateDto.name);
+      expect(res.body.email).toBe(updateDto.email);
+    });
+  });
+
+  describe('DELETE /customers/:id', () => {
+    it('should delete a customer successfully', async () => {
+      const cpf = generateValidCpf();
+      const create = await request(app.getHttpServer())
+        .post('/customers')
+        .send({
+          name: 'To Delete',
+          personType: 'INDIVIDUAL',
+          document: cpf,
+          phone: '+5511955555555',
+        })
+        .expect(201);
+      const id = create.body.id;
+
+      await request(app.getHttpServer()).delete(`/customers/${id}`).expect(204);
+
+      const res = await request(app.getHttpServer()).get(`/customers/${id}`).expect(200);
+
+      expect(res.body).toHaveProperty('status');
+      expect(res.body.status).toBe(false);
+    });
+  });
+});
