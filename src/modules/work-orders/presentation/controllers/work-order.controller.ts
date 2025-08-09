@@ -1,38 +1,130 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Query, ParseUUIDPipe, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateWorkOrderDto } from '../../application/dtos/create-work-order.dto';
+import { CreateWorkOrderDto as CreateWorkOrderWithCustomerDto } from '../../application/dtos/create-work-order-with-customer-identification.dto';
 import { UpdateWorkOrderDto } from '../../application/dtos/update-work-order.dto';
 import { WorkOrderResponseDto } from '../dtos/work-order-response.dto';
+import { CreateWorkOrderService } from '../../application/services/create-work-order.service';
+import { CreateWorkOrderWithCustomerIdentificationService } from '../../application/services/create-work-order-with-customer-identification.service';
+import { UpdateWorkOrderService } from '../../application/services/update-work-order.service';
+import { FindWorkOrderService } from '../../application/services/find-work-order.service';
+import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 
 @ApiTags('work-orders')
 @Controller('work-orders')
 export class WorkOrderController {
+  constructor(
+    private readonly createWorkOrderService: CreateWorkOrderService,
+    private readonly createWorkOrderWithCustomerIdentificationService: CreateWorkOrderWithCustomerIdentificationService,
+    private readonly updateWorkOrderService: UpdateWorkOrderService,
+    private readonly findWorkOrderService: FindWorkOrderService,
+  ) {}
+
   @Post()
-  create(@Body() _dto: CreateWorkOrderDto): WorkOrderResponseDto {
-    // TODO: Call service
-    return {} as WorkOrderResponseDto;
+  @ApiOperation({ summary: 'Create a new work order' })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Work order created successfully', type: WorkOrderResponseDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
+  async create(@Body() dto: CreateWorkOrderDto): Promise<WorkOrderResponseDto> {
+    const workOrder = await this.createWorkOrderService.execute(dto);
+    return WorkOrderResponseDto.fromDomain(workOrder);
+  }
+
+  @Post('with-customer-identification')
+  @ApiOperation({ 
+    summary: 'Create a new work order with customer identification by CPF/CNPJ',
+    description: 'Allows creating work orders by providing customer CPF/CNPJ instead of customer ID'
+  })
+  @ApiResponse({ 
+    status: HttpStatus.CREATED, 
+    description: 'Work order created successfully with customer identification', 
+    type: WorkOrderResponseDto 
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data or document format' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Customer not found with provided document' })
+  async createWithCustomerIdentification(@Body() dto: CreateWorkOrderWithCustomerDto): Promise<WorkOrderResponseDto> {
+    const result = await this.createWorkOrderWithCustomerIdentificationService.execute(dto);
+    return WorkOrderResponseDto.fromDomain(result.workOrder);
   }
 
   @Get()
-  findAll(): WorkOrderResponseDto[] {
-    // TODO: Call service
-    return [];
+  @ApiOperation({ summary: 'Get all work orders' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Work orders retrieved successfully', type: [WorkOrderResponseDto] })
+  @ApiQuery({ name: 'status', enum: WorkOrderStatus, required: false })
+  @ApiQuery({ name: 'customerId', type: 'string', required: false })
+  @ApiQuery({ name: 'vehicleId', type: 'string', required: false })
+  async findAll(
+    @Query('status') status?: WorkOrderStatus,
+    @Query('customerId') customerId?: string,
+    @Query('vehicleId') vehicleId?: string,
+  ): Promise<WorkOrderResponseDto[]> {
+    let workOrders;
+
+    if (status) {
+      workOrders = await this.findWorkOrderService.findByStatus(status);
+    } else if (customerId) {
+      workOrders = await this.findWorkOrderService.findByCustomerId(customerId);
+    } else if (vehicleId) {
+      workOrders = await this.findWorkOrderService.findByVehicleId(vehicleId);
+    } else {
+      workOrders = await this.findWorkOrderService.findAll();
+    }
+
+    return workOrders.map(workOrder => WorkOrderResponseDto.fromDomain(workOrder));
+  }
+
+  @Get('pending')
+  @ApiOperation({ summary: 'Get work orders pending approval' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Pending work orders retrieved successfully', type: [WorkOrderResponseDto] })
+  async findPending(): Promise<WorkOrderResponseDto[]> {
+    const workOrders = await this.findWorkOrderService.findPendingApproval();
+    return workOrders.map(workOrder => WorkOrderResponseDto.fromDomain(workOrder));
+  }
+
+  @Get('in-progress')
+  @ApiOperation({ summary: 'Get work orders in progress' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'In progress work orders retrieved successfully', type: [WorkOrderResponseDto] })
+  async findInProgress(): Promise<WorkOrderResponseDto[]> {
+    const workOrders = await this.findWorkOrderService.findInProgress();
+    return workOrders.map(workOrder => WorkOrderResponseDto.fromDomain(workOrder));
+  }
+
+  @Get('completed')
+  @ApiOperation({ summary: 'Get completed work orders' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Completed work orders retrieved successfully', type: [WorkOrderResponseDto] })
+  async findCompleted(): Promise<WorkOrderResponseDto[]> {
+    const workOrders = await this.findWorkOrderService.findCompleted();
+    return workOrders.map(workOrder => WorkOrderResponseDto.fromDomain(workOrder));
   }
 
   @Get(':id')
-  findOne(@Param('id') _id: string): WorkOrderResponseDto {
-    // TODO: Call service
-    return {} as WorkOrderResponseDto;
+  @ApiOperation({ summary: 'Get work order by ID' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Work order retrieved successfully', type: WorkOrderResponseDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<WorkOrderResponseDto> {
+    const workOrder = await this.findWorkOrderService.findById(id);
+    return WorkOrderResponseDto.fromDomain(workOrder);
   }
 
   @Patch(':id')
-  update(@Param('id') _id: string, @Body() _dto: UpdateWorkOrderDto): WorkOrderResponseDto {
-    // TODO: Call service
-    return {} as WorkOrderResponseDto;
+  @ApiOperation({ summary: 'Update work order' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Work order updated successfully', type: WorkOrderResponseDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateWorkOrderDto): Promise<WorkOrderResponseDto> {
+    const workOrder = await this.updateWorkOrderService.execute(id, dto);
+    return WorkOrderResponseDto.fromDomain(workOrder);
   }
 
   @Delete(':id')
-  remove(@Param('id') _id: string): void {
-    // TODO: Call service
+  @ApiOperation({ summary: 'Delete work order' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Work order deleted successfully' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    // Note: In a real implementation, you might want to create a delete service
+    // For now, we'll throw an error since deletion might not be allowed for work orders
+    throw new Error('Work order deletion not implemented - consider status change instead');
   }
 }

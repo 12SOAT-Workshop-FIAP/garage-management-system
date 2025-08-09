@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsString, IsNumber, IsOptional, IsInt } from 'class-validator';
 
 /**
  * UpdateVehicleDto (DTO de atualização de Veículo)
@@ -18,11 +19,18 @@ export class UpdateVehicleDto {
   @IsString()
   plate?: string;
 
+  @ApiPropertyOptional({ description: 'Year of the vehicle', example: 2021 })
   @IsOptional()
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
   year?: number;
 
+  @ApiPropertyOptional({
+    description: 'ID of the customer to reassign this vehicle to',
+    example: 42,
+  })
   @IsOptional()
-  @IsNumber()
-  customer_id?: number;
+  @Type(() => Number)
+  @IsInt()
+  customer?: number;
 }

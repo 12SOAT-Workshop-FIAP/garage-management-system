@@ -18,6 +18,7 @@ import { FindUserByIdService } from '../../application/services/find-user-by-id.
 import { UpdateUserService } from '../../application/services/update-user.service';
 import { HashPasswordPipe } from '../../../../pipes/hash-password.pipe';
 import { UserResponseDto } from '../dtos/user-response.dto';
+import { IsPublic } from '../../../auth/presentation/decorators/is-public.decorator';
 
 @Controller('users')
 export class UserController {
@@ -30,6 +31,7 @@ export class UserController {
   ) {}
 
   @Post()
+  @IsPublic()
   async create(
     @Body() createUserDto: CreateUserDto,
     @Body('password', HashPasswordPipe) passwordHashed: string,

@@ -5,7 +5,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Up
 @Entity('vehicles')
 export class Vehicle {
   @PrimaryGeneratedColumn()
-  id!: string;
+  id!: number;
 
   @Column({ length: 50 })
   brand!: string;
@@ -19,7 +19,7 @@ export class Vehicle {
   @Column({ type: 'int' })
   year!: number;
 
-  @ManyToOne(() => CustomerEntity, (customer) => customer.vehicles)
+  @ManyToOne(() => CustomerEntity, (customer) => customer.vehicles, { onDelete: 'CASCADE' })
   customer!: CustomerEntity;
 
   @CreateDateColumn()

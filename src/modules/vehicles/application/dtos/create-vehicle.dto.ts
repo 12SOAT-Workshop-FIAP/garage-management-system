@@ -1,6 +1,3 @@
-//Ele especifica quais campos são esperados, seus tipos e, possivelmente, regras de validação
-
-import { Customer } from '@modules/customers/domain/customer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsNumber, Min, Max } from 'class-validator';
 import { IsValidLicensePlate } from '@shared/validators/is-valid-license-plate.decorator';

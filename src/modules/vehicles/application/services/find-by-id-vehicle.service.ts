@@ -9,7 +9,7 @@ export class FindByIdVehicleService {
     private readonly vehicleRepo: VehicleRepository,
   ) {}
 
-  async execute(id: string): Promise<Vehicle> {
+  async execute(id: number): Promise<Vehicle> {
     const vehicle = await this.vehicleRepo.findById(id); // Chamar o método findById da minha interface
 
     if (!vehicle) {
