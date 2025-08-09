@@ -44,7 +44,7 @@ describe('JwtAuthGuard', () => {
     it('should return true for public routes', async () => {
       reflector.getAllAndOverride.mockReturnValue(true);
 
-      const result = guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
 
       expect(result).toBe(true);
       expect(reflector.getAllAndOverride).toHaveBeenCalledWith(IS_PUBLIC_KEY, [
