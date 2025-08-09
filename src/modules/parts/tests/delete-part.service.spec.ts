@@ -3,7 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 import { DeletePartService } from '../application/services/delete-part.service';
 import { PartRepository } from '../domain/part.repository';
 import { Part } from '../domain/part.entity';
-import { PART_REPOSITORY } from '../infrastructure/repositories/part.typeorm.repository';
+
 
 describe('DeletePartService', () => {
   let service: DeletePartService;
@@ -25,14 +25,14 @@ describe('DeletePartService', () => {
       providers: [
         DeletePartService,
         {
-          provide: PART_REPOSITORY,
+          provide: PartRepository,
           useValue: mockPartRepository,
         },
       ],
     }).compile();
 
     service = module.get<DeletePartService>(DeletePartService);
-    repository = module.get(PART_REPOSITORY);
+    repository = module.get(PartRepository);
   });
 
   afterEach(() => {
@@ -117,3 +117,4 @@ describe('DeletePartService', () => {
     });
   });
 });
+

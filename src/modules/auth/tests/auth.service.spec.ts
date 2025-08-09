@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../application/services/auth.service';
 import { UserRepository } from '../../users/domain/user.repository';
-import { USER_REPOSITORY } from '../../users/infrastructure/repositories/user.typeorm.repository';
+
 import { User } from '../../users/domain/user.entity';
 import * as bcrypt from 'bcrypt';
 
@@ -49,7 +49,7 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         {
-          provide: USER_REPOSITORY,
+          provide: UserRepository,
           useValue: mockUserRepository,
         },
         {
@@ -64,7 +64,7 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    userRepository = module.get(USER_REPOSITORY);
+    userRepository = module.get(UserRepository);
     jwtService = module.get(JwtService);
     configService = module.get(ConfigService);
   });
@@ -184,3 +184,4 @@ describe('AuthService', () => {
     });
   });
 });
+

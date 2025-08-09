@@ -86,7 +86,7 @@ describe('UpdateServiceService', () => {
     );
 
     // Only to avoid to have the same updatedAt timestamp
-    await new Promise((resolve) => setTimeout(resolve, 1));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     const originalUpdatedAt = existingService.updatedAt;
     const updateServiceDto: UpdateServiceDto = {

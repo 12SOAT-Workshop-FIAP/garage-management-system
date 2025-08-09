@@ -4,7 +4,6 @@ import { CreatePartService } from '../application/services/create-part.service';
 import { PartRepository } from '../domain/part.repository';
 import { Part } from '../domain/part.entity';
 import { CreatePartDto } from '../application/dtos/create-part.dto';
-import { PART_REPOSITORY } from '../infrastructure/repositories/part.typeorm.repository';
 
 describe('CreatePartService', () => {
   let service: CreatePartService;
@@ -19,6 +18,8 @@ describe('CreatePartService', () => {
     save: jest.fn(),
     delete: jest.fn(),
     count: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -26,14 +27,14 @@ describe('CreatePartService', () => {
       providers: [
         CreatePartService,
         {
-          provide: PART_REPOSITORY,
+          provide: PartRepository,
           useValue: mockPartRepository,
         },
       ],
     }).compile();
 
     service = module.get<CreatePartService>(CreatePartService);
-    repository = module.get(PART_REPOSITORY);
+    repository = module.get(PartRepository);
   });
 
   afterEach(() => {
@@ -177,3 +178,4 @@ describe('CreatePartService', () => {
     });
   });
 });
+

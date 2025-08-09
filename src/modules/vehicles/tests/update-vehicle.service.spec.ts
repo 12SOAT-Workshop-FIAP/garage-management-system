@@ -23,6 +23,10 @@ describe('UpdateVehicleService', () => {
       year: 2010,
       customer: {} as any,
       created_at: new Date(),
+      updated_at: new Date(),
+      formatLicensePlate: jest.fn(),
+      getLicensePlateType: jest.fn(),
+      getMaskedPlate: jest.fn(),
     };
 
     const dto = {
@@ -31,7 +35,13 @@ describe('UpdateVehicleService', () => {
     };
 
     vehicleRepo.findById.mockResolvedValue(existingVehicle);
-    vehicleRepo.update.mockResolvedValue({ ...existingVehicle, ...dto });
+    vehicleRepo.update.mockResolvedValue({ 
+      ...existingVehicle, 
+      ...dto,
+      formatLicensePlate: jest.fn(),
+      getLicensePlateType: jest.fn(),
+      getMaskedPlate: jest.fn(),
+    });
 
     const result = await service.execute(1, dto);
     expect(result.model).toBe(dto.model);
@@ -39,3 +49,4 @@ describe('UpdateVehicleService', () => {
     expect(vehicleRepo.update).toHaveBeenCalled();
   });
 });
+

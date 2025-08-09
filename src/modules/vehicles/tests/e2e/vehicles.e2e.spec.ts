@@ -41,7 +41,7 @@ describe('Vehicles (e2e)', () => {
     await app.init();
 
     // Cria um cliente para relacionar ao veículo
-    const uniqueDocument = `12345678910`;
+    const uniqueDocument = `11144477735`; // CPF válido para teste
     const uniqueEmail = `cliente${Date.now()}@teste.com`;
 
     const createCustomerResponse = await request(app.getHttpServer()).post('/customers').send({
@@ -63,12 +63,13 @@ describe('Vehicles (e2e)', () => {
 
   describe('POST /vehicles', () => {
     it('deve criar um veículo com sucesso e retornar customer dentro do response', async () => {
+      const randomPlate = `ABC${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`;
       const dto = {
         brand: 'Fiat',
         model: 'Uno',
-        plate: `ABC-1234${Date.now()}`,
+        plate: randomPlate,
         year: 2012,
-        customer: createdCustomerId,
+        customerId: createdCustomerId,
       };
 
       const res = await request(app.getHttpServer()).post('/vehicles').send(dto).expect(201);

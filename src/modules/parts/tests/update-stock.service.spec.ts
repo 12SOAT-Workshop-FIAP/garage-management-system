@@ -4,7 +4,7 @@ import { UpdateStockService } from '../application/services/update-stock.service
 import { PartRepository } from '../domain/part.repository';
 import { Part } from '../domain/part.entity';
 import { UpdateStockDto } from '../application/dtos/update-part.dto';
-import { PART_REPOSITORY } from '../infrastructure/repositories/part.typeorm.repository';
+
 
 describe('UpdateStockService', () => {
   let service: UpdateStockService;
@@ -26,14 +26,14 @@ describe('UpdateStockService', () => {
       providers: [
         UpdateStockService,
         {
-          provide: PART_REPOSITORY,
+          provide: PartRepository,
           useValue: mockPartRepository,
         },
       ],
     }).compile();
 
     service = module.get<UpdateStockService>(UpdateStockService);
-    repository = module.get(PART_REPOSITORY);
+    repository = module.get(PartRepository);
   });
 
   afterEach(() => {
@@ -169,3 +169,4 @@ describe('UpdateStockService', () => {
     });
   });
 });
+

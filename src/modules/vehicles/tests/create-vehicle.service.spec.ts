@@ -121,3 +121,4 @@ describe('CreateVehicleService', () => {
     expect(result.customer).toEqual(mockCustomer);
   });
 });
+

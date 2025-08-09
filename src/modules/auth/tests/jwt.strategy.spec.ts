@@ -3,7 +3,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from '../infrastructure/strategies/jwt.strategy';
 import { UserRepository } from '../../users/domain/user.repository';
-import { USER_REPOSITORY } from '../../users/infrastructure/repositories/user.typeorm.repository';
+
 import { User } from '../../users/domain/user.entity';
 import { JwtPayload } from '../domain/jwt-payload.interface';
 
@@ -40,7 +40,7 @@ describe('JwtStrategy', () => {
       providers: [
         JwtStrategy,
         {
-          provide: USER_REPOSITORY,
+          provide: UserRepository,
           useValue: mockUserRepository,
         },
         {
@@ -51,7 +51,7 @@ describe('JwtStrategy', () => {
     }).compile();
 
     strategy = module.get<JwtStrategy>(JwtStrategy);
-    userRepository = module.get(USER_REPOSITORY);
+    userRepository = module.get(UserRepository);
     configService = module.get(ConfigService);
   });
 
@@ -107,3 +107,4 @@ describe('JwtStrategy', () => {
     });
   });
 });
+

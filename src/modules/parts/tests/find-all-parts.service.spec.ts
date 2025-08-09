@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllPartsService } from '../application/services/find-all-parts.service';
 import { PartRepository } from '../domain/part.repository';
 import { Part } from '../domain/part.entity';
-import { PART_REPOSITORY } from '../infrastructure/repositories/part.typeorm.repository';
+
 
 describe('FindAllPartsService', () => {
   let service: FindAllPartsService;
@@ -24,14 +24,14 @@ describe('FindAllPartsService', () => {
       providers: [
         FindAllPartsService,
         {
-          provide: PART_REPOSITORY,
+          provide: PartRepository,
           useValue: mockPartRepository,
         },
       ],
     }).compile();
 
     service = module.get<FindAllPartsService>(FindAllPartsService);
-    repository = module.get(PART_REPOSITORY);
+    repository = module.get(PartRepository);
   });
 
   afterEach(() => {
@@ -217,3 +217,4 @@ describe('FindAllPartsService', () => {
     });
   });
 });
+

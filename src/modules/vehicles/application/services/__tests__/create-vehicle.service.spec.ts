@@ -24,7 +24,7 @@ describe('CreateVehicleService', () => {
   } as any;
 
   const mockVehicle: Vehicle = {
-    id: '1',
+    id: 1,
     brand: 'Toyota',
     model: 'Corolla',
     plate: 'ABC-1234',
@@ -59,19 +59,19 @@ describe('CreateVehicleService', () => {
       providers: [
         CreateVehicleService,
         {
-          provide: 'VehicleRepository',
+          provide: VehicleRepository,
           useValue: mockVehicleRepository,
         },
         {
-          provide: 'CustomerRepository',
+          provide: CustomerRepository,
           useValue: mockCustomerRepository,
         },
       ],
     }).compile();
 
     service = module.get<CreateVehicleService>(CreateVehicleService);
-    vehicleRepository = module.get('VehicleRepository');
-    customerRepository = module.get('CustomerRepository');
+    vehicleRepository = module.get(VehicleRepository);
+    customerRepository = module.get(CustomerRepository);
   });
 
   it('should be defined', () => {
