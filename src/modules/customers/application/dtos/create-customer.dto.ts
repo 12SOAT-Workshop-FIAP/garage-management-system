@@ -3,11 +3,11 @@ import {
   IsString,
   IsOptional,
   Length,
-  IsIn,
   Matches,
   IsPhoneNumber,
   IsEmail,
   IsBoolean,
+  IsEnum,
 } from 'class-validator';
 
 /**
@@ -21,7 +21,7 @@ export class CreateCustomerDto {
   name!: string;
 
   @ApiProperty({ enum: ['INDIVIDUAL', 'COMPANY'], description: 'Type of person' })
-  @IsIn(['INDIVIDUAL', 'COMPANY'])
+  @IsEnum(['INDIVIDUAL', 'COMPANY'])
   personType!: 'INDIVIDUAL' | 'COMPANY';
 
   @ApiProperty({ description: 'CPF (11 digits) or CNPJ (14 digits)' })
@@ -45,7 +45,6 @@ export class CreateCustomerDto {
     default: true,
     required: false,
   })
-
   @IsOptional()
   @IsBoolean()
   status: boolean = true;

@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+const path = require('path');
 
 // Para migrations, usamos variáveis de ambiente diretamente
 const dataSource = new DataSource({
@@ -8,13 +9,20 @@ const dataSource = new DataSource({
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD || 'postgres',
   database: process.env.POSTGRES_DB || 'garage',
-  entities: [
-    'src/modules/**/domain/*.entity.ts',
-    'src/modules/**/infrastructure/entities/*.entity.ts',
-  ],
-  migrations: ['src/migrations/*.ts'],
+
+  entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
+  migrations: [path.join(__dirname, 'migrations', '*.{ts,js}')],
+
   synchronize: false,
   logging: true,
 });
 
-export default dataSource;
+export const AppDataSource = dataSource;
+
+AppDataSource.initialize()
+  .then(() => {
+    console.log('Data Source foi inicializado com sucesso!!!');
+  })
+  .catch((err) => {
+    console.error('Erro durante a inicializacao do Data Source', err);
+  });
