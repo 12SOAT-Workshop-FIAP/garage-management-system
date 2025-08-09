@@ -7,8 +7,6 @@ import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 import { WorkOrderMapper } from '../work-order.mapper';
 import { InjectRepository } from '@nestjs/typeorm';
 
-export const WORK_ORDER_REPOSITORY = Symbol('WorkOrderRepository');
-
 /**
  * WorkOrderTypeOrmRepository (Repositório TypeORM de Ordem de Serviço)
  * TypeORM implementation for WorkOrderRepository (Ordem de Serviço).

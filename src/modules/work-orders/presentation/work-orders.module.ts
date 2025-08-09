@@ -6,19 +6,21 @@ import { CreateWorkOrderService } from '../application/services/create-work-orde
 import { CreateWorkOrderWithCustomerIdentificationService } from '../application/services/create-work-order-with-customer-identification.service';
 import { UpdateWorkOrderService } from '../application/services/update-work-order.service';
 import { FindWorkOrderService } from '../application/services/find-work-order.service';
-import { FindByDocumentCustomerService } from '../../customers/application/services/find-by-document-customer.service';
 import { WorkOrderTypeOrmRepository } from '../infrastructure/repositories/work-order.typeorm.repository';
 import { WorkOrderRepository } from '../domain/work-order.repository';
+import { CustomersModule } from '../../customers/presentation/customers.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WorkOrderORM])],
+  imports: [
+    TypeOrmModule.forFeature([WorkOrderORM]),
+    CustomersModule,
+  ],
   controllers: [WorkOrderController],
   providers: [
     CreateWorkOrderService,
     CreateWorkOrderWithCustomerIdentificationService,
     UpdateWorkOrderService,
     FindWorkOrderService,
-    FindByDocumentCustomerService,
     { provide: WorkOrderRepository, useClass: WorkOrderTypeOrmRepository },
   ],
   exports: [

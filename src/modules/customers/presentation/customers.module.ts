@@ -23,6 +23,9 @@ import { FindByDocumentCustomerService } from '../application/services/find-by-d
     DeleteCustomerService,
     { provide: CustomerRepository, useClass: CustomerTypeOrmRepository },
   ],
-  exports: [{ provide: CustomerRepository, useClass: CustomerTypeOrmRepository }],
+  exports: [
+    FindByDocumentCustomerService,
+    { provide: CustomerRepository, useClass: CustomerTypeOrmRepository },
+  ],
 })
 export class CustomersModule {}
