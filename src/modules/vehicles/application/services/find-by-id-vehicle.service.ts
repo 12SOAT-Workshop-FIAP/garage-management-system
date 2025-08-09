@@ -1,16 +1,15 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Vehicle } from '../../domain/vehicle.entity';
-import { VehicleRepository } from '../../domain/vehicle.repository'; // IMPORTAR minha interface VehicleRepository
+import { VehicleRepository } from '../../domain/vehicle.repository';
 
 @Injectable()
 export class FindByIdVehicleService {
   constructor(
-    @Inject(VehicleRepository)
     private readonly vehicleRepo: VehicleRepository,
   ) {}
 
   async execute(id: number): Promise<Vehicle> {
-    const vehicle = await this.vehicleRepo.findById(id); // Chamar o método findById da minha interface
+    const vehicle = await this.vehicleRepo.findById(id);
 
     if (!vehicle) {
       throw new NotFoundException(`Vehicle with ID "${id}" not found.`);

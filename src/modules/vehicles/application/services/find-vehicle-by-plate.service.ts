@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { VehicleRepository } from '../../domain/vehicle.repository';
 import { Vehicle } from '../../domain/vehicle.entity';
 import { LicensePlate } from '@modules/cryptography/domain/value-objects/license-plate.value-object';
@@ -6,7 +6,6 @@ import { LicensePlate } from '@modules/cryptography/domain/value-objects/license
 @Injectable()
 export class FindVehicleByPlateService {
   constructor(
-    @Inject('VehicleRepository')
     private readonly vehicleRepo: VehicleRepository,
   ) {}
 

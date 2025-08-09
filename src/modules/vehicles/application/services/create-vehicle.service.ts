@@ -1,4 +1,4 @@
-import { Injectable, Inject, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { CreateVehicleDto } from '../dtos/create-vehicle.dto';
 import { VehicleRepository } from '../../domain/vehicle.repository';
 import { Vehicle } from '../../domain/vehicle.entity';
@@ -8,9 +8,7 @@ import { LicensePlate } from '@modules/cryptography/domain/value-objects/license
 @Injectable()
 export class CreateVehicleService {
   constructor(
-    @Inject('VehicleRepository')
     private readonly vehicleRepo: VehicleRepository,
-    @Inject('CustomerRepository')
     private readonly customerRepo: CustomerRepository,
   ) {}
 

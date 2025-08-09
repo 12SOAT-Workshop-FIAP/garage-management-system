@@ -8,6 +8,7 @@ import { FindAllVehicleService } from '../application/services/find-all-vehicle.
 import { UpdateVehicleService } from '../application/services/update-vehicle.service';
 import { DeleteVehicleService } from '../application/services/delete-vehicle.service';
 import { FindByIdVehicleService } from '../application/services/find-by-id-vehicle.service';
+import { FindVehicleByPlateService } from '../application/services/find-vehicle-by-plate.service';
 
 // Importação da implementação do repositório TypeORM
 // CORREÇÃO AQUI: Ajustado para 'vehicle-typeorm.repository' conforme sua estrutura.
@@ -27,6 +28,7 @@ import { CustomersModule } from '@modules/customers/presentation/customers.modul
     UpdateVehicleService,
     DeleteVehicleService,
     FindByIdVehicleService,
+    FindVehicleByPlateService,
 
     {
       provide: VehicleRepository,

@@ -1,12 +1,16 @@
 import { Vehicle } from './vehicle.entity';
 
-export interface VehicleRepository {
-  save(vehicle: Vehicle): Promise<Vehicle>;
-  create(vehicle: Vehicle): Promise<Vehicle>;
-  findAll(): Promise<Vehicle[]>;
-  findById(id: number): Promise<Vehicle | null>;
-  findByPlate(plate: string): Promise<Vehicle | null>;
-  findByCustomerId(customerId: number): Promise<Vehicle[]>;
-  update(id: number, data: Partial<Vehicle>): Promise<Vehicle>;
-  delete(id: number): Promise<void>;
+/**
+ * VehicleRepository
+ * Contract for vehicle persistence operations.
+ */
+export abstract class VehicleRepository {
+  abstract save(vehicle: Vehicle): Promise<Vehicle>;
+  abstract create(vehicle: Vehicle): Promise<Vehicle>;
+  abstract findAll(): Promise<Vehicle[]>;
+  abstract findById(id: number): Promise<Vehicle | null>;
+  abstract findByPlate(plate: string): Promise<Vehicle | null>;
+  abstract findByCustomerId(customerId: number): Promise<Vehicle[]>;
+  abstract update(id: number, data: Partial<Vehicle>): Promise<Vehicle>;
+  abstract delete(id: number): Promise<void>;
 }
