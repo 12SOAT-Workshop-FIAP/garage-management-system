@@ -28,5 +28,11 @@ import { HashPasswordPipe } from '../../pipes/hash-password.pipe';
       useClass: UserTypeOrmRepository,
     },
   ],
+  exports: [
+    {
+      provide: USER_REPOSITORY,
+      useClass: UserTypeOrmRepository,
+    },
+  ],
 })
 export class UsersModule {}

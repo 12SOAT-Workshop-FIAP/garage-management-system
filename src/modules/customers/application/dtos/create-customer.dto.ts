@@ -3,11 +3,11 @@ import {
   IsString,
   IsOptional,
   Length,
-  IsIn,
   IsPhoneNumber,
   IsEmail,
   IsBoolean,
   Validate,
+  IsEnum,
 } from 'class-validator';
 import { DocumentValidator } from '../../../../shared/validators/document.validator';
 
@@ -26,7 +26,7 @@ export class CreateCustomerDto {
     description: 'Type of person - INDIVIDUAL for CPF, COMPANY for CNPJ',
     example: 'INDIVIDUAL'
   })
-  @IsIn(['INDIVIDUAL', 'COMPANY'])
+  @IsEnum(['INDIVIDUAL', 'COMPANY'])
   personType!: 'INDIVIDUAL' | 'COMPANY';
 
   @ApiProperty({ 
@@ -51,7 +51,6 @@ export class CreateCustomerDto {
     default: true,
     required: false,
   })
-
   @IsOptional()
   @IsBoolean()
   status: boolean = true;

@@ -72,8 +72,7 @@ describe('UpdateServiceService', () => {
     expect(mockServiceRepository.update).not.toHaveBeenCalled();
   });
 
-  it.skip('should update updatedAt timestamp', async () => {
-    // TODO:  I will solve this later (currently is not working)
+  it('should update updatedAt timestamp', async () => {
     const serviceId = 'test-id';
     const existingService = new Service(
       {
@@ -85,6 +84,9 @@ describe('UpdateServiceService', () => {
       },
       serviceId,
     );
+
+    // Only to avoid to have the same updatedAt timestamp
+    await new Promise((resolve) => setTimeout(resolve, 1));
 
     const originalUpdatedAt = existingService.updatedAt;
     const updateServiceDto: UpdateServiceDto = {

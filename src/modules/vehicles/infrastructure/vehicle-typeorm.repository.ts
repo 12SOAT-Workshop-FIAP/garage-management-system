@@ -16,10 +16,10 @@ export class TypeOrmVehicleRepository implements VehicleRepository {
   }
 
   async findAll(): Promise<Vehicle[]> {
-    return await this.ormRepo.find();
+    return await this.ormRepo.find({ relations: { customer: true } });
   }
 
-  async findById(id: string): Promise<Vehicle | null> {
+  async findById(id: number): Promise<Vehicle | null> {
     return await this.ormRepo.findOne({ where: { id }, relations: { customer: true } });
   }
 
@@ -27,14 +27,14 @@ export class TypeOrmVehicleRepository implements VehicleRepository {
     return await this.ormRepo.findOne({ where: { plate }, relations: { customer: true } });
   }
 
-  async update(id: string, data: Partial<Vehicle>): Promise<Vehicle> {
+  async update(id: number, data: Partial<Vehicle>): Promise<Vehicle> {
     await this.ormRepo.update(id, data);
     const updated = await this.findById(id);
     if (!updated) throw new Error('Vehicle not found after update');
     return updated;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: number): Promise<void> {
     await this.ormRepo.delete(id);
   }
 }
