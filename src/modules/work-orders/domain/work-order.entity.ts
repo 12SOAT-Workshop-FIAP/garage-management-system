@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { WorkOrderStatus } from './work-order-status.enum';
+import { WorkOrderService } from './work-order-service.value-object';
 
 /**
  * WorkOrder Domain Entity
@@ -22,6 +23,7 @@ export class WorkOrder {
   completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  services: WorkOrderService[]; // Nova propriedade
 
   constructor(props: {
     customerId: string;
@@ -29,6 +31,7 @@ export class WorkOrder {
     description: string;
     estimatedCost?: number;
     diagnosis?: string;
+    services?: WorkOrderService[];
   }, id?: string) {
     this.id = id ?? randomUUID();
     this.customerId = props.customerId;
@@ -38,6 +41,7 @@ export class WorkOrder {
     this.estimatedCost = props.estimatedCost || 0;
     this.diagnosis = props.diagnosis;
     this.customerApproval = false;
+    this.services = props.services || [];
     this.createdAt = new Date();
     this.updatedAt = new Date();
   }
@@ -102,7 +106,176 @@ export class WorkOrder {
    * Calculate total estimated time based on complexity
    */
   getEstimatedHours(): number {
-    // Basic estimation based on cost (this could be more sophisticated)
+    // Calculate based on services duration if available
+    if (this.services.length > 0) {
+      const totalMinutes = this.services.reduce((total, service) => {
+        return total + (service.estimatedDuration * service.quantity);
+      }, 0);
+      return Math.ceil(totalMinutes / 60); // Convert to hours
+    }
+    
+    // Fallback to cost-based estimation
     return Math.ceil(this.estimatedCost / 100); // 1 hour per 100 units of cost
+  }
+
+  /**
+   * Add service to work order
+   */
+  addService(service: WorkOrderService): void {
+    // Check if service already exists
+    const existingService = this.services.find(s => s.serviceId === service.serviceId);
+    if (existingService) {
+      throw new Error(`Service ${service.serviceName} is already added to this work order`);
+    }
+    
+    this.services.push(service);
+    this.updateEstimatedCost();
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Remove service from work order
+   */
+  removeService(serviceId: string): void {
+    const serviceIndex = this.services.findIndex(s => s.serviceId === serviceId);
+    if (serviceIndex === -1) {
+      throw new Error('Service not found in this work order');
+    }
+    
+    this.services.splice(serviceIndex, 1);
+    this.updateEstimatedCost();
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Update service in work order
+   */
+  updateService(serviceId: string, updates: { quantity?: number; unitPrice?: number; technicianNotes?: string }): void {
+    const service = this.services.find(s => s.serviceId === serviceId);
+    if (!service) {
+      throw new Error('Service not found in this work order');
+    }
+
+    if (updates.quantity !== undefined) {
+      service.updateQuantity(updates.quantity);
+    }
+    
+    if (updates.unitPrice !== undefined) {
+      service.updateUnitPrice(updates.unitPrice);
+    }
+    
+    if (updates.technicianNotes !== undefined) {
+      service.technicianNotes = updates.technicianNotes;
+    }
+
+    this.updateEstimatedCost();
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Start service execution
+   */
+  startService(serviceId: string): void {
+    const service = this.services.find(s => s.serviceId === serviceId);
+    if (!service) {
+      throw new Error('Service not found in this work order');
+    }
+    
+    service.start();
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Complete service execution
+   */
+  completeService(serviceId: string, technicianNotes?: string): void {
+    const service = this.services.find(s => s.serviceId === serviceId);
+    if (!service) {
+      throw new Error('Service not found in this work order');
+    }
+    
+    service.complete(technicianNotes);
+    this.updateActualCost();
+    this.updatedAt = new Date();
+
+    // Check if all services are completed
+    if (this.areAllServicesCompleted()) {
+      this.updateStatus(WorkOrderStatus.COMPLETED);
+    }
+  }
+
+  /**
+   * Cancel service
+   */
+  cancelService(serviceId: string): void {
+    const service = this.services.find(s => s.serviceId === serviceId);
+    if (!service) {
+      throw new Error('Service not found in this work order');
+    }
+    
+    service.cancel();
+    this.updateEstimatedCost();
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Get service by ID
+   */
+  getService(serviceId: string): WorkOrderService | undefined {
+    return this.services.find(s => s.serviceId === serviceId);
+  }
+
+  /**
+   * Get all services by status
+   */
+  getServicesByStatus(status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'): WorkOrderService[] {
+    return this.services.filter(s => s.status === status);
+  }
+
+  /**
+   * Calculate total services cost
+   */
+  getTotalServicesCost(): number {
+    return this.services
+      .filter(s => s.status !== 'CANCELLED')
+      .reduce((total, service) => total + service.totalPrice, 0);
+  }
+
+  /**
+   * Check if all services are completed
+   */
+  areAllServicesCompleted(): boolean {
+    if (this.services.length === 0) return false;
+    return this.services.every(s => s.status === 'COMPLETED' || s.status === 'CANCELLED');
+  }
+
+  /**
+   * Get completion percentage based on services
+   */
+  getCompletionPercentage(): number {
+    if (this.services.length === 0) return 0;
+    
+    const completedServices = this.services.filter(s => s.status === 'COMPLETED').length;
+    return Math.round((completedServices / this.services.length) * 100);
+  }
+
+  /**
+   * Update estimated cost based on services
+   */
+  private updateEstimatedCost(): void {
+    const servicesCost = this.getTotalServicesCost();
+    this.estimatedCost = servicesCost;
+  }
+
+  /**
+   * Update actual cost based on completed services
+   */
+  private updateActualCost(): void {
+    const completedServicesCost = this.services
+      .filter(s => s.status === 'COMPLETED')
+      .reduce((total, service) => total + service.totalPrice, 0);
+    
+    this.actualCost = completedServicesCost + (this.partsCost || 0);
+    this.laborCost = completedServicesCost;
   }
 }

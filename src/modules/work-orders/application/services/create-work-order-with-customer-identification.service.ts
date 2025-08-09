@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { WorkOrderRepository } from '../../domain/work-order.repository';
-import { CreateWorkOrderDto } from '../dtos/create-work-order-with-customer-identification.dto';
+import { CreateWorkOrderWithCustomerDto } from '../dtos/create-work-order-with-customer-identification.dto';
 import { WorkOrder } from '../../domain/work-order.entity';
 import { FindByDocumentCustomerService } from '../../../customers/application/services/find-by-document-customer.service';
 
@@ -15,7 +15,7 @@ export class CreateWorkOrderWithCustomerIdentificationService {
     private readonly findByDocumentCustomerService: FindByDocumentCustomerService,
   ) {}
 
-  async execute(dto: CreateWorkOrderDto): Promise<{ workOrder: WorkOrder; customer: any }> {
+  async execute(dto: CreateWorkOrderWithCustomerDto): Promise<{ workOrder: WorkOrder; customer: any }> {
     let customer: any;
 
     // Determine customer

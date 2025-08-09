@@ -3,11 +3,11 @@ import { IsString, IsUUID, IsOptional, IsNumber, Length, Min, ValidateIf, Valida
 import { DocumentValidator } from '../../../../shared/validators/document.validator';
 
 /**
- * CreateWorkOrderDto (DTO de criação de Ordem de Serviço)
+ * CreateWorkOrderWithCustomerDto (DTO de criação de Ordem de Serviço)
  * Data Transfer Object for creating a work order (Ordem de Serviço).
  * Allows identification of customer by ID or by CPF/CNPJ document.
  */
-export class CreateWorkOrderDto {
+export class CreateWorkOrderWithCustomerDto {
   @ApiProperty({ 
     description: 'Customer ID (UUID)', 
     required: false,

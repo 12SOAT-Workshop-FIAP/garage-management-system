@@ -1,5 +1,5 @@
 import { WorkOrder } from '../domain/work-order.entity';
-import { WorkOrderORM } from './work-order.orm';
+import { WorkOrderORM } from './entities/work-order.entity';
 
 /**
  * WorkOrderMapper (Mapeador de Ordem de Serviço)
@@ -25,8 +25,6 @@ export class WorkOrderMapper {
     workOrder.partsCost = orm.partsCost;
     workOrder.technicianNotes = orm.technicianNotes;
     workOrder.customerApproval = orm.customerApproval;
-    workOrder.estimatedCompletionDate = orm.estimatedCompletionDate;
-    workOrder.completedAt = orm.completedAt;
     workOrder.createdAt = orm.createdAt;
     workOrder.updatedAt = orm.updatedAt;
 
@@ -48,8 +46,6 @@ export class WorkOrderMapper {
     orm.diagnosis = domain.diagnosis;
     orm.technicianNotes = domain.technicianNotes;
     orm.customerApproval = domain.customerApproval || false;
-    orm.estimatedCompletionDate = domain.estimatedCompletionDate;
-    orm.completedAt = domain.completedAt;
     orm.createdAt = domain.createdAt;
     orm.updatedAt = domain.updatedAt;
 
