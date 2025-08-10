@@ -43,8 +43,8 @@ export class WorkOrderServiceORM {
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   actualCost?: number;
 
-  @Column('enum', { 
-    enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+  @Column('varchar', { 
+    length: 20,
     default: 'PENDING'
   })
   status!: string;

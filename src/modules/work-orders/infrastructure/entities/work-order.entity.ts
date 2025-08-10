@@ -1,6 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 import { WorkOrderServiceORM } from './work-order-service.entity';
+import { WorkOrderPartORM } from './work-order-part.entity';
+import { CustomerEntity } from '../../../customers/infrastructure/customer.entity';
+import { Vehicle } from '../../../vehicles/domain/vehicle.entity';
 
 /**
  * WorkOrderORM (Entidade TypeORM de Ordem de Serviço)
@@ -20,10 +23,9 @@ export class WorkOrderORM {
   @Column('text')
   description!: string;
 
-  @Column({
-    type: 'enum',
-    enum: WorkOrderStatus,
-    default: WorkOrderStatus.PENDING,
+  @Column('varchar', { 
+    length: 20,
+    default: 'PENDING'
   })
   status!: WorkOrderStatus;
 
@@ -57,10 +59,26 @@ export class WorkOrderORM {
   @UpdateDateColumn()
   updatedAt!: Date;
 
+  // Relacionamentos
+  @ManyToOne(() => CustomerEntity, { eager: false })
+  @JoinColumn({ name: 'customerId' })
+  customer?: CustomerEntity;
+
+  @ManyToOne(() => Vehicle, { eager: false })
+  @JoinColumn({ name: 'vehicleId' })
+  vehicle?: Vehicle;
+
   // Relacionamento com serviços da ordem de serviço
   @OneToMany(() => WorkOrderServiceORM, (service) => service.workOrder, {
     cascade: true,
     eager: false,
   })
   services!: WorkOrderServiceORM[];
+
+  // Relacionamento com peças da ordem de serviço
+  @OneToMany(() => WorkOrderPartORM, (part) => part.workOrder, {
+    cascade: true,
+    eager: false,
+  })
+  parts!: WorkOrderPartORM[];
 }

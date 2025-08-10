@@ -9,6 +9,9 @@ import {
   UpdateWorkOrderServiceDto, 
   CompleteServiceDto 
 } from '../../application/dtos/work-order-services.dto';
+import { AddPartToWorkOrderDto } from '../../application/dtos/add-part-to-work-order.dto';
+import { UpdatePartQuantityDto } from '../../application/dtos/update-part-quantity.dto';
+import { WorkOrderPartResponseDto } from '../../application/dtos/work-order-part-response.dto';
 import { WorkOrderResponseDto } from '../dtos/work-order-response.dto';
 import { 
   WorkOrderDetailedResponseDto, 
@@ -21,6 +24,11 @@ import { FindWorkOrderService } from '../../application/services/find-work-order
 import { CreateWorkOrderWithServicesService } from '../../application/services/create-work-order-with-services.service';
 import { AddServiceToWorkOrderService } from '../../application/services/add-service-to-work-order.service';
 import { ManageWorkOrderServicesService } from '../../application/services/manage-work-order-services.service';
+import { AddPartToWorkOrderService } from '../../application/services/add-part-to-work-order.service';
+import { RemovePartFromWorkOrderService } from '../../application/services/remove-part-from-work-order.service';
+import { UpdatePartQuantityService } from '../../application/services/update-part-quantity.service';
+import { ApprovePartService } from '../../application/services/approve-part.service';
+import { ApplyPartService } from '../../application/services/apply-part.service';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 
 @ApiTags('work-orders')
@@ -34,6 +42,11 @@ export class WorkOrderController {
     private readonly createWorkOrderWithServicesService: CreateWorkOrderWithServicesService,
     private readonly addServiceToWorkOrderService: AddServiceToWorkOrderService,
     private readonly manageWorkOrderServicesService: ManageWorkOrderServicesService,
+    private readonly addPartToWorkOrderService: AddPartToWorkOrderService,
+    private readonly removePartFromWorkOrderService: RemovePartFromWorkOrderService,
+    private readonly updatePartQuantityService: UpdatePartQuantityService,
+    private readonly approvePartService: ApprovePartService,
+    private readonly applyPartService: ApplyPartService,
   ) {}
 
   @Post()
@@ -252,5 +265,104 @@ export class WorkOrderController {
     // Note: In a real implementation, you might want to create a delete service
     // For now, we'll throw an error since deletion might not be allowed for work orders
     throw new Error('Work order deletion not implemented - consider status change instead');
+  }
+
+  // ========== PARTS MANAGEMENT ENDPOINTS ==========
+
+  @Post(':id/parts')
+  @ApiOperation({ 
+    summary: 'Add part to work order',
+    description: 'Add a part/material to a work order with specified quantity and optional price override'
+  })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiResponse({ 
+    status: HttpStatus.CREATED, 
+    description: 'Part added to work order successfully' 
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or part not found' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Insufficient stock or invalid data' })
+  async addPart(
+    @Param('id', ParseUUIDPipe) workOrderId: string,
+    @Body() dto: AddPartToWorkOrderDto
+  ): Promise<void> {
+    await this.addPartToWorkOrderService.execute(workOrderId, dto);
+  }
+
+  @Put(':id/parts/:partId/quantity')
+  @ApiOperation({ 
+    summary: 'Update part quantity in work order',
+    description: 'Update the quantity of a specific part in the work order'
+  })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiParam({ name: 'partId', description: 'Part ID' })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Part quantity updated successfully' 
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or part not found' })
+  async updatePartQuantity(
+    @Param('id', ParseUUIDPipe) workOrderId: string,
+    @Param('partId', ParseUUIDPipe) partId: string,
+    @Body() dto: UpdatePartQuantityDto
+  ): Promise<void> {
+    await this.updatePartQuantityService.execute(workOrderId, partId, dto);
+  }
+
+  @Delete(':id/parts/:partId')
+  @ApiOperation({ 
+    summary: 'Remove part from work order',
+    description: 'Remove a part from the work order completely'
+  })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiParam({ name: 'partId', description: 'Part ID' })
+  @ApiResponse({ 
+    status: HttpStatus.NO_CONTENT, 
+    description: 'Part removed from work order successfully' 
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or part not found' })
+  async removePart(
+    @Param('id', ParseUUIDPipe) workOrderId: string,
+    @Param('partId', ParseUUIDPipe) partId: string
+  ): Promise<void> {
+    await this.removePartFromWorkOrderService.execute(workOrderId, partId);
+  }
+
+  @Post(':id/parts/:partId/approve')
+  @ApiOperation({ 
+    summary: 'Approve part for use',
+    description: 'Approve a part for use in the work order (customer/supervisor approval)'
+  })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiParam({ name: 'partId', description: 'Part ID' })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Part approved successfully' 
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or part not found' })
+  async approvePart(
+    @Param('id', ParseUUIDPipe) workOrderId: string,
+    @Param('partId', ParseUUIDPipe) partId: string
+  ): Promise<void> {
+    await this.approvePartService.execute(workOrderId, partId);
+  }
+
+  @Post(':id/parts/:partId/apply')
+  @ApiOperation({ 
+    summary: 'Apply part to work order',
+    description: 'Mark a part as applied/used in the work order (reduces stock)'
+  })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiParam({ name: 'partId', description: 'Part ID' })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Part applied successfully' 
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order or part not found' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Part must be approved before applying' })
+  async applyPart(
+    @Param('id', ParseUUIDPipe) workOrderId: string,
+    @Param('partId', ParseUUIDPipe) partId: string
+  ): Promise<void> {
+    await this.applyPartService.execute(workOrderId, partId);
   }
 }
