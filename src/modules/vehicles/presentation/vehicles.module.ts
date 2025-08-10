@@ -17,7 +17,7 @@ import { TypeOrmVehicleRepository } from '../infrastructure/vehicle-typeorm.repo
 // IMPORTAÇÃO DA INTERFACE VehicleRepository (necessária para tipagem em 'exports')
 import { VehicleRepository } from '../domain/vehicle.repository';
 import { Vehicle } from '../domain/vehicle.entity';
-import { CustomersModule } from '@modules/customers/presentation/customers.module';
+import { CustomersModule } from '@modules/customers/customers.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Vehicle]), CustomersModule],
