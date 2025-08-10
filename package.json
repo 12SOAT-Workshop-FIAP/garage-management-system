@@ -24,7 +24,6 @@
     "migration:generate:js": "node ./node_modules/typeorm/cli.js migration:generate --dataSource ./dist/ormconfig.js src/migrations/migration",
     "migration:run:js": "node ./node_modules/typeorm/cli.js migration:run --dataSource ./dist/ormconfig.js",
     "seed:run:js": "node ./dist/src/seed/seed.js"
-
   },
   "dependencies": {
     "@nestjs/common": "^11.1.5",
@@ -47,7 +46,8 @@
     "swagger-ui-express": "^5.0.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typeorm": "^0.3.25"
+    "typeorm": "^0.3.25",
+    "cpf-cnpj-validator": "^1.0.3"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.9.0",

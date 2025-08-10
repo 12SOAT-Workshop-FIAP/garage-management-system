@@ -1,8 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import {
-  ICryptographyRepository,
-  CRYPTOGRAPHY_REPOSITORY,
-} from '../../domain/cryptography.repository';
+import { ICryptographyRepository } from '../../domain/cryptography.repository';
 import { CPF } from '../../domain/value-objects/cpf.value-object';
 import { CNPJ } from '../../domain/value-objects/cnpj.value-object';
 import { LicensePlate } from '../../domain/value-objects/license-plate.value-object';
@@ -24,7 +21,7 @@ import { LicensePlate } from '../../domain/value-objects/license-plate.value-obj
 @Injectable()
 export class CryptographyService {
   constructor(
-    @Inject(CRYPTOGRAPHY_REPOSITORY)
+    @Inject(ICryptographyRepository)
     private readonly cryptographyRepository: ICryptographyRepository,
   ) {}
 

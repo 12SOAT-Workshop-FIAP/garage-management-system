@@ -18,9 +18,9 @@ import { ApprovePartService } from '../application/services/approve-part.service
 import { ApplyPartService } from '../application/services/apply-part.service';
 import { WorkOrderTypeOrmRepository } from '../infrastructure/repositories/work-order.typeorm.repository';
 import { WorkOrderRepository } from '../domain/work-order.repository';
-import { CustomersModule } from '../../customers/presentation/customers.module';
 import { ServicesModule } from '../../services/services.module';
 import { PartsModule } from '../../parts/parts.module';
+import { CustomersModule } from '@modules/customers/customers.module';
 
 @Module({
   imports: [
