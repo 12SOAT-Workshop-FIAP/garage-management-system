@@ -26,5 +26,6 @@ import { PartRepository } from './domain/part.repository';
       useClass: PartTypeOrmRepository,
     },
   ],
+  exports: [PartRepository],
 })
 export class PartsModule {}

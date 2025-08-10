@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { WorkOrderStatus } from './work-order-status.enum';
 import { WorkOrderService } from './work-order-service.value-object';
+import { WorkOrderPart } from './work-order-part.value-object';
 
 /**
  * WorkOrder Domain Entity
@@ -23,7 +24,8 @@ export class WorkOrder {
   completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  services: WorkOrderService[]; // Nova propriedade
+  services: WorkOrderService[]; // Serviços da ordem
+  parts: WorkOrderPart[]; // Peças da ordem
 
   constructor(props: {
     customerId: string;
@@ -32,6 +34,7 @@ export class WorkOrder {
     estimatedCost?: number;
     diagnosis?: string;
     services?: WorkOrderService[];
+    parts?: WorkOrderPart[];
   }, id?: string) {
     this.id = id ?? randomUUID();
     this.customerId = props.customerId;
@@ -42,6 +45,7 @@ export class WorkOrder {
     this.diagnosis = props.diagnosis;
     this.customerApproval = false;
     this.services = props.services || [];
+    this.parts = props.parts || [];
     this.createdAt = new Date();
     this.updatedAt = new Date();
   }
@@ -260,11 +264,12 @@ export class WorkOrder {
   }
 
   /**
-   * Update estimated cost based on services
+   * Update estimated cost based on services and parts
    */
   private updateEstimatedCost(): void {
     const servicesCost = this.getTotalServicesCost();
-    this.estimatedCost = servicesCost;
+    const partsCost = this.getTotalPartsCost();
+    this.estimatedCost = servicesCost + partsCost;
   }
 
   /**
@@ -275,7 +280,121 @@ export class WorkOrder {
       .filter(s => s.status === 'COMPLETED')
       .reduce((total, service) => total + service.totalPrice, 0);
     
-    this.actualCost = completedServicesCost + (this.partsCost || 0);
+    const appliedPartsCost = this.getAppliedPartsCost();
+    
+    this.actualCost = completedServicesCost + appliedPartsCost;
     this.laborCost = completedServicesCost;
+    this.partsCost = appliedPartsCost;
+  }
+
+  /**
+   * Add a part to the work order
+   */
+  addPart(part: WorkOrderPart): void {
+    // Check if part already exists and update quantity instead
+    const existingPartIndex = this.parts.findIndex(p => p.partId === part.partId);
+    
+    if (existingPartIndex >= 0) {
+      const existingPart = this.parts[existingPartIndex];
+      const newQuantity = existingPart.quantity + part.quantity;
+      this.parts[existingPartIndex] = existingPart.updateQuantity(newQuantity);
+    } else {
+      this.parts.push(part);
+    }
+    
+    this.updatedAt = new Date();
+    this.updateEstimatedCost();
+  }
+
+  /**
+   * Remove a part from the work order
+   */
+  removePart(partId: string): void {
+    this.parts = this.parts.filter(part => part.partId !== partId);
+    this.updatedAt = new Date();
+    this.updateEstimatedCost();
+  }
+
+  /**
+   * Update part quantity
+   */
+  updatePartQuantity(partId: string, newQuantity: number): void {
+    const partIndex = this.parts.findIndex(p => p.partId === partId);
+    
+    if (partIndex === -1) {
+      throw new Error(`Part with ID ${partId} not found in work order`);
+    }
+
+    if (newQuantity <= 0) {
+      this.removePart(partId);
+      return;
+    }
+
+    this.parts[partIndex] = this.parts[partIndex].updateQuantity(newQuantity);
+    this.updatedAt = new Date();
+    this.updateEstimatedCost();
+  }
+
+  /**
+   * Approve a part for use
+   */
+  approvePart(partId: string): void {
+    const partIndex = this.parts.findIndex(p => p.partId === partId);
+    
+    if (partIndex === -1) {
+      throw new Error(`Part with ID ${partId} not found in work order`);
+    }
+
+    this.parts[partIndex] = this.parts[partIndex].approve();
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Mark a part as applied
+   */
+  applyPart(partId: string): void {
+    const partIndex = this.parts.findIndex(p => p.partId === partId);
+    
+    if (partIndex === -1) {
+      throw new Error(`Part with ID ${partId} not found in work order`);
+    }
+
+    if (!this.parts[partIndex].isApproved) {
+      throw new Error('Part must be approved before it can be applied');
+    }
+
+    this.parts[partIndex] = this.parts[partIndex].markAsApplied();
+    this.updatedAt = new Date();
+    this.updateActualCost();
+  }
+
+  /**
+   * Get total cost of all parts (estimated)
+   */
+  getTotalPartsCost(): number {
+    return this.parts.reduce((total, part) => total + part.totalPrice, 0);
+  }
+
+  /**
+   * Get total cost of applied parts only
+   */
+  getAppliedPartsCost(): number {
+    return this.parts
+      .filter(part => part.appliedAt)
+      .reduce((total, part) => total + part.totalPrice, 0);
+  }
+
+  /**
+   * Get parts by approval status
+   */
+  getPartsByApprovalStatus(isApproved: boolean): WorkOrderPart[] {
+    return this.parts.filter(part => part.isApproved === isApproved);
+  }
+
+  /**
+   * Check if all parts are approved
+   */
+  areAllPartsApproved(): boolean {
+    return this.parts.length > 0 && this.parts.every(part => part.isApproved);
   }
 }

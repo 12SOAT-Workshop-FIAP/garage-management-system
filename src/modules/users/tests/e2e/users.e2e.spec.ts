@@ -18,8 +18,12 @@ describe('Users (e2e)', () => {
           isGlobal: true,
         }),
         TypeOrmModule.forRoot({
-          type: 'sqlite',
-          database: ':memory:',
+          type: 'postgres',
+          host: process.env.POSTGRES_HOST || 'localhost',
+          port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+          username: process.env.POSTGRES_USER || 'postgres',
+          password: process.env.POSTGRES_PASSWORD || 'postgres',
+          database: process.env.POSTGRES_TEST_DB || 'garage_test',
           entities: [User],
           synchronize: true,
           dropSchema: true,
@@ -168,7 +172,7 @@ describe('Users (e2e)', () => {
     });
 
     it('should return 404 for non-existent user', () => {
-      const nonExistentId = 'non-existent-id';
+      const nonExistentId = '12345678-1234-1234-1234-123456789012';
       return request(app.getHttpServer()).get(`/users/${nonExistentId}`).expect(404);
     });
   });
@@ -233,7 +237,7 @@ describe('Users (e2e)', () => {
     });
 
     it('should return 404 when updating non-existent user', () => {
-      const nonExistentId = 'non-existent-id';
+      const nonExistentId = '12345678-1234-1234-1234-123456789012';
       const updateUserDto = {
         name: 'Updated User',
         email: 'updated@example.com',
@@ -252,7 +256,7 @@ describe('Users (e2e)', () => {
     });
 
     it('should return 404 when deleting non-existent user', () => {
-      const nonExistentId = 'non-existent-id';
+      const nonExistentId = '12345678-1234-1234-1234-123456789012';
       return request(app.getHttpServer()).delete(`/users/${nonExistentId}`).expect(404);
     });
   });

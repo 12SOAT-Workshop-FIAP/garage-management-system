@@ -13,8 +13,12 @@ describe('Services (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({
-          type: 'sqlite',
-          database: ':memory:',
+          type: 'postgres',
+          host: process.env.POSTGRES_HOST || 'localhost',
+          port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+          username: process.env.POSTGRES_USER || 'postgres',
+          password: process.env.POSTGRES_PASSWORD || 'postgres',
+          database: process.env.POSTGRES_TEST_DB || 'garage_test',
           entities: [Service],
           synchronize: true,
           dropSchema: true,
@@ -128,7 +132,7 @@ describe('Services (e2e)', () => {
     });
 
     it('should return 404 for non-existent service', () => {
-      const nonExistentId = 'non-existent-id';
+      const nonExistentId = '12345678-1234-1234-1234-123456789012';
       return request(app.getHttpServer()).get(`/services/${nonExistentId}`).expect(404);
     });
   });
@@ -158,7 +162,7 @@ describe('Services (e2e)', () => {
     });
 
     it('should return 404 when updating non-existent service', () => {
-      const nonExistentId = 'non-existent-id';
+      const nonExistentId = '12345678-1234-1234-1234-123456789012';
       const updateServiceDto = {
         name: 'Updated Service',
         price: 100.0,
@@ -177,7 +181,7 @@ describe('Services (e2e)', () => {
     });
 
     it('should return 404 when deleting non-existent service', () => {
-      const nonExistentId = 'non-existent-id';
+      const nonExistentId = '12345678-1234-1234-1234-123456789012';
       return request(app.getHttpServer()).delete(`/services/${nonExistentId}`).expect(404);
     });
   });
