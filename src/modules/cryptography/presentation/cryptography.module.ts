@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CryptographyService } from '../application/services/cryptography.service';
-import { CRYPTOGRAPHY_REPOSITORY } from '../domain/cryptography.repository';
+import { ICryptographyRepository } from '../domain/cryptography.repository';
 import { CryptographyRepository } from '../infrastructure/repositories/cryptography.repository';
 
 /**
@@ -25,7 +25,7 @@ import { CryptographyRepository } from '../infrastructure/repositories/cryptogra
   providers: [
     CryptographyService,
     {
-      provide: CRYPTOGRAPHY_REPOSITORY,
+      provide: ICryptographyRepository,
       useClass: CryptographyRepository,
     },
   ],
