@@ -4,6 +4,7 @@ import { WorkOrderORM } from '../infrastructure/entities/work-order.entity';
 import { WorkOrderServiceORM } from '../infrastructure/entities/work-order-service.entity';
 import { WorkOrderPartORM } from '../infrastructure/entities/work-order-part.entity';
 import { WorkOrderController } from './controllers/work-order.controller';
+import { PublicWorkOrderController } from './controllers/public-work-order.controller';
 import { CreateWorkOrderService } from '../application/services/create-work-order.service';
 import { CreateWorkOrderWithCustomerIdentificationService } from '../application/services/create-work-order-with-customer-identification.service';
 import { UpdateWorkOrderService } from '../application/services/update-work-order.service';
@@ -29,7 +30,7 @@ import { CustomersModule } from '@modules/customers/customers.module';
     ServicesModule,
     PartsModule,
   ],
-  controllers: [WorkOrderController],
+  controllers: [WorkOrderController, PublicWorkOrderController],
   providers: [
     CreateWorkOrderService,
     CreateWorkOrderWithCustomerIdentificationService,
