@@ -19,9 +19,12 @@ export class CryptographyRepository implements ICryptographyRepository {
    */
   async encrypt(data: string): Promise<string> {
     // Generate deterministic IV based on data hash (first 16 bytes)
-    const hash = crypto.createHash('sha256').update(data + this.secretKey).digest();
+    const hash = crypto
+      .createHash('sha256')
+      .update(data + this.secretKey)
+      .digest();
     const iv = hash.subarray(0, this.ivLength);
-    
+
     const key = crypto.scryptSync(this.secretKey, 'salt', 32);
     const cipher = crypto.createCipheriv(this.algorithm, key, iv);
 
@@ -39,6 +42,7 @@ export class CryptographyRepository implements ICryptographyRepository {
   async decrypt(encryptedData: string): Promise<string> {
     const textParts = encryptedData.split(':');
     const iv = Buffer.from(textParts.shift()!, 'hex');
+
     const encryptedText = textParts.join(':');
     const key = crypto.scryptSync(this.secretKey, 'salt', 32);
 

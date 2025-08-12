@@ -18,9 +18,10 @@ import { TypeOrmVehicleRepository } from '../infrastructure/vehicle-typeorm.repo
 import { VehicleRepository } from '../domain/vehicle.repository';
 import { Vehicle } from '../domain/vehicle.entity';
 import { CustomersModule } from '@modules/customers/customers.module';
+import { CryptographyModule } from '@modules/cryptography/presentation/cryptography.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Vehicle]), CustomersModule],
+  imports: [TypeOrmModule.forFeature([Vehicle]), CustomersModule, CryptographyModule],
   controllers: [VehicleController],
   providers: [
     CreateVehicleService,
