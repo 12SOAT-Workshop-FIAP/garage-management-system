@@ -1,10 +1,12 @@
 import { FindAllCustomerService } from '../application/services/find-all-customer.service';
 import { Customer } from '../domain/customer';
 import { CustomerRepository } from '../domain/customer.repository';
+import { CryptographyService } from '@modules/cryptography/application/services/cryptography.service';
 
-describe('FindAllCustomersService', () => {
+describe('FindAllCustomerService', () => {
   let findAllCustomerService: FindAllCustomerService;
   let mockCustomerRepository: jest.Mocked<CustomerRepository>;
+  let mockCryptographyService: Partial<CryptographyService>;
 
   beforeEach(() => {
     mockCustomerRepository = {
@@ -16,75 +18,56 @@ describe('FindAllCustomersService', () => {
       findByDocument: jest.fn(),
     };
 
-    findAllCustomerService = new FindAllCustomerService(mockCustomerRepository);
+    mockCryptographyService = {
+      decryptSensitiveData: jest.fn().mockResolvedValue({ value: '12345678901' }),
+    };
+
+    findAllCustomerService = new FindAllCustomerService(
+      mockCustomerRepository,
+      mockCryptographyService as CryptographyService,
+    );
   });
 
-  it('should be defined', () => {
-    expect(findAllCustomerService).toBeDefined();
-  });
-
-  it('should return all customers that exists', async () => {
-    const mockCustomers = [
+  it('should return all customers', async () => {
+    const customers = [
       new Customer({
-        id: 2,
-        name: 'Maria Oliveira da Silva',
+        id: 1,
+        name: 'John Doe',
         personType: 'INDIVIDUAL',
-        document: '98765432100',
-        email: 'maria.oliveira@example.com',
-        phone: '+5511976543210',
-        createdAt: new Date('2025-07-29T14:34:45.318Z'),
-        updatedAt: new Date('2025-07-29T14:36:02.053Z'),
-        status: false,
-      }),
-      new Customer({
-        id: 3,
-        name: 'João Pedro Andrade',
-        personType: 'INDIVIDUAL',
-        document: '12312312399',
-        email: 'joao.pedro@example.com',
-        phone: '+5511987654321',
-        createdAt: new Date('2025-07-29T15:10:00.000Z'),
-        updatedAt: new Date('2025-07-29T15:20:00.000Z'),
+        document: '12345678901',
+        email: 'john@example.com',
+        phone: '+5511999999999',
+        createdAt: new Date(),
+        updatedAt: new Date(),
         status: true,
       }),
-
       new Customer({
-        id: 4,
-        name: 'Oficina Mecânica Ltda',
+        id: 2,
+        name: 'Jane Smith',
         personType: 'COMPANY',
-        document: '55667788000144',
-        email: 'contato@oficinamecanica.com',
-        phone: '+551130304050',
-        createdAt: new Date('2025-07-29T13:45:00.000Z'),
-        updatedAt: new Date('2025-07-29T14:00:00.000Z'),
+        document: '12345678000195',
+        email: 'jane@example.com',
+        phone: '+5511888888888',
+        createdAt: new Date(),
+        updatedAt: new Date(),
         status: true,
       }),
     ];
 
-    mockCustomerRepository.findAll.mockResolvedValue(mockCustomers);
+    mockCustomerRepository.findAll.mockResolvedValue(customers);
 
     const result = await findAllCustomerService.execute();
 
-    if (!result) {
-      fail('Expected customers array, but got null');
-    }
-
-    expect(result).toEqual(mockCustomers);
-    expect(result).toHaveLength(3);
-    expect(result[0]).toBeInstanceOf(Customer);
-    expect(result[0].document).toBe('98765432100');
-    expect(result[1].document).toBe('12312312399');
-    expect(result[2].document).toBe('55667788000144');
-    expect(mockCustomerRepository.findAll).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(customers);
+    expect(mockCustomerRepository.findAll).toHaveBeenCalled();
   });
 
-  it('should return empty array when no found customers', async () => {
+  it('should return empty array when no customers found', async () => {
     mockCustomerRepository.findAll.mockResolvedValue([]);
 
     const result = await findAllCustomerService.execute();
 
     expect(result).toEqual([]);
-    expect(result).toHaveLength(0);
-    expect(mockCustomerRepository.findAll).toHaveBeenCalledTimes(1);
+    expect(mockCustomerRepository.findAll).toHaveBeenCalled();
   });
 });

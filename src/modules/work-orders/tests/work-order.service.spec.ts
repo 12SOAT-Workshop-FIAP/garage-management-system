@@ -11,7 +11,9 @@ describe('CreateWorkOrderService', () => {
       findByVehicleId: jest.fn(),
       findByStatus: jest.fn(),
       findByDateRange: jest.fn(),
-      delete: jest.fn()
+      delete: jest.fn(),
+      findCustomerByVehicleId: jest.fn(),
+      findCustomerByLicensePlate: jest.fn()
     };
     expect(new CreateWorkOrderService(mockRepository)).toBeDefined();
   });

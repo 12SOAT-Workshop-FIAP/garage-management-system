@@ -1,6 +1,6 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
+  "rootDir": "..",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
@@ -12,7 +12,8 @@
   "coverageDirectory": "../coverage",
   "testTimeout": 30000,
   "moduleNameMapper": {
-    "^@shared/(.*)$": "<rootDir>/../src/shared/$1",
-    "^@modules/(.*)$": "<rootDir>/../src/modules/$1"
-  }
+    "^@shared/(.*)$": "<rootDir>/src/shared/$1",
+    "^@modules/(.*)$": "<rootDir>/src/modules/$1"
+  },
+  "setupFilesAfterEnv": ["<rootDir>/test/jest.setup.ts"]
 }

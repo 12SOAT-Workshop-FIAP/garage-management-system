@@ -12,26 +12,26 @@ export class CryptographyRepository implements ICryptographyRepository {
   private readonly secretKey = process.env.CRYPTO_SECRET_KEY || 'your-secret-key-32-chars-long!!';
   private readonly ivLength = 16;
 
-  private getDeterministicIv(): Buffer {
-    return Buffer.alloc(this.ivLength, 0);
-  }
-
   /**
-   * Encrypts data using AES-256-CBC
+   * Encrypts data using AES-256-CBC with deterministic IV
    * @param data - The data to encrypt
    * @returns Promise<string> - The encrypted data
    */
   async encrypt(data: string): Promise<string> {
-    // const iv = crypto.randomBytes(this.ivLength);
-    const iv = this.getDeterministicIv();
+    // Generate deterministic IV based on data hash (first 16 bytes)
+    const hash = crypto
+      .createHash('sha256')
+      .update(data + this.secretKey)
+      .digest();
+    const iv = hash.subarray(0, this.ivLength);
+
     const key = crypto.scryptSync(this.secretKey, 'salt', 32);
     const cipher = crypto.createCipheriv(this.algorithm, key, iv);
 
     let encrypted = cipher.update(data, 'utf8', 'hex');
     encrypted += cipher.final('hex');
 
-    return encrypted;
-    // return iv.toString('hex') + ':' + encrypted;
+    return iv.toString('hex') + ':' + encrypted;
   }
 
   /**
@@ -41,9 +41,7 @@ export class CryptographyRepository implements ICryptographyRepository {
    */
   async decrypt(encryptedData: string): Promise<string> {
     const textParts = encryptedData.split(':');
-    // const iv = Buffer.from(textParts.shift()!, 'hex');
-
-    const iv = this.getDeterministicIv();
+    const iv = Buffer.from(textParts.shift()!, 'hex');
 
     const encryptedText = textParts.join(':');
     const key = crypto.scryptSync(this.secretKey, 'salt', 32);

@@ -41,13 +41,13 @@ describe('CryptoRepository', () => {
       expect(result1).not.toBe(result2);
     });
 
-    it('should encrypt same data with different results (due to IV)', async () => {
+    it('should encrypt same data with same results (deterministic IV)', async () => {
       const data = 'test-data';
 
       const result1 = await repository.encrypt(data);
       const result2 = await repository.encrypt(data);
 
-      expect(result1).not.toBe(result2);
+      expect(result1).toBe(result2);
 
       // Both should decrypt to the same original data
       const decrypted1 = await repository.decrypt(result1);

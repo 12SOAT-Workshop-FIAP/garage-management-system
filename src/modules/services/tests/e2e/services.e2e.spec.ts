@@ -18,7 +18,7 @@ describe('Services (e2e)', () => {
           port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
           username: process.env.POSTGRES_USER || 'postgres',
           password: process.env.POSTGRES_PASSWORD || 'postgres',
-          database: process.env.POSTGRES_TEST_DB || 'garage_test',
+          database: process.env.POSTGRES_TEST_DB || 'garage',
           entities: [Service],
           synchronize: true,
           dropSchema: true,

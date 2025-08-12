@@ -14,4 +14,6 @@ export abstract class WorkOrderRepository {
   abstract findByDateRange(startDate: Date, endDate: Date): Promise<WorkOrder[]>;
   abstract save(workOrder: WorkOrder): Promise<WorkOrder>;
   abstract delete(id: string): Promise<void>;
+  abstract findCustomerByVehicleId(vehicleId: string): Promise<string | null>;
+  abstract findCustomerByLicensePlate(licensePlate: string): Promise<string | null>;
 }
