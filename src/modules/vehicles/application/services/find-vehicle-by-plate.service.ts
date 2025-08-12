@@ -1,24 +1,29 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { VehicleRepository } from '../../domain/vehicle.repository';
 import { Vehicle } from '../../domain/vehicle.entity';
 import { LicensePlate } from '@modules/cryptography/domain/value-objects/license-plate.value-object';
+import { CryptographyService } from '@modules/cryptography/application/services/cryptography.service';
 
 @Injectable()
 export class FindVehicleByPlateService {
   constructor(
     private readonly vehicleRepo: VehicleRepository,
+    private readonly cryptographyService: CryptographyService,
   ) {}
 
   async execute(plate: string): Promise<Vehicle> {
-    // Validate license plate format
-    const licensePlate = new LicensePlate(plate);
-    if (!licensePlate.validate()) {
-      throw new Error('Invalid license plate format');
+    if (!this.cryptographyService.validateSensitiveData(plate, 'license-plate')) {
+      throw new BadRequestException('Formato ou checksum do documento inválido.');
     }
 
-    const vehicle = await this.vehicleRepo.findByPlate(plate);
+    const plateVo = await this.cryptographyService.encryptSensitiveData(plate, 'license-plate');
+    const encryptedPlate = plateVo.encryptedValue;
+
+    const vehicle = await this.vehicleRepo.findByPlate(encryptedPlate);
     if (!vehicle) {
-      throw new NotFoundException(`Vehicle with license plate ${plate} not found`);
+      throw new NotFoundException(
+        `Vehicle with license plate ${plateVo.getMaskedValue()} not found`,
+      );
     }
 
     return vehicle;

@@ -4,12 +4,14 @@ import { VehicleRepository } from '../../domain/vehicle.repository';
 import { Vehicle } from '../../domain/vehicle.entity';
 import { CustomerRepository } from '@modules/customers/domain/customer.repository';
 import { LicensePlate } from '@modules/cryptography/domain/value-objects/license-plate.value-object';
+import { CryptographyService } from '@modules/cryptography/application/services/cryptography.service';
 
 @Injectable()
 export class CreateVehicleService {
   constructor(
     private readonly vehicleRepo: VehicleRepository,
     private readonly customerRepo: CustomerRepository,
+    private readonly cryptographyService: CryptographyService,
   ) {}
 
   async execute(dto: CreateVehicleDto): Promise<Vehicle> {
@@ -35,10 +37,12 @@ export class CreateVehicleService {
     const vehicle = new Vehicle();
     vehicle.brand = dto.brand;
     vehicle.model = dto.model;
-    vehicle.plate = dto.plate; // Will be formatted in @BeforeInsert
+
+    const plateVo = await this.cryptographyService.encryptSensitiveData(dto.plate, 'license-plate');
+    vehicle.plate = plateVo.encryptedValue; // Will be formatted in @BeforeInsert
     vehicle.year = dto.year;
     vehicle.customer = customer;
 
-    return await this.vehicleRepo.save(vehicle);
+    return await this.vehicleRepo.create(vehicle);
   }
 }

@@ -1,6 +1,15 @@
 import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
 import { LicensePlate } from '@modules/cryptography/domain/value-objects/license-plate.value-object';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, UpdateDateColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  UpdateDateColumn,
+  BeforeInsert,
+  BeforeUpdate,
+} from 'typeorm';
 
 @Entity('vehicles')
 export class Vehicle {
@@ -13,7 +22,7 @@ export class Vehicle {
   @Column({ length: 50 })
   model!: string;
 
-  @Column({ unique: true, length: 8 })
+  @Column({ unique: true })
   plate!: string;
 
   @Column({ type: 'int' })
