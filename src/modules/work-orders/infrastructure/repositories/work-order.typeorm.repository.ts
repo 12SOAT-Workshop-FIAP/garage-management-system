@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, DataSource } from 'typeorm';
 import { WorkOrder as WorkOrderDomain } from '../../domain/work-order.entity';
 import { WorkOrderORM } from '../entities/work-order.entity';
 import { WorkOrderPartORM } from '../entities/work-order-part.entity';
@@ -8,6 +8,7 @@ import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 import { WorkOrderMapper } from '../work-order.mapper';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
 
 /**
  * WorkOrderTypeOrmRepository (Repositório TypeORM de Ordem de Serviço)
@@ -172,5 +173,29 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
 
   async delete(id: string): Promise<void> {
     await this.repository.delete(id);
+  }
+
+  async findCustomerByVehicleId(vehicleId: string): Promise<string | null> {
+    // Use DataSource to query Vehicle entity directly to get its customer
+    const dataSource = this.repository.manager.connection;
+    const vehicleRepository = dataSource.getRepository(Vehicle);
+    const vehicle = await vehicleRepository.findOne({
+      where: { id: parseInt(vehicleId) },
+      relations: ['customer']
+    });
+    
+    return vehicle?.customer?.id?.toString() || null;
+  }
+
+  // Buscar cliente por placa do veículo
+  async findCustomerByLicensePlate(licensePlate: string): Promise<string | null> {
+    const dataSource = this.repository.manager.connection;
+    const vehicleRepository = dataSource.getRepository(Vehicle);
+    const vehicle = await vehicleRepository.findOne({
+      where: { plate: licensePlate },
+      relations: ['customer']
+    });
+    
+    return vehicle?.customer?.id?.toString() || null;
   }
 }

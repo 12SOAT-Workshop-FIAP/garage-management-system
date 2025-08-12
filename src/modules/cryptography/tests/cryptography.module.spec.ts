@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CryptographyModule } from '../presentation/cryptography.module';
 import { CryptographyService } from '../application/services/cryptography.service';
 import { CryptographyRepository } from '../infrastructure/repositories/cryptography.repository';
-import { CRYPTOGRAPHY_REPOSITORY } from '../domain/cryptography.repository';
+import { ICryptographyRepository } from '../domain/cryptography.repository';
 
 describe('CryptographyModule', () => {
   let module: TestingModule;
@@ -24,7 +24,7 @@ describe('CryptographyModule', () => {
   });
 
   it('should provide CryptoRepository', () => {
-    const repository = module.get<CryptographyRepository>(CRYPTOGRAPHY_REPOSITORY);
+    const repository = module.get<CryptographyRepository>(ICryptographyRepository);
     expect(repository).toBeDefined();
     expect(repository).toBeInstanceOf(CryptographyRepository);
   });

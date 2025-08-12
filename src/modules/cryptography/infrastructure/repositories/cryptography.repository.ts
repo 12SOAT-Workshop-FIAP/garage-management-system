@@ -13,12 +13,15 @@ export class CryptographyRepository implements ICryptographyRepository {
   private readonly ivLength = 16;
 
   /**
-   * Encrypts data using AES-256-CBC
+   * Encrypts data using AES-256-CBC with deterministic IV
    * @param data - The data to encrypt
    * @returns Promise<string> - The encrypted data
    */
   async encrypt(data: string): Promise<string> {
-    const iv = crypto.randomBytes(this.ivLength);
+    // Generate deterministic IV based on data hash (first 16 bytes)
+    const hash = crypto.createHash('sha256').update(data + this.secretKey).digest();
+    const iv = hash.subarray(0, this.ivLength);
+    
     const key = crypto.scryptSync(this.secretKey, 'salt', 32);
     const cipher = crypto.createCipheriv(this.algorithm, key, iv);
 

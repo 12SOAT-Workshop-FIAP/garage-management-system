@@ -1,18 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsUUID, IsOptional, IsNumber, Length, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, Length, Min, IsInt, IsArray } from 'class-validator';
 
 /**
  * CreateWorkOrderDto (DTO de criação de Ordem de Serviço)
  * Data Transfer Object for creating a work order (Ordem de Serviço).
  */
 export class CreateWorkOrderDto {
-  @ApiProperty({ description: 'Customer ID' })
-  @IsUUID()
-  customerId!: string;
-
-  @ApiProperty({ description: 'Vehicle ID' })
-  @IsUUID()
-  vehicleId!: string;
+  @ApiProperty({ description: 'Vehicle ID', example: 1 })
+  @IsInt()
+  vehicleId!: number;
 
   @ApiProperty({ description: 'Work order description' })
   @IsString()
@@ -34,4 +30,26 @@ export class CreateWorkOrderDto {
   @ApiProperty({ description: 'Estimated completion date', required: false })
   @IsOptional()
   estimatedCompletionDate?: Date;
+
+  @ApiProperty({ 
+    description: 'List of service IDs to be performed', 
+    required: false,
+    type: [String],
+    example: ["123e4567-e89b-12d3-a456-426614174000"]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  serviceIds?: string[];
+
+  @ApiProperty({ 
+    description: 'List of part IDs to be used', 
+    required: false,
+    type: [String],
+    example: ["987fcdeb-51a2-34c6-d789-102938475610"]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  partIds?: string[];
 }

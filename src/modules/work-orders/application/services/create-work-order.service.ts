@@ -15,15 +15,30 @@ export class CreateWorkOrderService {
 
   async execute(dto: CreateWorkOrderDto): Promise<WorkOrder> {
     try {
-      // Validate that customer and vehicle exist (this would be done via repositories in a full implementation)
-      if (!dto.customerId || !dto.vehicleId) {
-        throw new BadRequestException('Customer ID and Vehicle ID are required');
+      // Validate that vehicle exists and get customer through vehicle relationship
+      if (!dto.vehicleId) {
+        throw new BadRequestException('Vehicle ID is required');
+      }
+
+      // Convert vehicleId to string for repository search
+      const vehicleIdStr = dto.vehicleId.toString();
+      
+      // Buscar cliente através do veículo
+      const customerId = await this.workOrderRepository.findCustomerByVehicleId(vehicleIdStr);
+      if (!customerId) {
+        throw new NotFoundException('Cliente não encontrado para o veículo fornecido');
+      }
+
+      // Validar se pelo menos um serviço ou peça foi incluído
+      if ((!dto.serviceIds || dto.serviceIds.length === 0) && 
+          (!dto.partIds || dto.partIds.length === 0)) {
+        throw new BadRequestException('Pelo menos um serviço ou peça deve ser incluído na ordem de serviço');
       }
 
       // Create new work order
       const workOrder = new WorkOrder({
-        customerId: dto.customerId,
-        vehicleId: dto.vehicleId,
+        customerId: customerId,
+        vehicleId: vehicleIdStr,
         description: dto.description,
         estimatedCost: dto.estimatedCost,
         diagnosis: dto.diagnosis,

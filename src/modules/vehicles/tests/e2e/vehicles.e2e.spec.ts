@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
-import { CustomersModule } from '@modules/customers/presentation/customers.module';
+import { CustomersModule } from '@modules/customers/customers.module';
 import { VehiclesModule } from '@modules/vehicles/presentation/vehicles.module';
 import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
 
@@ -21,7 +21,7 @@ describe('Vehicles (e2e)', () => {
           port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
           username: process.env.POSTGRES_USER || 'postgres',
           password: process.env.POSTGRES_PASSWORD || 'postgres',
-          database: process.env.POSTGRES_TEST_DB || 'garage_test',
+          database: process.env.POSTGRES_TEST_DB || 'garage',
           entities: [Vehicle, CustomerEntity],
           synchronize: true,
           dropSchema: true,
