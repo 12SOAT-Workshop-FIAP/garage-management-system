@@ -3,10 +3,12 @@ import { CreateCustomerService } from '../application/services/create-customer.s
 import { Customer } from '../domain/customer';
 import { CustomerRepository } from '../domain/customer.repository';
 import { CustomerResponseDto } from '../presentation/dtos/customer-response.dto';
+import { CryptographyService } from '@modules/cryptography/application/services/cryptography.service';
 
 describe('CreateCustomerService', () => {
   let createCustomerService: CreateCustomerService;
   let mockCustomerRepository: jest.Mocked<CustomerRepository>;
+  let mockCryptographyService: Partial<CryptographyService>;
 
   beforeEach(() => {
     mockCustomerRepository = {
@@ -18,7 +20,24 @@ describe('CreateCustomerService', () => {
       findByDocument: jest.fn(),
     };
 
-    createCustomerService = new CreateCustomerService(mockCustomerRepository);
+    mockCryptographyService = {
+      encryptSensitiveData: jest.fn(),
+      decryptSensitiveData: jest.fn(),
+      validateSensitiveData: jest.fn(),
+      encryptCPF: jest.fn(),
+      decryptCPF: jest.fn(),
+      validateCPF: jest.fn(),
+      encryptCNPJ: jest.fn(),
+      decryptCNPJ: jest.fn(),
+      validateCNPJ: jest.fn(),
+      encryptLicensePlate: jest.fn(),
+      decryptLicensePlate: jest.fn(),
+      validateLicensePlate: jest.fn(),
+      hashData: jest.fn(),
+      verifyHash: jest.fn(),
+    };
+
+    createCustomerService = new CreateCustomerService(mockCustomerRepository, mockCryptographyService as CryptographyService);
   });
 
   it('should create a new customer successfully', async () => {
@@ -31,11 +50,16 @@ describe('CreateCustomerService', () => {
       status: true,
     };
 
+    // Mock the encryptSensitiveData to return an object with encryptedValue
+    (mockCryptographyService.encryptSensitiveData as jest.Mock).mockResolvedValue({
+      encryptedValue: 'encrypted_document_value'
+    });
+
     const createdCustomer = new Customer({
       id: 1,
       name: createCustomereDto.name,
       personType: createCustomereDto.personType,
-      document: createCustomereDto.document,
+      document: 'encrypted_document_value', // Use the encrypted value
       email: createCustomereDto.email,
       phone: createCustomereDto.phone,
       createdAt: new Date('2025-07-29T14:34:45.318Z'),
@@ -50,7 +74,7 @@ describe('CreateCustomerService', () => {
     expect(result).toBeInstanceOf(Customer);
     expect(result.name).toBe(createCustomereDto.name);
     expect(result.personType).toBe(createCustomereDto.personType);
-    expect(result.document).toBe(createCustomereDto.document);
+    expect(result.document).toBe('encrypted_document_value');
     expect(result.email).toBe(createCustomereDto.email);
     expect(result.phone).toBe(createCustomereDto.phone);
     expect(result.status).toBe(createCustomereDto.status);
@@ -61,7 +85,7 @@ describe('CreateCustomerService', () => {
       expect.objectContaining({
         name: createCustomereDto.name,
         personType: createCustomereDto.personType,
-        document: createCustomereDto.document,
+        document: 'encrypted_document_value',
         email: createCustomereDto.email,
         phone: createCustomereDto.phone,
         status: true,

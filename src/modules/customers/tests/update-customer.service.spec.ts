@@ -3,10 +3,12 @@ import { UpdateCustomerService } from '../application/services/update-customer.s
 import { CustomerRepository } from '../domain/customer.repository';
 import { Customer } from '../domain/customer';
 import { UpdateCustomerDto } from '../application/dtos/update-customer.dto';
+import { CryptographyService } from '@modules/cryptography/application/services/cryptography.service';
 
 describe('UpdateCustomerService', () => {
   let service: UpdateCustomerService;
   let mockCustomerRepository: jest.Mocked<CustomerRepository>;
+  let mockCryptographyService: Partial<CryptographyService>;
 
   beforeEach(() => {
     mockCustomerRepository = {
@@ -17,7 +19,14 @@ describe('UpdateCustomerService', () => {
       findById: jest.fn(),
       findByDocument: jest.fn(),
     };
-    service = new UpdateCustomerService(mockCustomerRepository);
+
+    mockCryptographyService = {
+      encryptSensitiveData: jest.fn(),
+      decryptSensitiveData: jest.fn().mockResolvedValue({ value: '12345678901' }),
+      validateSensitiveData: jest.fn(),
+    };
+
+    service = new UpdateCustomerService(mockCustomerRepository, mockCryptographyService as CryptographyService);
   });
 
   it('should update the customer partially (PATCH)', async () => {

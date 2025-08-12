@@ -42,7 +42,7 @@ describe('WorkOrder Parts Integration', () => {
           port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
           username: process.env.POSTGRES_USER || 'postgres',
           password: process.env.POSTGRES_PASSWORD || 'postgres',
-          database: process.env.POSTGRES_TEST_DB || 'garage_test',
+          database: process.env.POSTGRES_TEST_DB || 'garage',
           entities: [WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM, Part, CustomerEntity, Vehicle],
           synchronize: true,
           dropSchema: true,

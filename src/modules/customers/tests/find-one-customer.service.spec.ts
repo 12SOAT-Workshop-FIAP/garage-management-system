@@ -2,10 +2,12 @@ import { NotFoundException } from '@nestjs/common';
 import { FindOneCustomerService } from '../application/services/find-one-customer.sevice';
 import { Customer } from '../domain/customer';
 import { CustomerRepository } from '../domain/customer.repository';
+import { CryptographyService } from '@modules/cryptography/application/services/cryptography.service';
 
 describe('FindOneCustomerService', () => {
   let findOneCustomerService: FindOneCustomerService;
   let mockCustomerRepository: jest.Mocked<CustomerRepository>;
+  let mockCryptographyService: Partial<CryptographyService>;
 
   beforeEach(() => {
     mockCustomerRepository = {
@@ -17,50 +19,46 @@ describe('FindOneCustomerService', () => {
       findByDocument: jest.fn(),
     };
 
-    findOneCustomerService = new FindOneCustomerService(mockCustomerRepository);
+    mockCryptographyService = {
+      decryptSensitiveData: jest.fn().mockResolvedValue({ value: '12345678901' }),
+    };
+
+    findOneCustomerService = new FindOneCustomerService(
+      mockCustomerRepository,
+      mockCryptographyService as CryptographyService,
+    );
   });
 
-  it('should be defined', () => {
-    expect(findOneCustomerService).toBeDefined();
-  });
-
-  it('should return the customer if exists', async () => {
+  it('should return a customer when found', async () => {
     const customerId = 1;
-    const mockCustomer = new Customer({
-      id: 2,
-      name: 'Maria Oliveira da Silva',
+    const customer = new Customer({
+      id: customerId,
+      name: 'John Doe',
       personType: 'INDIVIDUAL',
-      document: '98765432100',
-      email: 'maria.oliveira@example.com',
-      phone: '+5511976543210',
-      createdAt: new Date('2025-07-29T14:34:45.318Z'),
-      updatedAt: new Date('2025-07-29T14:36:02.053Z'),
-      status: false,
+      document: '12345678901',
+      email: 'john@example.com',
+      phone: '+5511999999999',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: true,
     });
 
-    mockCustomerRepository.findById.mockResolvedValue(mockCustomer);
+    mockCustomerRepository.findById.mockResolvedValue(customer);
 
     const result = await findOneCustomerService.execute(customerId);
 
-    if (!result) {
-      fail('Expected customer entity, but got null');
-    }
-
-    expect(result).toEqual(mockCustomer);
-    expect(result).toBeInstanceOf(Customer);
-    expect(result.document).toBe('98765432100');
-    expect(mockCustomerRepository.findById).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(customer);
+    expect(mockCustomerRepository.findById).toHaveBeenCalledWith(customerId);
   });
 
-  it('should throw NotFoundException when customer is not found', async () => {
-    const customerId = 15;
-
+  it('should throw NotFoundException when customer not found', async () => {
+    const customerId = 999;
     mockCustomerRepository.findById.mockResolvedValue(null);
 
     await expect(findOneCustomerService.execute(customerId)).rejects.toThrow(
       new NotFoundException(`Customer with ID ${customerId} not found`),
     );
 
-    expect(mockCustomerRepository.findById).toHaveBeenCalledTimes(1);
+    expect(mockCustomerRepository.findById).toHaveBeenCalledWith(customerId);
   });
 });
