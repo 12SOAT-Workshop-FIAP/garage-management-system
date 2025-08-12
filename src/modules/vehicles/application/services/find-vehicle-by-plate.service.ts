@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { VehicleRepository } from '../../domain/vehicle.repository';
 import { Vehicle } from '../../domain/vehicle.entity';
-import { LicensePlate } from '@modules/cryptography/domain/value-objects/license-plate.value-object';
 import { CryptographyService } from '@modules/cryptography/application/services/cryptography.service';
 
 @Injectable()
@@ -25,6 +24,7 @@ export class FindVehicleByPlateService {
         `Vehicle with license plate ${plateVo.getMaskedValue()} not found`,
       );
     }
+    vehicle.plate = plate;
 
     return vehicle;
   }

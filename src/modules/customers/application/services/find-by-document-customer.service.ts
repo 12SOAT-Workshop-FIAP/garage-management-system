@@ -39,6 +39,21 @@ export class FindByDocumentCustomerService {
         `Customer not found with document: ${documentVo.getMaskedValue()}`,
       );
     }
+
+    if (customer.vehicles && customer.vehicles.length > 0) {
+      await Promise.all(
+        customer.vehicles.map(async (vehicle) => {
+          if (vehicle.plate) {
+            const plateVo = await this.cryptographyService.decryptSensitiveData(
+              vehicle.plate,
+              'license-plate',
+            );
+            vehicle.plate = plateVo.value;
+          }
+        }),
+      );
+    }
+
     customer.document = document;
 
     return customer;

@@ -25,6 +25,19 @@ export class FindOneCustomerService {
       );
       customer.document = documentVo.value;
     }
+    if (customer.vehicles && customer.vehicles.length > 0) {
+      await Promise.all(
+        customer.vehicles.map(async (vehicle) => {
+          if (vehicle.plate) {
+            const plateVo = await this.cryptographyService.decryptSensitiveData(
+              vehicle.plate,
+              'license-plate',
+            );
+            vehicle.plate = plateVo.value;
+          }
+        }),
+      );
+    }
 
     return customer;
   }
