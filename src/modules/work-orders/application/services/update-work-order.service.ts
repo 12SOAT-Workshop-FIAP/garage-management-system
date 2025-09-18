@@ -10,9 +10,7 @@ import { WorkOrderStatus } from '../../domain/work-order-status.enum';
  */
 @Injectable()
 export class UpdateWorkOrderService {
-  constructor(
-    private readonly workOrderRepository: WorkOrderRepository,
-  ) {}
+  constructor(private readonly workOrderRepository: WorkOrderRepository) {}
 
   async execute(id: string, dto: UpdateWorkOrderDto): Promise<WorkOrder> {
     const workOrder = await this.workOrderRepository.findById(id);
@@ -73,19 +71,23 @@ export class UpdateWorkOrderService {
     }
   }
 
-  private validateStatusTransition(currentStatus: WorkOrderStatus, newStatus: WorkOrderStatus): void {
+  private validateStatusTransition(
+    currentStatus: WorkOrderStatus,
+    newStatus: WorkOrderStatus,
+  ): void {
     const validTransitions: Record<WorkOrderStatus, WorkOrderStatus[]> = {
-      [WorkOrderStatus.PENDING]: [WorkOrderStatus.APPROVED, WorkOrderStatus.CANCELLED],
+      [WorkOrderStatus.RECEIVED]: [WorkOrderStatus.APPROVED, WorkOrderStatus.CANCELLED],
       [WorkOrderStatus.APPROVED]: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.CANCELLED],
       [WorkOrderStatus.IN_PROGRESS]: [
         WorkOrderStatus.WAITING_PARTS,
-        WorkOrderStatus.WAITING_CUSTOMER,
+        WorkOrderStatus.PENDING,
         WorkOrderStatus.COMPLETED,
         WorkOrderStatus.CANCELLED,
       ],
       [WorkOrderStatus.WAITING_PARTS]: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.CANCELLED],
-      [WorkOrderStatus.WAITING_CUSTOMER]: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.CANCELLED],
+      [WorkOrderStatus.PENDING]: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.CANCELLED],
       [WorkOrderStatus.COMPLETED]: [WorkOrderStatus.DELIVERED],
+      [WorkOrderStatus.DIAGNOSIS]: [WorkOrderStatus.PENDING],
       [WorkOrderStatus.CANCELLED]: [],
       [WorkOrderStatus.DELIVERED]: [],
     };
