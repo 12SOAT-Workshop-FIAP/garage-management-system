@@ -4,7 +4,7 @@ dist/
 
 # Env
 .env
-.env.*
+
 
 # Logs
 logs/

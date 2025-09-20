@@ -36,6 +36,7 @@ import { CryptographyModule } from '@modules/cryptography/presentation/cryptogra
       useClass: TypeOrmVehicleRepository,
     },
   ],
-  exports: [],
+
+  exports: [FindByIdVehicleService],
 })
 export class VehiclesModule {}

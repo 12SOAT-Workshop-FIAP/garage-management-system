@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atualização do Status da Ordem de Serviço</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f4f4f4;
+      }
+      .container {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 20px;
+      }
+
+      .header h1 {
+        margin: 0px;
+      }
+
+      .highlight {
+        padding: 15px;
+        margin: 20px 0;
+      }
+
+      .highlight.pending {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .highlight.approved {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .highlight.in-progress {
+        background-color: #cce7ff;
+        color: #004085;
+      }
+      .highlight.completed {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .highlight.cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .highlight.waiting-parts {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .highlight.waiting-customer {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .highlight.delivered {
+        background-color: #d1ecf1;
+        color: #0c5460;
+      }
+
+      .details {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      .details th {
+        text-align: left;
+        padding: 8px;
+        font-weight: bold;
+        width: 30%;
+      }
+      .details td {
+        padding: 8px;
+      }
+      .footer {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Atualização da Ordem de Serviço</h1>
+      </div>
+
+      <p>Olá <b>{{customerName}}</b>,</p>
+
+      <p>Informamos que o status da sua ordem de serviço foi atualizado.</p>
+
+      <div class="highlight {{status}}">
+        <strong>Status atual:</strong>
+        <span>{{statusDisplay}}</span>
+      </div>
+
+      <div class="details">
+        <table>
+          <tr>
+            <th>Número da OS:</th>
+            <td>#{{workOrderId}}</td>
+          </tr>
+          <tr>
+            <th>Veículo:</th>
+            <td>{{vehicleBrand}} {{vehicleModel}} - {{vehiclePlate}}</td>
+          </tr>
+          <tr>
+            <th>Data de Atualização:</th>
+            <td>{{updatedAt}}</td>
+          </tr>
+          {{#if estimatedCompletion}}
+          <tr>
+            <th>Previsão de Conclusão:</th>
+            <td>{{estimatedCompletion}}</td>
+          </tr>
+          {{/if}} {{#if totalValue}}
+          <tr>
+            <th>Valor Total:</th>
+            <td>R$ {{totalValue}}</td>
+          </tr>
+          {{/if}}
+        </table>
+      </div>
+
+      {{#if statusMessage}}
+      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0">
+        <h3>Informações Adicionais:</h3>
+        <p>{{statusMessage}}</p>
+      </div>
+      {{/if}}
+
+      <div class="footer">
+        <p>Esta é uma mensagem automática. Por favor, não responda diretamente a este email.</p>
+        <p>© {{year}} Oficina FIAP - Todos os direitos reservados</p>
+      </div>
+    </div>
+  </body>
+</html>

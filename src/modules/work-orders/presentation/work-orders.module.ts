@@ -22,13 +22,17 @@ import { WorkOrderRepository } from '../domain/work-order.repository';
 import { ServicesModule } from '../../services/services.module';
 import { PartsModule } from '../../parts/parts.module';
 import { CustomersModule } from '@modules/customers/customers.module';
+import { EmailModule } from '@modules/email/email.module';
+import { VehiclesModule } from '@modules/vehicles/presentation/vehicles.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM]),
     CustomersModule,
+    VehiclesModule,
     ServicesModule,
     PartsModule,
+    EmailModule,
   ],
   controllers: [WorkOrderController, PublicWorkOrderController],
   providers: [
