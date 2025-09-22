@@ -22,7 +22,11 @@ export class UserTypeOrmRepository implements UserRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.repository.delete(id);
+    const user = await this.findById(id);
+
+    if (user) {
+      await this.update({ ...user, isActive: false });
+    }
   }
 
   async findAll(): Promise<UserEntity[]> {

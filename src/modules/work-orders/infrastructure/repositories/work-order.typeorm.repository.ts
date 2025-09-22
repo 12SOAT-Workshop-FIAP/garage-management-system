@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository, Between, DataSource } from 'typeorm';
+import { Repository, Between, DataSource, Not, In } from 'typeorm';
 import { WorkOrder as WorkOrderDomain } from '../../domain/work-order.entity';
 import { WorkOrderORM } from '../entities/work-order.entity';
 import { WorkOrderPartORM } from '../entities/work-order-part.entity';
@@ -22,21 +22,33 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
   ) {}
 
   async findById(id: string): Promise<WorkOrderDomain | null> {
-    const entity = await this.repository.findOne({ 
+    const entity = await this.repository.findOne({
       where: { id },
-      relations: ['services', 'parts']
+      relations: ['services', 'parts'],
     });
     if (!entity) return null;
-    
+
     return WorkOrderMapper.toDomain(entity);
   }
 
   async findAll(): Promise<WorkOrderDomain[]> {
+    console.log('chegou aqui\n\n\n\n\n\n\n\n\\n\n\n\n\n\n\n\n ---------------------------- aqui');
     const entities = await this.repository.find({
+      where: {
+        status: In([
+          WorkOrderStatus.APPROVED,
+          WorkOrderStatus.CANCELLED,
+          WorkOrderStatus.IN_PROGRESS,
+          WorkOrderStatus.PENDING,
+          WorkOrderStatus.DIAGNOSIS,
+          WorkOrderStatus.RECEIVED,
+          WorkOrderStatus.WAITING_PARTS,
+        ]),
+      },
       relations: ['services', 'parts'],
-      order: { createdAt: 'DESC' },
+      order: { status: 'ASC', createdAt: 'ASC' },
     });
-    
+
     return WorkOrderMapper.toDomainArray(entities);
   }
 
@@ -46,7 +58,7 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
       relations: ['services', 'parts'],
       order: { createdAt: 'DESC' },
     });
-    
+
     return WorkOrderMapper.toDomainArray(entities);
   }
 
@@ -56,7 +68,7 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
       relations: ['services', 'parts'],
       order: { createdAt: 'DESC' },
     });
-    
+
     return WorkOrderMapper.toDomainArray(entities);
   }
 
@@ -65,7 +77,7 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
       where: { status },
       order: { createdAt: 'DESC' },
     });
-    
+
     return WorkOrderMapper.toDomainArray(entities);
   }
 
@@ -76,14 +88,14 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
       },
       order: { createdAt: 'DESC' },
     });
-    
+
     return WorkOrderMapper.toDomainArray(entities);
   }
 
   async save(workOrder: WorkOrderDomain): Promise<WorkOrderDomain> {
-    return await this.repository.manager.transaction(async manager => {
+    return await this.repository.manager.transaction(async (manager) => {
       const entity = WorkOrderMapper.toORM(workOrder);
-      
+
       // Save the main work order without relations first
       const mainEntityData = {
         id: entity.id,
@@ -101,14 +113,14 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
       };
-      
+
       const savedMain = await manager.save(WorkOrderORM, mainEntityData);
-      
+
       // Handle parts
       if (entity.parts && entity.parts.length > 0) {
         // Delete existing parts
         await manager.delete(WorkOrderPartORM, { workOrderId: savedMain.id });
-        
+
         // Save new parts
         for (const part of entity.parts) {
           await manager.save(WorkOrderPartORM, {
@@ -129,12 +141,12 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
         // If no parts, delete any existing ones
         await manager.delete(WorkOrderPartORM, { workOrderId: savedMain.id });
       }
-      
+
       // Handle services
       if (entity.services && entity.services.length > 0) {
         // Delete existing services
         await manager.delete(WorkOrderServiceORM, { workOrderId: savedMain.id });
-        
+
         // Save new services
         for (const service of entity.services) {
           await manager.save(WorkOrderServiceORM, {
@@ -160,13 +172,13 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
         // If no services, delete any existing ones
         await manager.delete(WorkOrderServiceORM, { workOrderId: savedMain.id });
       }
-      
+
       // Reload with relations
       const reloaded = await manager.findOne(WorkOrderORM, {
         where: { id: savedMain.id },
-        relations: ['services', 'parts']
+        relations: ['services', 'parts'],
       });
-      
+
       return WorkOrderMapper.toDomain(reloaded!);
     });
   }
@@ -181,9 +193,9 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
     const vehicleRepository = dataSource.getRepository(Vehicle);
     const vehicle = await vehicleRepository.findOne({
       where: { id: parseInt(vehicleId) },
-      relations: ['customer']
+      relations: ['customer'],
     });
-    
+
     return vehicle?.customer?.id?.toString() || null;
   }
 
@@ -193,9 +205,9 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
     const vehicleRepository = dataSource.getRepository(Vehicle);
     const vehicle = await vehicleRepository.findOne({
       where: { plate: licensePlate },
-      relations: ['customer']
+      relations: ['customer'],
     });
-    
+
     return vehicle?.customer?.id?.toString() || null;
   }
 }

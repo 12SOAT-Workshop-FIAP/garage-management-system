@@ -125,7 +125,6 @@ export class UpdateWorkOrderService {
         statusMessage: dto.technicianNotes,
       });
     } catch (error) {
-      // Log error but don't fail the work order update
       console.error(`Failed to send email notification for work order ${workOrder.id}:`, error);
     }
   }
@@ -135,17 +134,18 @@ export class UpdateWorkOrderService {
     newStatus: WorkOrderStatus,
   ): void {
     const validTransitions: Record<WorkOrderStatus, WorkOrderStatus[]> = {
-      [WorkOrderStatus.PENDING]: [WorkOrderStatus.APPROVED, WorkOrderStatus.CANCELLED],
+      [WorkOrderStatus.RECEIVED]: [WorkOrderStatus.APPROVED, WorkOrderStatus.CANCELLED],
       [WorkOrderStatus.APPROVED]: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.CANCELLED],
       [WorkOrderStatus.IN_PROGRESS]: [
         WorkOrderStatus.WAITING_PARTS,
-        WorkOrderStatus.WAITING_CUSTOMER,
+        WorkOrderStatus.PENDING,
         WorkOrderStatus.COMPLETED,
         WorkOrderStatus.CANCELLED,
       ],
       [WorkOrderStatus.WAITING_PARTS]: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.CANCELLED],
-      [WorkOrderStatus.WAITING_CUSTOMER]: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.CANCELLED],
+      [WorkOrderStatus.PENDING]: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.CANCELLED],
       [WorkOrderStatus.COMPLETED]: [WorkOrderStatus.DELIVERED],
+      [WorkOrderStatus.DIAGNOSIS]: [WorkOrderStatus.PENDING],
       [WorkOrderStatus.CANCELLED]: [],
       [WorkOrderStatus.DELIVERED]: [],
     };
