@@ -3,6 +3,9 @@ import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { UpdateWorkOrderDto } from '../dtos/update-work-order.dto';
 import { WorkOrder } from '../../domain/work-order.entity';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
+import { WorkOrderEmailNotificationService } from '@modules/email/application/services/work-order-email-notification.service';
+import { CustomerRepository } from '@modules/customers/domain/customer.repository';
+import { FindByIdVehicleService } from '@modules/vehicles/application/services/find-by-id-vehicle.service';
 
 /**
  * UpdateWorkOrderService (Serviço de atualização de Ordem de Serviço)
@@ -10,13 +13,20 @@ import { WorkOrderStatus } from '../../domain/work-order-status.enum';
  */
 @Injectable()
 export class UpdateWorkOrderService {
-  constructor(private readonly workOrderRepository: WorkOrderRepository) {}
+  constructor(
+    private readonly workOrderRepository: WorkOrderRepository,
+    private readonly workOrderEmailNotificationService: WorkOrderEmailNotificationService,
+    private readonly customerRepository: CustomerRepository,
+    private readonly findByIdVehicleService: FindByIdVehicleService,
+  ) {}
 
   async execute(id: string, dto: UpdateWorkOrderDto): Promise<WorkOrder> {
     const workOrder = await this.workOrderRepository.findById(id);
     if (!workOrder) {
       throw new NotFoundException('Work order not found');
     }
+
+    const originalStatus = workOrder.status;
 
     try {
       // Update basic fields
@@ -62,12 +72,60 @@ export class UpdateWorkOrderService {
       }
 
       // Save updated work order
-      return await this.workOrderRepository.save(workOrder);
+      const updatedWorkOrder = await this.workOrderRepository.save(workOrder);
+
+      if (originalStatus !== updatedWorkOrder.status) {
+        await this.sendStatusChangeNotification(updatedWorkOrder, dto);
+      }
+
+      return updatedWorkOrder;
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
       throw new BadRequestException('Failed to update work order');
+    }
+  }
+
+  private async sendStatusChangeNotification(
+    workOrder: WorkOrder,
+    dto: UpdateWorkOrderDto,
+  ): Promise<void> {
+    try {
+      // Fetch customer data
+      const customer = await this.customerRepository.findById(parseInt(workOrder.customerId));
+      if (!customer?.email) {
+        console.warn(
+          `No email found for customer ${workOrder.customerId} in work order ${workOrder.id}`,
+        );
+        return;
+      }
+
+      // Fetch vehicle data
+      const vehicle = await this.findByIdVehicleService.execute(parseInt(workOrder.vehicleId));
+      if (!vehicle) {
+        console.warn(`Vehicle ${workOrder.vehicleId} not found for work order ${workOrder.id}`);
+        return;
+      }
+
+      // Calculate total cost from work order
+      const totalCost = (workOrder.actualCost ?? workOrder.estimatedCost) || 0;
+
+      await this.workOrderEmailNotificationService.sendStatusChangeNotification({
+        workOrderId: workOrder.id,
+        customerName: customer.name,
+        customerEmail: customer.email,
+        vehicleBrand: vehicle.brand || 'N/A',
+        vehicleModel: vehicle.model || 'N/A',
+        vehiclePlate: vehicle.plate || 'N/A',
+        status: workOrder.status,
+        updatedAt: workOrder.updatedAt,
+        estimatedCompletion: workOrder.estimatedCompletionDate,
+        totalValue: totalCost,
+        statusMessage: dto.technicianNotes,
+      });
+    } catch (error) {
+      console.error(`Failed to send email notification for work order ${workOrder.id}:`, error);
     }
   }
 
