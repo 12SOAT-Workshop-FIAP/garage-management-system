@@ -1,4 +1,4 @@
-import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
+// Note: Vehicle relationship handled via foreign key reference
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -43,8 +43,9 @@ export class CustomerEntity {
   @Column()
   phone!: string;
 
-  @OneToMany(() => Vehicle, (vehicle) => vehicle.customer)
-  vehicles?: Vehicle[];
+  // Note: Vehicle relationship handled via foreign key in vehicles table
+  // @OneToMany(() => Vehicle, (vehicle) => vehicle.customer)
+  // vehicles?: Vehicle[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

@@ -2,7 +2,7 @@ import { Injectable, ConflictException, NotFoundException } from '@nestjs/common
 import { CreateVehicleDto } from '../dtos/create-vehicle.dto';
 import { VehicleRepository } from '../../domain/vehicle.repository';
 import { Vehicle } from '../../domain/vehicle.entity';
-import { CustomerRepository } from '@modules/customers/domain/customer.repository';
+import { CustomerRepository } from '@modules/customers/domain/repositories/customer.repository';
 import { LicensePlate } from '@modules/cryptography/domain/value-objects/license-plate.value-object';
 import { CryptographyService } from '@modules/cryptography/application/services/cryptography.service';
 
@@ -41,7 +41,7 @@ export class CreateVehicleService {
     const plateVo = await this.cryptographyService.encryptSensitiveData(dto.plate, 'license-plate');
     vehicle.plate = plateVo.encryptedValue; // Will be formatted in @BeforeInsert
     vehicle.year = dto.year;
-    vehicle.customer = customer;
+    vehicle.customer = customer as any; // Type compatibility issue - needs refactoring
 
     return await this.vehicleRepo.create(vehicle);
   }

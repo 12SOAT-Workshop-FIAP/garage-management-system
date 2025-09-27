@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PublicWorkOrderController } from '../presentation/controllers/public-work-order.controller';
 import { FindWorkOrderService } from '../application/services/find-work-order.service';
-import { FindByDocumentCustomerService } from '@modules/customers/application/services/find-by-document-customer.service';
+import { FindCustomerByDocumentUseCase } from '@modules/customers/application/use-cases/find-customer-by-document.use-case';
 import { WorkOrderStatus } from '../domain/work-order-status.enum';
 
 describe('PublicWorkOrderController', () => {
@@ -35,7 +35,7 @@ describe('PublicWorkOrderController', () => {
       controllers: [PublicWorkOrderController],
       providers: [
         { provide: FindWorkOrderService, useValue: findWorkOrderService },
-        { provide: FindByDocumentCustomerService, useValue: findByDocumentCustomerService },
+        { provide: FindCustomerByDocumentUseCase, useValue: findByDocumentCustomerService },
       ],
     }).compile();
 

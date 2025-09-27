@@ -1,15 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { CustomerEntity } from './customer.entity';
-import { CustomerRepository } from '../domain/customer.repository';
+import { CustomerRepository } from '../domain/repositories/customer.repository';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Customer } from '@modules/customers/domain/customer';
-import { UpdateCustomerDto } from '@modules/customers/application/dtos/update-customer.dto';
+import { Customer } from '@modules/customers/domain/entities/customer.entity';
+import { CustomerMapper } from './mappers/customer.mapper';
 
-/**
- * CustomerTypeOrmRepository
- * TypeORM implementation for CustomerRepository
- */
 @Injectable()
 export class CustomerTypeOrmRepository implements CustomerRepository {
   constructor(
@@ -18,52 +14,45 @@ export class CustomerTypeOrmRepository implements CustomerRepository {
   ) {}
 
   async findAll(): Promise<Customer[] | null> {
-    const customer = await this.repository.find({
+    const entities = await this.repository.find({
       where: { status: true },
       order: {
         id: 'ASC',
       },
-      relations: {
-        vehicles: true,
-      },
     });
-    const domainCustomer = customer.map(this.toDomain);
-    return domainCustomer;
+    return entities.map(CustomerMapper.toDomain);
   }
 
   async findById(id: number): Promise<Customer | null> {
-    const customer = await this.repository.findOne({
+    const entity = await this.repository.findOne({
       where: { id },
-      relations: { vehicles: true },
     });
-    return customer ? this.toDomain(customer) : null;
+    return entity ? CustomerMapper.toDomain(entity) : null;
   }
 
   async findByDocument(document: string): Promise<Customer | null> {
-    const customer = await this.repository.findOne({
+    const entity = await this.repository.findOne({
       where: { document },
-      relations: { vehicles: true },
     });
-    return customer ? this.toDomain(customer) : null;
+    return entity ? CustomerMapper.toDomain(entity) : null;
   }
 
   async create(customer: Customer): Promise<Customer> {
-    const createdCustomer = this.repository.create(customer);
-    const savedCustomer = await this.repository.save(createdCustomer);
-    return this.toDomain(savedCustomer);
+    const entityData = CustomerMapper.toInfrastructure(customer);
+    const entity = this.repository.create(entityData);
+    const savedEntity = await this.repository.save(entity);
+    return CustomerMapper.toDomain(savedEntity);
   }
 
-  async update(oldData: CustomerEntity, newData: UpdateCustomerDto): Promise<Customer> {
-    const updated = this.repository.merge(oldData, newData);
+  async update(oldCustomer: Customer, newCustomer: Customer): Promise<Customer | null> {
+    const entityData = CustomerMapper.toInfrastructureUpdate(newCustomer);
+    const updated = this.repository.merge(oldCustomer as any, entityData);
     const saved = await this.repository.save(updated);
-    return this.toDomain(saved);
+    return CustomerMapper.toDomain(saved);
   }
 
   async delete(customer: Customer): Promise<void> {
-    await this.update(customer, { status: false });
-  }
-
-  private toDomain(entity: CustomerEntity): Customer {
-    return new Customer({ ...entity });
+    customer.deactivate();
+    await this.update(customer, customer);
   }
 }

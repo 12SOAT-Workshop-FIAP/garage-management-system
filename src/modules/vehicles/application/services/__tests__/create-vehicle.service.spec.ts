@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { CreateVehicleService } from '../create-vehicle.service';
 import { VehicleRepository } from '../../../domain/vehicle.repository';
-import { CustomerRepository } from '@modules/customers/domain/customer.repository';
+import { CustomerRepository } from '@modules/customers/domain/repositories/customer.repository';
 import { CreateVehicleDto } from '../../dtos/create-vehicle.dto';
 import { Vehicle } from '../../../domain/vehicle.entity';
-import { Customer } from '@modules/customers/domain/customer';
+import { Customer } from '@modules/customers/domain/entities/customer.entity';
 
 describe('CreateVehicleService', () => {
   let service: CreateVehicleService;
@@ -129,7 +129,7 @@ describe('CreateVehicleService', () => {
 
     it('should validate Mercosul format license plates', async () => {
       const mercosulDto = { ...createVehicleDto, plate: 'ABC1D23' };
-      
+
       customerRepository.findById.mockResolvedValue(mockCustomer);
       vehicleRepository.findByPlate.mockResolvedValue(null);
       vehicleRepository.save.mockResolvedValue(mockVehicle);
@@ -143,7 +143,7 @@ describe('CreateVehicleService', () => {
     it('should handle license plates with different formats', async () => {
       const formattedDto = { ...createVehicleDto, plate: 'ABC-1234' };
       const unformattedDto = { ...createVehicleDto, plate: 'ABC1234' };
-      
+
       customerRepository.findById.mockResolvedValue(mockCustomer);
       vehicleRepository.findByPlate.mockResolvedValue(null);
       vehicleRepository.save.mockResolvedValue(mockVehicle);

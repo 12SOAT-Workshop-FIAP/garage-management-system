@@ -11,7 +11,7 @@ import {
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IsPublic } from '@modules/auth/presentation/decorators/is-public.decorator';
 import { FindWorkOrderService } from '../../application/services/find-work-order.service';
-import { FindByDocumentCustomerService } from '@modules/customers/application/services/find-by-document-customer.service';
+import { FindCustomerByDocumentUseCase } from '@modules/customers/application/use-cases/find-customer-by-document.use-case';
 import { PublicWorkOrderStatusDto } from '../dtos/public-work-order-status.dto';
 
 @ApiTags('public-work-orders')
@@ -19,7 +19,7 @@ import { PublicWorkOrderStatusDto } from '../dtos/public-work-order-status.dto';
 export class PublicWorkOrderController {
   constructor(
     private readonly findWorkOrderService: FindWorkOrderService,
-    private readonly findByDocumentCustomerService: FindByDocumentCustomerService,
+    private readonly findByDocumentCustomerService: FindCustomerByDocumentUseCase,
   ) {}
 
   @Get(':id/status')
@@ -57,8 +57,9 @@ export class PublicWorkOrderController {
     }
 
     // Validate customer by document and ensure ownership
-    const customer = await this.findByDocumentCustomerService.execute(document);
-    if (!customer || workOrder.customerId !== customer.id.toString()) {
+    const query = { document } as any;
+    const customer = await this.findByDocumentCustomerService.execute(query);
+    if (!customer || workOrder.customerId !== customer.id?.value?.toString()) {
       throw new NotFoundException('Work order not found for the provided document');
     }
 
