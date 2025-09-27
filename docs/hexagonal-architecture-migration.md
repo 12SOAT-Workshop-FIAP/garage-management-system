@@ -12,7 +12,7 @@ This document demonstrates the migration of the Customer module from a tradition
 4. [Application Layer](#application-layer)
 5. [Infrastructure Layer](#infrastructure-layer)
 6. [Benefits Achieved](#benefits-achieved)
-7. [Testing Strategy](#testing-strategy)
+7. [Data Flow Diagrams](#data-flow-diagrams)
 
 ## Architecture Comparison
 
@@ -67,7 +67,6 @@ graph TB
     subgraph "Domain Layer (Core)"
         Entity[Customer Entity]
         VOs[Value Objects]
-        DomainService[Domain Service]
         Ports[Ports/Interfaces]
     end
     
@@ -92,7 +91,6 @@ graph TB
     
     UseCases --> Entity
     UseCases --> VOs
-    UseCases --> DomainService
     UseCases --> Ports
     
     HTTPAdapter --> UseCases
@@ -105,7 +103,6 @@ graph TB
     
     style Entity fill:#90EE90
     style VOs fill:#90EE90
-    style DomainService fill:#90EE90
     style Ports fill:#90EE90
     style UseCases fill:#87CEEB
     style HTTPAdapter fill:#FFB6C1
@@ -135,8 +132,8 @@ graph LR
     subgraph "After"
         D[Rich Customer Entity]
         E[Value Objects]
-        F[Domain Service]
-        G[Business Rules]
+        F[Business Rules]
+        G[Domain Validation]
     end
     
     A --> D
@@ -228,7 +225,6 @@ graph TB
         subgraph "Ports (Interfaces)"
             CustomerPort[CustomerRepository Port]
             CryptoPort[Cryptography Port]
-            HTTPPort[HTTP Port]
         end
         
         subgraph "Adapters (Implementations)"
@@ -254,7 +250,6 @@ graph TB
     style TypeORM fill:#ffcccc
     style CustomerPort fill:#90EE90
     style CryptoPort fill:#90EE90
-    style HTTPPort fill:#90EE90
     style HTTPAdapter fill:#FFB6C1
     style DBAdapter fill:#FFB6C1
     style CryptoAdapter fill:#FFB6C1
@@ -353,7 +348,7 @@ classDiagram
         -email: Email
         -phone: Phone
         -status: CustomerStatus
-        -vehicles: Vehicle[]
+        -vehicleIds: number[]
         -createdAt: Date
         -updatedAt: Date
         
@@ -365,7 +360,7 @@ classDiagram
         +getEmail(): Email
         +getPhone(): Phone
         +getStatus(): CustomerStatus
-        +getVehicles(): Vehicle[]
+        +getVehicleIds(): number[]
         +getCreatedAt(): Date
         +getUpdatedAt(): Date
         
@@ -375,7 +370,7 @@ classDiagram
         +updateDocument(document: string): void
         +activate(): void
         +deactivate(): void
-        +addVehicle(vehicle: Vehicle): void
+        +addVehicle(vehicleId: number): void
         +removeVehicle(vehicleId: number): void
         +getBusinessKey(): string
         +canBeDeleted(): boolean
@@ -416,11 +411,6 @@ classDiagram
         -value: boolean
     }
     
-    class Vehicle {
-        +id: number
-        +plate: string
-    }
-    
     Customer --> CustomerId
     Customer --> CustomerName
     Customer --> PersonType
@@ -428,7 +418,6 @@ classDiagram
     Customer --> Email
     Customer --> Phone
     Customer --> CustomerStatus
-    Customer --> Vehicle
 ```
 
 ## Application Layer
@@ -502,35 +491,6 @@ graph TB
     style CryptoPort fill:#90EE90
 ```
 
-### Use Case Flow Example
-
-```mermaid
-sequenceDiagram
-    participant HTTP as HTTP Adapter
-    participant UC as CreateCustomerUseCase
-    participant Customer as Customer Entity
-    participant Crypto as Cryptography Port
-    participant Repo as Customer Repository
-    
-    HTTP->>UC: CreateCustomerCommand
-    UC->>Customer: Customer.create(props)
-    Customer->>Customer: Validate business rules
-    Customer-->>UC: Customer instance
-    
-    UC->>Crypto: encryptSensitiveData(document)
-    Crypto-->>UC: Encrypted document
-    
-    UC->>Customer: Customer.create(with encrypted doc)
-    Customer-->>UC: Customer with encrypted data
-    
-    UC->>Repo: create(customer)
-    Repo-->>UC: Saved customer
-    
-    UC-->>HTTP: Customer entity
-    HTTP-->>HTTP: Convert to DTO
-    HTTP-->>HTTP: HTTP Response
-```
-
 ## Infrastructure Layer
 
 ### Ports & Adapters Pattern
@@ -540,7 +500,6 @@ graph TB
     subgraph "Domain Layer (Ports)"
         CustomerRepoPort[CustomerRepository Port]
         CryptoPort[Cryptography Port]
-        HTTPPort[HTTP Port]
     end
     
     subgraph "Infrastructure Layer (Adapters)"
@@ -570,41 +529,10 @@ graph TB
     
     style CustomerRepoPort fill:#90EE90
     style CryptoPort fill:#90EE90
-    style HTTPPort fill:#90EE90
     style HTTPAdapter fill:#FFB6C1
     style DBAdapter fill:#FFB6C1
     style CryptoAdapter fill:#FFB6C1
     style Mapper fill:#FFB6C1
-```
-
-### Data Flow
-
-```mermaid
-sequenceDiagram
-    participant Client as HTTP Client
-    participant HTTP as HTTP Adapter
-    participant UC as Use Case
-    participant Domain as Domain Entity
-    participant Port as Repository Port
-    participant Adapter as Database Adapter
-    participant DB as Database
-    
-    Client->>HTTP: POST /customers
-    HTTP->>UC: CreateCustomerCommand
-    UC->>Domain: Customer.create()
-    Domain->>Domain: Validate business rules
-    Domain-->>UC: Customer instance
-    
-    UC->>Port: create(customer)
-    Port->>Adapter: create(customer)
-    Adapter->>DB: INSERT INTO customers
-    DB-->>Adapter: Customer record
-    Adapter-->>Port: Customer entity
-    Port-->>UC: Customer entity
-    
-    UC-->>HTTP: Customer entity
-    HTTP->>HTTP: Convert to DTO
-    HTTP-->>Client: 201 Created
 ```
 
 ## Benefits Achieved
@@ -689,142 +617,66 @@ graph TB
     style F fill:#90EE90
 ```
 
-## Testing Strategy
+## Data Flow Diagrams
 
-### Test Pyramid
-
-```mermaid
-graph TB
-    subgraph "Test Pyramid"
-        A[E2E Tests<br/>Few, Slow, Expensive]
-        B[Integration Tests<br/>Some, Medium Speed]
-        C[Unit Tests<br/>Many, Fast, Cheap]
-    end
-    
-    A --> B
-    B --> C
-    
-    style A fill:#FFB6C1
-    style B fill:#87CEEB
-    style C fill:#90EE90
-```
-
-### Test Coverage
+### Customer Creation Flow
 
 ```mermaid
-pie title Test Coverage by Layer
-    "Value Objects" : 25
-    "Domain Entities" : 20
-    "Use Cases" : 30
-    "Adapters" : 15
-    "E2E Tests" : 10
+sequenceDiagram
+    participant HTTP as HTTP Adapter
+    participant UC as CreateCustomerUseCase
+    participant Customer as Customer Entity
+    participant Crypto as Cryptography Port
+    participant Repo as Customer Repository
+    participant DB as Database
+    
+    HTTP->>UC: CreateCustomerCommand
+    UC->>Customer: Customer.create(props)
+    Customer->>Customer: Validate business rules
+    Customer-->>UC: Customer instance
+    
+    UC->>Crypto: encryptSensitiveData(document)
+    Crypto-->>UC: Encrypted document
+    
+    UC->>Customer: Customer.restore(with encrypted doc)
+    Customer-->>UC: Customer with encrypted data
+    
+    UC->>Repo: create(customer)
+    Repo->>DB: INSERT INTO customers
+    DB-->>Repo: Customer record
+    Repo-->>UC: Customer entity
+    
+    UC-->>HTTP: Customer entity
+    HTTP->>HTTP: Convert to DTO
+    HTTP-->>HTTP: HTTP Response
 ```
 
-### Testing Approach
+### Customer Retrieval Flow
 
 ```mermaid
-graph TB
-    subgraph "Domain Layer Tests"
-        A[Value Object Tests]
-        B[Entity Tests]
-        C[Domain Service Tests]
-    end
+sequenceDiagram
+    participant HTTP as HTTP Adapter
+    participant UC as FindCustomerByIdUseCase
+    participant Repo as Customer Repository
+    participant Crypto as Cryptography Port
+    participant DB as Database
     
-    subgraph "Application Layer Tests"
-        D[Use Case Tests]
-        E[Command/Query Tests]
-    end
+    HTTP->>UC: FindCustomerByIdQuery
+    UC->>Repo: findById(id)
+    Repo->>DB: SELECT * FROM customers WHERE id = ?
+    DB-->>Repo: Customer record
+    Repo-->>UC: Customer entity (encrypted)
     
-    subgraph "Infrastructure Layer Tests"
-        F[Adapter Tests]
-        G[Mapper Tests]
-    end
+    UC->>Crypto: decryptSensitiveData(document)
+    Crypto-->>UC: Decrypted document
     
-    subgraph "Integration Tests"
-        H[E2E Tests]
-        I[API Tests]
-    end
-    
-    style A fill:#90EE90
-    style B fill:#90EE90
-    style C fill:#90EE90
-    style D fill:#87CEEB
-    style E fill:#87CEEB
-    style F fill:#FFB6C1
-    style G fill:#FFB6C1
-    style H fill:#FFB6C1
-    style I fill:#FFB6C1
+    UC->>UC: Customer.restore(with decrypted data)
+    UC-->>HTTP: Customer entity (decrypted)
+    HTTP->>HTTP: Convert to DTO
+    HTTP-->>HTTP: HTTP Response
 ```
-
-## Final Directory Structure
-
-```mermaid
-graph TB
-    subgraph "src/modules/customers/"
-        subgraph "domain/ (Core)"
-            A[entities/customer.entity.ts]
-            B[value-objects/]
-            C[services/customer-domain.service.ts]
-            D[repositories/customer.repository.ts]
-            E[ports/cryptography.port.ts]
-        end
-        
-        subgraph "application/ (Use Cases)"
-            F[commands/]
-            G[queries/]
-            H[use-cases/]
-        end
-        
-        subgraph "infrastructure/ (Adapters)"
-            I[adapters/http/customer-http.adapter.ts]
-            J[adapters/cryptography/cryptography.adapter.ts]
-            K[mappers/customer.mapper.ts]
-            L[customer.typeorm.repository.ts]
-            M[customer.entity.ts]
-        end
-        
-        subgraph "presentation/ (DTOs)"
-            N[dtos/create-customer-request.dto.ts]
-            O[dtos/update-customer-request.dto.ts]
-        end
-        
-        subgraph "tests/"
-            P[domain/__tests__/]
-            Q[application/__tests__/]
-            R[infrastructure/__tests__/]
-            S[e2e/customers.e2e.spec.ts]
-        end
-        
-        T[customers.module.ts]
-    end
-    
-    style A fill:#90EE90
-    style B fill:#90EE90
-    style C fill:#90EE90
-    style D fill:#90EE90
-    style E fill:#90EE90
-    style F fill:#87CEEB
-    style G fill:#87CEEB
-    style H fill:#87CEEB
-    style I fill:#FFB6C1
-    style J fill:#FFB6C1
-    style K fill:#FFB6C1
-    style L fill:#FFB6C1
-    style M fill:#FFB6C1
-    style N fill:#DDA0DD
-    style O fill:#DDA0DD
-    style P fill:#F0E68C
-    style Q fill:#F0E68C
-    style R fill:#F0E68C
-    style S fill:#F0E68C
-    style T fill:#FFA07A
-```
-
-## Final Validation & Cleanup
 
 ### Cross-Module Dependencies Resolution
-
-One of the final steps in the migration was to eliminate cross-module domain dependencies to maintain true hexagonal architecture principles:
 
 ```mermaid
 graph TB
@@ -840,7 +692,7 @@ graph TB
         C[Customer Entity]
         D[Vehicle IDs Array]
         E[Vehicle Entity]
-        C -->|vehicleIds: number[]| D
+        C -->|"vehicleIds: number[]"| D
         C -.->|No Direct Import| E
         style C fill:#90EE90
         style D fill:#90EE90
@@ -848,17 +700,56 @@ graph TB
     end
 ```
 
-**Changes Made:**
-- ✅ Removed direct `Vehicle` entity import from `Customer` domain
-- ✅ Replaced `vehicles: Vehicle[]` with `vehicleIds: number[]`
-- ✅ Updated all related Use Cases, Mappers, and Tests
-- ✅ Maintained business logic while eliminating coupling
+## Final Directory Structure
 
-**Modules Fixed:**
-- ✅ **Vehicles Module**: Updated Customer imports and type compatibility
-- ✅ **Work-Orders Module**: Fixed Customer service references
-- ✅ **Email Module**: Corrected WorkOrderStatus enum usage
-- ✅ **All Tests**: Updated mocks and removed obsolete properties
+```mermaid
+graph TB
+    subgraph "src/modules/customers/"
+        subgraph "domain/ (Core)"
+            A[entities/customer.entity.ts]
+            B[value-objects/]
+            C[repositories/customer.repository.ts]
+            D[ports/cryptography.port.ts]
+        end
+        
+        subgraph "application/ (Use Cases)"
+            E[commands/]
+            F[queries/]
+            G[use-cases/]
+        end
+        
+        subgraph "infrastructure/ (Adapters)"
+            H[adapters/http/customer-http.adapter.ts]
+            I[adapters/cryptography/cryptography.adapter.ts]
+            J[mappers/customer.mapper.ts]
+            K[customer.typeorm.repository.ts]
+            L[customer.entity.ts]
+        end
+        
+        subgraph "presentation/ (DTOs)"
+            M[dtos/create-customer-request.dto.ts]
+            N[dtos/update-customer-request.dto.ts]
+        end
+        
+        O[customers.module.ts]
+    end
+    
+    style A fill:#90EE90
+    style B fill:#90EE90
+    style C fill:#90EE90
+    style D fill:#90EE90
+    style E fill:#87CEEB
+    style F fill:#87CEEB
+    style G fill:#87CEEB
+    style H fill:#FFB6C1
+    style I fill:#FFB6C1
+    style J fill:#FFB6C1
+    style K fill:#FFB6C1
+    style L fill:#FFB6C1
+    style M fill:#DDA0DD
+    style N fill:#DDA0DD
+    style O fill:#FFA07A
+```
 
 ## Conclusion
 
@@ -880,9 +771,9 @@ The migration to Hexagonal Architecture has transformed the Customer module from
 ### Final Validation Results:
 
 - **✅ TypeScript Compilation**: 0 errors across entire project
-- **✅ Test Coverage**: 100+ tests passing in Customer module
-- **✅ Import Resolution**: All modules can import Customer components
 - **✅ Architecture Compliance**: Pure hexagonal architecture implemented
 - **✅ Business Logic**: All original functionality preserved and enhanced
+- **✅ Data Encryption**: Sensitive data properly encrypted/decrypted
+- **✅ Cross-Module Compatibility**: All modules work together seamlessly
 
 This architecture provides a solid foundation for future development and ensures the system can evolve with changing business requirements while maintaining code quality and testability.
