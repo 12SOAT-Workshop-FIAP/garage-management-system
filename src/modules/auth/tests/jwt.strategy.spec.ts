@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from '../infrastructure/strategies/jwt.strategy';
-import { UserRepository } from '../../users/domain/user.repository';
+import { UserRepository } from '../../users/domain/repositories/user.repository';
 
 import { User } from '../../users/domain/user.entity';
 import { JwtPayload } from '../domain/jwt-payload.interface';
@@ -12,15 +12,15 @@ describe('JwtStrategy', () => {
   let userRepository: jest.Mocked<UserRepository>;
   let configService: jest.Mocked<ConfigService>;
 
-  const mockUser = new User(
-    {
-      name: 'Test User',
-      email: 'test@example.com',
-      password: 'hashedPassword123',
-      isActive: true,
-    },
-    'user-id-123',
-  );
+  const mockUser = User.restore({
+    id: 'user-id-123',
+    name: 'Test User',
+    email: 'test@example.com',
+    password: 'hashedPassword123',
+    status: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
 
   const mockUserRepository = {
     findByEmail: jest.fn(),
@@ -70,10 +70,10 @@ describe('JwtStrategy', () => {
       const result = await strategy.validate(jwtPayload);
 
       expect(result).toEqual({
-        email: mockUser.email,
-        name: mockUser.name,
-        id: mockUser.id,
-        isActive: mockUser.isActive,
+        email: mockUser.email.value,
+        name: mockUser.name.value,
+        id: mockUser.id?.value,
+        isActive: mockUser.status.isActive,
       });
       expect(userRepository.findById).toHaveBeenCalledWith(jwtPayload.sub);
     });
@@ -88,15 +88,15 @@ describe('JwtStrategy', () => {
     });
 
     it('should throw UnauthorizedException when user is inactive', async () => {
-      const inactiveUser = new User(
-        {
-          name: 'Inactive User',
-          email: 'inactive@example.com',
-          password: 'hashedPassword123',
-          isActive: false,
-        },
-        'inactive-user-id',
-      );
+      const inactiveUser = User.restore({
+        id: 'inactive-user-id',
+        name: 'Inactive User',
+        email: 'inactive@example.com',
+        password: 'hashedPassword123',
+        status: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       userRepository.findById.mockResolvedValue(inactiveUser);
 
@@ -107,4 +107,3 @@ describe('JwtStrategy', () => {
     });
   });
 });
-

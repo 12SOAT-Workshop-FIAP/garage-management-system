@@ -1,36 +1,33 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CreateUserService } from './application/services/create-user.service';
-import { DeleteUserService } from './application/services/delete-user.service';
-import { FindAllUsersService } from './application/services/find-all-users.service';
-import { FindUserByIdService } from './application/services/find-user-by-id.service';
-import { UpdateUserService } from './application/services/update-user.service';
-import { User } from './infrastructure/entities/user.entity';
+import { UserHttpAdapter } from './infrastructure/adapters/http/user-http.adapter';
+import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
+import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
+import { DeleteUserUseCase } from './application/use-cases/delete-user.use-case';
+import { FindUserByIdUseCase } from './application/use-cases/find-user-by-id.use-case';
+import { FindUserByEmailUseCase } from './application/use-cases/find-user-by-email.use-case';
+import { FindAllUsersUseCase } from './application/use-cases/find-all-users.use-case';
+import { UserRepository } from './domain/repositories/user.repository';
 import { UserTypeOrmRepository } from './infrastructure/repositories/user.typeorm.repository';
-import { UserController } from './presentation/controllers/user.controller';
-import { HashPasswordPipe } from '../../pipes/hash-password.pipe';
-import { UserRepository } from './domain/user.repository';
+import { CryptographyPort } from './domain/ports/cryptography.port';
+import { CryptographyAdapter } from './infrastructure/adapters/cryptography/cryptography.adapter';
+import { User as UserEntity } from './infrastructure/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
-  controllers: [UserController],
+  imports: [TypeOrmModule.forFeature([UserEntity])],
+  controllers: [UserHttpAdapter],
   providers: [
-    CreateUserService,
-    UpdateUserService,
-    DeleteUserService,
-    FindAllUsersService,
-    FindUserByIdService,
-    HashPasswordPipe,
-    {
-      provide: UserRepository,
-      useClass: UserTypeOrmRepository,
-    },
+    // Use Cases
+    CreateUserUseCase,
+    UpdateUserUseCase,
+    DeleteUserUseCase,
+    FindUserByIdUseCase,
+    FindUserByEmailUseCase,
+    FindAllUsersUseCase,
+    // Ports and Adapters
+    { provide: UserRepository, useClass: UserTypeOrmRepository },
+    { provide: CryptographyPort, useClass: CryptographyAdapter },
   ],
-  exports: [
-    {
-      provide: UserRepository,
-      useClass: UserTypeOrmRepository,
-    },
-  ],
+  exports: [FindUserByEmailUseCase, { provide: UserRepository, useClass: UserTypeOrmRepository }],
 })
 export class UsersModule {}

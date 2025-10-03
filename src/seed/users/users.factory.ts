@@ -20,13 +20,11 @@ export class UsersFactory extends Factory<UserEntity> {
 
     const isActive = faker.number.int({ min: 1, max: 100 }) <= 90;
 
-    const newUser = new User({
+    return {
       name: userName,
       email: userEmail,
       password: hashedPassword,
       isActive,
-    });
-
-    return newUser;
+    };
   }
 }

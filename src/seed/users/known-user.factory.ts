@@ -20,13 +20,11 @@ export class KnownUserFactory extends Factory<UserEntity> {
 
     const isActive = true;
 
-    const newUser = new User({
+    return {
       name: userName,
       email: userEmail,
       password: hashedPassword,
       isActive,
-    });
-
-    return newUser;
+    };
   }
 }

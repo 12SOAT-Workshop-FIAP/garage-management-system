@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserRepository } from '../../../users/domain/user.repository';
+import { UserRepository } from '../../../users/domain/repositories/user.repository';
 import { LoginDto } from '../dtos/login.dto';
 import { AuthResponseDto } from '../dtos/auth-response.dto';
 import { JwtPayload } from '../../domain/jwt-payload.interface';
@@ -27,11 +27,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    if (!user.isActive) {
+    if (!user.status.isActive) {
       throw new UnauthorizedException('Account is deactivated');
     }
 
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password.value);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -40,7 +40,15 @@ export class AuthService {
     const tokens = await this.generateTokens(user);
 
     // Return user data and tokens
-    const userResponse = new AuthResponseDto(user, 'Login successful');
+    const userResponse = new AuthResponseDto(
+      {
+        id: user.id?.value || '',
+        name: user.name.value,
+        email: user.email.value,
+        isActive: user.status.isActive,
+      },
+      'Login successful',
+    );
     return { user: userResponse, tokens };
   }
 
@@ -86,7 +94,7 @@ export class AuthService {
 
       // Get user to ensure they still exist and are active
       const user = await this.userRepository.findById(payload.sub);
-      if (!user || !user.isActive) {
+      if (!user || !user.status.isActive) {
         // Remove invalid refresh token
         this.refreshTokenStore.delete(payload.tokenId);
         throw new UnauthorizedException('User not found or deactivated');
@@ -104,12 +112,12 @@ export class AuthService {
 
   private async generateTokens(user: User): Promise<AuthTokens> {
     const accessPayload: JwtPayload = {
-      sub: user.id,
+      sub: user.id?.value || '',
     };
 
     const refreshTokenId = randomUUID();
     const refreshPayload: RefreshTokenPayload = {
-      sub: user.id,
+      sub: user.id?.value || '',
       tokenId: refreshTokenId,
     };
 
@@ -133,9 +141,15 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userRepository.findByEmail(email);
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const { password: _, ...result } = user;
-      return result;
+    if (user && (await bcrypt.compare(password, user.password.value))) {
+      return {
+        id: user.id?.value,
+        name: user.name.value,
+        email: user.email.value,
+        isActive: user.status.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
     }
     return null;
   }
