@@ -36,3 +36,9 @@ build/
 # Misc
 *.tgz
 *.swp 
+
+# Terraform
+**/*.tfstate
+**/*.tfstate.backup
+**/.terraform
+**/terraform.tfvars
