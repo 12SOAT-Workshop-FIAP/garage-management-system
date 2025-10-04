@@ -5,13 +5,13 @@ export class DeleteVehicleUseCase {
   constructor(private readonly vehicleRepository: VehicleRepositoryPort) {}
 
   async execute(id: number): Promise<void> {
-    // 1️⃣ Verifica se o veículo existe
+    // Verifica se o veículo existe
     const vehicle = await this.vehicleRepository.findById(id);
     if (!vehicle) {
       throw new DomainError('VEHICLE_NOT_FOUND', 'Veículo não encontrado.');
     }
 
-    // 2️⃣ Remove o registro
+    // Remove o registro
     await this.vehicleRepository.delete(id);
   }
 }

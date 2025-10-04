@@ -16,7 +16,6 @@ type DBVehicleRow = {
   model: string;
   year: number;
   customer_id: number;
-  color: string | null;
   created_at?: Date;
   updated_at?: Date;
 };
@@ -33,7 +32,6 @@ export class VehicleRepositoryAdapter implements VehicleRepositoryPort {
       model: row.model,
       year: row.year,
       customerId: row.customer_id,
-      color: row.color ?? null,
     });
   }
 
@@ -48,7 +46,6 @@ export class VehicleRepositoryAdapter implements VehicleRepositoryPort {
       model: row.model,
       year: row.year,
       customerId: row.customer_id,
-      color: row.color ?? null,
     });
   }
 
@@ -61,7 +58,6 @@ export class VehicleRepositoryAdapter implements VehicleRepositoryPort {
         model: row.model,
         year: row.year,
         customerId: row.customer_id,
-        color: row.color ?? null,
       }),
     );
   }
@@ -74,11 +70,11 @@ async existsByPlate(plate: Plate): Promise<boolean> {
   async save(vehicle: Vehicle): Promise<void> {
     const v = vehicle.toPrimitives();
     const query = `
-      INSERT INTO vehicles (plate, brand, model, year, customer_id, color)
+      INSERT INTO vehicles (plate, brand, model, year, customer_id,)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id;
     `;
-    const values = [v.plate, v.brand, v.model, v.year, v.customerId, v.color];
+    const values = [v.plate, v.brand, v.model, v.year, v.customerId,];
     const result = await pool.query(query, values);
 
     if (!result.rows[0]) {
@@ -90,10 +86,10 @@ async existsByPlate(plate: Plate): Promise<boolean> {
     const v = vehicle.toPrimitives();
     const query = `
       UPDATE vehicles
-      SET plate = $1, brand = $2, model = $3, year = $4, customer_id = $5, color = $6, updated_at = NOW()
+      SET plate = $1, brand = $2, model = $3, year = $4, customer_id = $5, updated_at = NOW()
       WHERE id = $7;
     `;
-    const values = [v.plate, v.brand, v.model, v.year, v.customerId, v.color, v.id];
+    const values = [v.plate, v.brand, v.model, v.year, v.customerId, v.id];
     await pool.query(query, values);
   }
 

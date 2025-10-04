@@ -30,7 +30,6 @@ class VehicleResponse {
   model!: string;
   year!: number;
   customerId!: number;
-  color!: string | null | undefined;
 }
 
 @ApiTags('vehicles')
@@ -52,7 +51,6 @@ export class VehiclesController {
       model: v.model,
       year: v.year,
       customerId: v.customerId,
-      color: v.color ?? null,
     };
   }
 

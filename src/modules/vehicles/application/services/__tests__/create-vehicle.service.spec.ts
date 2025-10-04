@@ -6,6 +6,8 @@ import { CustomerRepository } from '@modules/customers/domain/customer.repositor
 import { CreateVehicleDto } from '../../dtos/create-vehicle.dto';
 import { Vehicle } from '../../../domain/vehicle.entity';
 import { Customer } from '@modules/customers/domain/customer';
+import { it } from '@faker-js/faker/.';
+import { describe, beforeEach } from 'node:test';
 
 describe('CreateVehicleService', () => {
   let service: CreateVehicleService;

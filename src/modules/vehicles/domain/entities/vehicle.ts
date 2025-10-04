@@ -9,7 +9,6 @@ export interface VehicleProps {
   model: string;
   year: number;
   customerId: number;
-  color?: string | null;
 }
 
 export class Vehicle {
@@ -48,8 +47,7 @@ export class Vehicle {
   get model(): string { return this.props.model; }
   get year(): number { return this.props.year; }
   get customerId(): number { return this.props.customerId; }
-  get color(): string | null | undefined { return this.props.color; }
-
+ 
   // Intenções de mudança controladas
   changeOwner(newCustomerId: number) {
     if (newCustomerId == null) throw new DomainError('CUSTOMER_REQUIRED', 'Novo cliente inválido.');
@@ -64,7 +62,7 @@ export class Vehicle {
   }
 
   changePlate(newPlate: Plate) {
-    // permitido se sua regra de negócio aceitar troca de placa
+    // troca de placa
     this.props.plate = newPlate;
   }
 
@@ -77,7 +75,6 @@ export class Vehicle {
       model: this.model,
       year: this.year,
       customerId: this.customerId,
-      color: this.color ?? null,
     };
   }
 }

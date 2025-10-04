@@ -12,7 +12,6 @@ interface CreateVehicleRequest {
   model: string;
   year: number;
   customerId: number;
-  color?: string | null;
 }
 
 @Injectable()
@@ -38,7 +37,6 @@ export class CreateVehicleUseCase {
       model: request.model,
       year: request.year,
       customerId: request.customerId,
-      color: request.color,
     });
 
     await this.vehicleRepository.save(vehicle);

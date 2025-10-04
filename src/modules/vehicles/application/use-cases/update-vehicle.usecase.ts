@@ -10,7 +10,6 @@ interface UpdateVehicleRequest {
   brand?: string;
   model?: string;
   year?: number;
-  color?: string | null;
   customerId?: number;       // se vier, valida existência
 }
 
@@ -51,8 +50,6 @@ export class UpdateVehicleUseCase {
     if (typeof req.brand === 'string') partial.brand = req.brand;
     if (typeof req.model === 'string') partial.model = req.model;
     if (typeof req.year === 'number') partial.year = req.year;
-    if (typeof req.color !== 'undefined') partial.color = req.color;
-
     if (Object.keys(partial).length > 0) {
       vehicle.updateSpecs(partial);
     }
