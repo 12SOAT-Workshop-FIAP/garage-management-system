@@ -2,6 +2,8 @@
   "compilerOptions": {
     "module": "commonjs",
     "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "types": ["node"],
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,

@@ -1,112 +1,129 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Put,
-  Delete,
   Body,
-  Param,
-  UsePipes,
-  ValidationPipe,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
-  ParseIntPipe,
+  Inject,
+  NotFoundException,
   BadRequestException,
-  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CreateVehicleDto } from '../dtos/create-vehicle.dto';
+import { UpdateVehicleDto } from '../dtos/update-vehicle.dto';
+import { CreateVehicleUseCase } from '../../application/use-cases/create-vehicle.usecase';
+import { UpdateVehicleUseCase } from '../../application/use-cases/update-vehicle.usecase';
+import { FindVehicleByIdUseCase } from '../../application/use-cases/find-vehicle-by-id.usecase';
+import { FindAllVehiclesUseCase } from '../../application/use-cases/find-all-vehicles.usecase';
+import { DeleteVehicleUseCase } from '../../application/use-cases/delete-vehicle.usecase';
+import { Vehicle } from '../../domain/entities/vehicle';
+import { DomainError } from '../../domain/errors/domain-error';
 
-// Importação dos serviços
-import { CreateVehicleService } from '../../application/services/create-vehicle.service';
-import { FindAllVehicleService } from '../../application/services/find-all-vehicle.service';
-import { UpdateVehicleService } from '../../application/services/update-vehicle.service';
-import { DeleteVehicleService } from '../../application/services/delete-vehicle.service';
-import { FindByIdVehicleService } from '../../application/services/find-by-id-vehicle.service'; 
-import { FindVehicleByPlateService } from '../../application/services/find-vehicle-by-plate.service';
-
-// Importação dos DTOs
-import { CreateVehicleDto } from '../../application/dtos/create-vehicle.dto';
-import { UpdateVehicleDto } from '../../application/dtos/update-vehicle.dto';
-import { VehicleResponseDto } from '../dtos/vehicle-response.dto';
+class VehicleResponse {
+  id!: number | null; // na criação pode ser null se o repo não retornar o id
+  plate!: string;
+  brand!: string;
+  model!: string;
+  year!: number;
+  customerId!: number;
+  color!: string | null | undefined;
+}
 
 @ApiTags('vehicles')
 @Controller('vehicles')
-export class VehicleController {
+export class VehiclesController {
   constructor(
-    private readonly createService: CreateVehicleService,
-    private readonly findService: FindAllVehicleService,
-    private readonly findByIdService: FindByIdVehicleService,
-    private readonly findByPlateService: FindVehicleByPlateService,
-    private readonly updateService: UpdateVehicleService,
-    private readonly deleteService: DeleteVehicleService,
+    private readonly createVehicle: CreateVehicleUseCase,
+    private readonly updateVehicle: UpdateVehicleUseCase,
+    private readonly findById: FindVehicleByIdUseCase,
+    private readonly findAll: FindAllVehiclesUseCase,
+    private readonly deleteVehicle: DeleteVehicleUseCase,
   ) {}
 
+  private toResponse(v: Vehicle): VehicleResponse {
+    return {
+      id: v.id ?? null,
+      plate: v.plate.value,
+      brand: v.brand,
+      model: v.model,
+      year: v.year,
+      customerId: v.customerId,
+      color: v.color ?? null,
+    };
+  }
+
+  private mapError(e: unknown): never {
+    if (e instanceof DomainError) {
+      if (e.code.includes('NOT_FOUND')) throw new NotFoundException(e.message);
+      throw new BadRequestException({ code: e.code, message: e.message });
+    }
+    throw e;
+  }
+
   @Post()
-  @ApiOperation({ summary: 'Register a new vehicle' })
-  @ApiResponse({ status: 201, description: 'Vehicle successfully registered', type: VehicleResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid input data' })
-  @ApiResponse({ status: 409, description: 'License plate already exists' })
-  @UsePipes(new ValidationPipe({ whitelist: true }))
-  async create(@Body() dto: CreateVehicleDto): Promise<VehicleResponseDto> {
+  @ApiOperation({ summary: 'Create vehicle' })
+  @ApiCreatedResponse({ type: VehicleResponse })
+  async create(@Body() dto: CreateVehicleDto): Promise<VehicleResponse> {
     try {
-      const vehicle = await this.createService.execute(dto);
-      return new VehicleResponseDto(vehicle);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('Invalid license plate')) {
-        throw new BadRequestException('Invalid license plate format');
-      }
-      throw error;
+      const vehicle = await this.createVehicle.execute(dto);
+      return this.toResponse(vehicle);
+    } catch (e) {
+      this.mapError(e);
     }
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all vehicles' })
-  @ApiResponse({ status: 200, description: 'List of vehicles', type: [VehicleResponseDto] })
-  async findAll(): Promise<VehicleResponseDto[]> {
-    const vehicles = await this.findService.execute();
-    return vehicles.map(vehicle => new VehicleResponseDto(vehicle));
+  @ApiOperation({ summary: 'List vehicles (desc by creation)' })
+  @ApiOkResponse({ type: VehicleResponse, isArray: true })
+  async list(): Promise<VehicleResponse[]> {
+    try {
+      const items = await this.findAll.execute();
+      return items.map((v) => this.toResponse(v));
+    } catch (e) {
+      this.mapError(e);
+    }
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get vehicle by ID' })
-  @ApiParam({ name: 'id', type: 'number', description: 'Vehicle ID' })
-  @ApiResponse({ status: 200, description: 'Vehicle found', type: VehicleResponseDto })
-  @ApiResponse({ status: 404, description: 'Vehicle not found' })
-  async findById(@Param('id', ParseIntPipe) id: number): Promise<VehicleResponseDto> {
-    const vehicle = await this.findByIdService.execute(id);
-    return new VehicleResponseDto(vehicle);
-  }
-
-  @Get('plate/:plate')
-  @ApiOperation({ summary: 'Get vehicle by license plate' })
-  @ApiParam({ name: 'plate', type: 'string', description: 'Vehicle license plate' })
-  @ApiResponse({ status: 200, description: 'Vehicle found', type: VehicleResponseDto })
-  @ApiResponse({ status: 404, description: 'Vehicle not found' })
-  async findByPlate(@Param('plate') plate: string): Promise<VehicleResponseDto> {
-    const vehicle = await this.findByPlateService.execute(plate);
-    return new VehicleResponseDto(vehicle);
+  @ApiOperation({ summary: 'Find vehicle by id' })
+  @ApiOkResponse({ type: VehicleResponse })
+  async get(@Param('id', ParseIntPipe) id: number): Promise<VehicleResponse> {
+    try {
+      const v = await this.findById.execute(id);
+      return this.toResponse(v);
+    } catch (e) {
+      this.mapError(e);
+    }
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update vehicle' })
-  @ApiParam({ name: 'id', type: 'number', description: 'Vehicle ID' })
-  @ApiResponse({ status: 200, description: 'Vehicle updated', type: VehicleResponseDto })
-  @ApiResponse({ status: 404, description: 'Vehicle not found' })
-  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @ApiOkResponse({ type: VehicleResponse })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateVehicleDto
-  ): Promise<VehicleResponseDto> {
-    const vehicle = await this.updateService.execute(id, dto);
-    return new VehicleResponseDto(vehicle);
+    @Body() dto: UpdateVehicleDto,
+  ): Promise<VehicleResponse> {
+    try {
+      const v = await this.updateVehicle.execute({ id, ...dto });
+      return this.toResponse(v);
+    } catch (e) {
+      this.mapError(e);
+    }
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete vehicle' })
-  @ApiParam({ name: 'id', type: 'number', description: 'Vehicle ID' })
-  @ApiResponse({ status: 204, description: 'Vehicle deleted' })
-  @ApiResponse({ status: 404, description: 'Vehicle not found' })
-  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.deleteService.execute(id);
+  @HttpCode(204)
+  @ApiNoContentResponse()
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    try {
+      await this.deleteVehicle.execute(id);
+    } catch (e) {
+      this.mapError(e);
+    }
   }
 }
