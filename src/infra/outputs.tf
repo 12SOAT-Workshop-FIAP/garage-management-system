@@ -13,3 +13,8 @@ output "rds_db_endpoint" {
   value       = module.rds.db_endpoint
   sensitive   = true
 }
+
+output "ecr_repository_url" {
+  description = "URL do repositorio ECR para as imagens Docker."
+  value       = module.ecr.repository_url
+}

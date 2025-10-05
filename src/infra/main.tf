@@ -18,10 +18,10 @@ module "eks" {
   cluster_name = var.project_name
 
   # As saídas da VPC viram entradas para o módulo EKS.
-  vpc_id            = module.vpc.vpc_id
+  vpc_id             = module.vpc.vpc_id
   public_subnet_ids  = module.vpc.public_subnet_ids
   private_subnet_ids = module.vpc.private_subnet_ids
-  eks_nodes_sg_id   = module.security.eks_nodes_sg_id
+  eks_nodes_sg_id    = module.security.eks_nodes_sg_id
 }
 
 module "rds" {
@@ -32,4 +32,10 @@ module "rds" {
   rds_sg_id          = module.security.rds_sg_id
   db_username        = var.db_username
   db_password        = var.db_password
+}
+
+module "ecr" {
+  source = "./modules/ecr"
+
+  repository_name = var.project_name
 }
