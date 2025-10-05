@@ -158,6 +158,10 @@ npm run docker:up
 
 ---
 
+## Infrastructure (IaC) (infra/)
+
+## [Terraform Documentation](/src//infra/README.md)
+
 ## Infrastructure Layer (infra/)
 
 - **infrastructure/repositories/**: TypeORM implementations of repository interfaces, data mappers.
