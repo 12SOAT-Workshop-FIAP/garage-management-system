@@ -9,6 +9,7 @@ This project is a robust, scalable, and well-structured base for a Garage/Auto R
 ## Domain Context & Key Activities
 
 The system models the real workflow of a garage, supporting:
+
 1. **Receive vehicle**
 2. **Register customer request**
 3. **Diagnose problems**
@@ -22,6 +23,7 @@ The system models the real workflow of a garage, supporting:
 11. **Store service history**
 
 ### Main Entities
+
 - **Customer**: Registers and manages clients.
 - **Vehicle**: Registers and manages vehicles.
 - **ServiceRequest**: Links customer, vehicle, and requested service/problem.
@@ -34,7 +36,9 @@ The system models the real workflow of a garage, supporting:
 - **ServiceHistory**: Historical record of all services performed.
 
 ### Cryptography Module
+
 The system includes a robust cryptography module for handling sensitive data:
+
 - **CPF/CNPJ Validation**: Brazilian tax document validation with encryption
 - **License Plate Validation**: Vehicle license plate validation (Mercosul and old formats)
 - **Secure Encryption**: AES-256-CBC encryption for sensitive data
@@ -61,6 +65,7 @@ flowchart TD
 - **presentation/**: NestJS modules, controllers, request/response DTOs, pipes, interceptors.
 
 ### Example Structure
+
 ```
 src/
   modules/
@@ -116,6 +121,7 @@ sequenceDiagram
 ## How to Run Locally
 
 ### 1. Clone and Install
+
 ```bash
 git clone <repo-url>
 cd <repo-folder>
@@ -123,19 +129,23 @@ npm install
 ```
 
 ### 2. Environment & Docker
+
 ```bash
 cp .env.example .env
 npm run docker:up
 ```
+
 - The API will be available at: http://localhost:3000
 - The database (PostgreSQL) will be available at: localhost:5432
 
 ### 3. API Documentation (Swagger)
+
 - Access: http://localhost:3000/api
 - All endpoints, DTOs, and models are documented automatically.
 - Cryptography endpoints available at `/cryptography/*`
 
 ### 4. Useful Commands
+
 - **Run unit tests:** `npm test`
 - **Run e2e tests:** `npm run test:e2e`
 - **Lint:** `npm run lint`
@@ -147,7 +157,12 @@ npm run docker:up
 
 ---
 
+## Infrastructure (IaC) (infra/)
+
+## [Terraform Documentation](/src//infra/README.md)
+
 ## Infrastructure Layer (infra/)
+
 - **infrastructure/repositories/**: TypeORM implementations of repository interfaces, data mappers.
 - **infrastructure/providers/**: External services, adapters, and dependency injection providers.
 - **infrastructure/database/**: TypeORM config, migrations, seeds.
@@ -156,6 +171,7 @@ npm run docker:up
 ---
 
 ## Development & Contribution
+
 - All code is in English, with JSDoc in English and Portuguese for entities and main contracts.
 - DTOs use `class-validator`, `class-transformer`, and `@nestjs/swagger` for validation, transformation, and documentation.
 - Validation is enforced globally via NestJS `ValidationPipe`.
@@ -166,6 +182,7 @@ npm run docker:up
 ---
 
 ## Patterns & Best Practices
+
 - **DDD**: Clear separation of concerns, Ubiquitous Language, aggregates, and domain events.
 - **SOLID**: All modules follow SOLID principles with proper dependency injection.
 - **Value Objects**: Sensitive data is encapsulated in value objects with validation.
@@ -179,6 +196,7 @@ npm run docker:up
 ---
 
 ## Observations
+
 - This project is a base/scaffolding: no business rules are implemented.
 - Extend modules and entities as needed for your business context.
 - For questions or contributions, open an issue or PR.
