@@ -18,6 +18,20 @@ jobs:
   build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: garage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: 1. Checkout Code
         uses: actions/checkout@v4
@@ -33,7 +47,7 @@ jobs:
       - name: 3. Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-      
+
       - name: 4. Setup Node.js and Install Dependencies
         uses: actions/setup-node@v4
         with:
@@ -75,7 +89,7 @@ jobs:
       - name: 9. Run Database Migrations
         run: |
           sed -i 's|IMAGE_URL|${{ steps.build-image.outputs.image }}|g' k8s/job-migration.yml
-          
+
           kubectl delete job garage-management-migration-job --ignore-not-found
           kubectl apply -f k8s/job-migration.yml
           kubectl wait --for=condition=complete job/garage-management-migration-job --timeout=3m
@@ -83,6 +97,6 @@ jobs:
       - name: 10. Deploy Application to EKS
         run: |
           sed -i 's|IMAGE_URL|${{ steps.build-image.outputs.image }}|g' k8s/deployment.yml
-          
+
           kubectl apply -f k8s/deployment.yml
           kubectl apply -f k8s/service.yml
