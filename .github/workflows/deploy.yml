@@ -38,11 +38,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-      - run: npm install
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
 
       - name: 5. Run Automated Tests
-        run: npm test
+        run: yarn test
 
       - name: 6. Build and Push Docker Image
         id: build-image
