@@ -6,7 +6,7 @@ export interface VehicleRepositoryPort {
   findByPlate(plate: Plate): Promise<Vehicle | null>;
   findAll(): Promise<Vehicle[]>;
   existsByPlate(plate: Plate): Promise<boolean>;
-  save(vehicle: Vehicle): Promise<void>;
+  save(vehicle: Vehicle): Promise<number>; // agora retorna o ID gerado
   update(vehicle: Vehicle): Promise<void>;
   delete(id: number): Promise<void>;
 }

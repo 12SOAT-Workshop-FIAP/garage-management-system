@@ -1,8 +1,14 @@
+import { Injectable, Inject } from '@nestjs/common';
 import { VehicleRepositoryPort } from '../../domain/ports/vehicle-repository.port';
+import { VEHICLE_REPOSITORY } from '../../domain/ports/tokens';
 import { DomainError } from '../../domain/errors/domain-error';
 
+@Injectable()
 export class DeleteVehicleUseCase {
-  constructor(private readonly vehicleRepository: VehicleRepositoryPort) {}
+  constructor(
+    @Inject(VEHICLE_REPOSITORY)
+    private readonly vehicleRepository: VehicleRepositoryPort,
+  ) {}
 
   async execute(id: number): Promise<void> {
     // Verifica se o veículo existe

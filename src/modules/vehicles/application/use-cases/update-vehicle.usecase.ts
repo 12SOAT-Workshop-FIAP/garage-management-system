@@ -1,7 +1,9 @@
-import { Vehicle } from '../../domain/entities/vehicle';
-import { Plate } from '../../domain/value-objects/plate';
+import { Injectable, Inject } from '@nestjs/common';
 import { VehicleRepositoryPort } from '../../domain/ports/vehicle-repository.port';
 import { CustomerRepositoryPort } from '../../domain/ports/customer-repository.port';
+import { VEHICLE_REPOSITORY, CUSTOMER_REPOSITORY } from '../../domain/ports/tokens';
+import { Vehicle } from '../../domain/entities/vehicle';
+import { Plate } from '../../domain/value-objects/plate';
 import { DomainError } from '../../domain/errors/domain-error';
 
 interface UpdateVehicleRequest {
@@ -13,9 +15,12 @@ interface UpdateVehicleRequest {
   customerId?: number;       // se vier, valida existência
 }
 
+@Injectable()
 export class UpdateVehicleUseCase {
   constructor(
+    @Inject(VEHICLE_REPOSITORY)
     private readonly vehicleRepository: VehicleRepositoryPort,
+    @Inject(CUSTOMER_REPOSITORY)
     private readonly customerRepository: CustomerRepositoryPort,
   ) {}
 

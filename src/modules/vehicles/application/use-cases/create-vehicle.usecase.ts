@@ -24,22 +24,34 @@ export class CreateVehicleUseCase {
   ) {}
 
   async execute(request: CreateVehicleRequest): Promise<Vehicle> {
-    const customerExists = await this.customerRepository.existsById(request.customerId);
-    if (!customerExists) throw new DomainError('CUSTOMER_NOT_FOUND', 'Cliente não encontrado.');
+  const customerExists = await this.customerRepository.existsById(request.customerId);
+  if (!customerExists) throw new DomainError('CUSTOMER_NOT_FOUND', 'Cliente não encontrado.');
 
-    const plate = Plate.create(request.plate);
-    const plateAlreadyExists = await this.vehicleRepository.existsByPlate(plate);
-    if (plateAlreadyExists) throw new DomainError('PLATE_ALREADY_EXISTS', 'Já existe um veículo com esta placa.');
+  const plate = Plate.create(request.plate);
+  const plateAlreadyExists = await this.vehicleRepository.existsByPlate(plate);
+  if (plateAlreadyExists) throw new DomainError('PLATE_ALREADY_EXISTS', 'Já existe um veículo com esta placa.');
 
-    const vehicle = Vehicle.createNew({
-      plate,
-      brand: request.brand,
-      model: request.model,
-      year: request.year,
-      customerId: request.customerId,
-    });
+  // cria sem id
+  const vehicle = Vehicle.createNew({
+    plate,
+    brand: request.brand,
+    model: request.model,
+    year: request.year,
+    customerId: request.customerId,
+  });
 
-    await this.vehicleRepository.save(vehicle);
-    return vehicle;
-  }
+  // persiste e obtém o id gerado
+  const newId = await this.vehicleRepository.save(vehicle);
+
+  // reidrata com o id para retornar ao caller
+  const persisted = Vehicle.restore(newId, {
+    plate: vehicle.plate,
+    brand: vehicle.brand,
+    model: vehicle.model,
+    year: vehicle.year,
+    customerId: vehicle.customerId,
+  });
+
+  return persisted;
 }
+  }

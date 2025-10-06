@@ -1,8 +1,14 @@
-import { Vehicle } from '../../domain/entities/vehicle';
+import { Injectable, Inject } from '@nestjs/common';
 import { VehicleRepositoryPort } from '../../domain/ports/vehicle-repository.port';
+import { VEHICLE_REPOSITORY } from '../../domain/ports/tokens';
+import { Vehicle } from '../../domain/entities/vehicle';
 
+@Injectable()
 export class FindAllVehiclesUseCase {
-  constructor(private readonly vehicleRepository: VehicleRepositoryPort) {}
+  constructor(
+    @Inject(VEHICLE_REPOSITORY)
+    private readonly vehicleRepository: VehicleRepositoryPort,
+  ) {}
 
   async execute(): Promise<Vehicle[]> {
     const vehicles = await this.vehicleRepository.findAll();

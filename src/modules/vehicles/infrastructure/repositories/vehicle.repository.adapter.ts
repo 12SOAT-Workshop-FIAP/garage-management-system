@@ -21,6 +21,9 @@ type DBVehicleRow = {
 };
 
 export class VehicleRepositoryAdapter implements VehicleRepositoryPort {
+  update(vehicle: Vehicle): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
   async findById(id: number): Promise<Vehicle | null> {
     const res = await pool.query('SELECT * FROM vehicles WHERE id = $1', [id]);
     const row = res.rows[0];
@@ -67,31 +70,22 @@ async existsByPlate(plate: Plate): Promise<boolean> {
   return (res.rowCount ?? 0) > 0; // trata undefined/null
 }
 
-  async save(vehicle: Vehicle): Promise<void> {
-    const v = vehicle.toPrimitives();
-    const query = `
-      INSERT INTO vehicles (plate, brand, model, year, customer_id,)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id;
-    `;
-    const values = [v.plate, v.brand, v.model, v.year, v.customerId,];
-    const result = await pool.query(query, values);
+ async save(vehicle: Vehicle): Promise<number> {
+  const v = vehicle.toPrimitives();
+  const query = `
+    INSERT INTO vehicles (plate, brand, model, year, customer_id)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id;
+  `;
+  const values = [v.plate, v.brand, v.model, v.year, v.customerId];
+  const result = await pool.query(query, values);
 
-    if (!result.rows[0]) {
-      throw new DomainError('DB_ERROR', 'Erro ao salvar veículo.');
-    }
+  const id = result.rows?.[0]?.id;
+  if (id == null) {
+    throw new DomainError('DB_ERROR', 'Erro ao salvar veículo.');
   }
-
-  async update(vehicle: Vehicle): Promise<void> {
-    const v = vehicle.toPrimitives();
-    const query = `
-      UPDATE vehicles
-      SET plate = $1, brand = $2, model = $3, year = $4, customer_id = $5, updated_at = NOW()
-      WHERE id = $7;
-    `;
-    const values = [v.plate, v.brand, v.model, v.year, v.customerId, v.id];
-    await pool.query(query, values);
-  }
+  return Number(id);
+}
 
   async delete(id: number): Promise<void> {
     await pool.query('DELETE FROM vehicles WHERE id = $1', [id]);
