@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PartRepository } from '../../domain/repositories/part.repository';
+import { DeletePartCommand } from '../commands/delete-part.command';
 
 @Injectable()
 export class DeletePartUseCase {
@@ -7,12 +8,12 @@ export class DeletePartUseCase {
     private readonly partRepository: PartRepository,
   ) {}
 
-  async execute(id: string): Promise<void> {
-    const part = await this.partRepository.findById(id);
+  async execute(command: DeletePartCommand): Promise<void> {
+    const part = await this.partRepository.findById(command.id);
     if (!part) {
-      throw new NotFoundException(`Part with ID ${id} not found`);
+      throw new Error('Part not found');
     }
     
-    await this.partRepository.delete(id);
+    await this.partRepository.delete(part);
   }
 }

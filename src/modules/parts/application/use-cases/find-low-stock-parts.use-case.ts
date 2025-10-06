@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Part } from '../../domain/entities/part.entity';
 import { PartRepository } from '../../domain/repositories/part.repository';
-import { FindPartByIdQuery } from '../queries/find-part-by-id.query';
+import { FindLowStockPartsQuery } from '../queries/find-low-stock-parts.query';
 
 @Injectable()
-export class FindPartByIdUseCase {
+export class FindLowStockPartsUseCase {
   constructor(
     private readonly partRepository: PartRepository,
   ) {}
 
-  async execute(query: FindPartByIdQuery): Promise<Part | null> {
-    return await this.partRepository.findById(query.id);
+  async execute(query: FindLowStockPartsQuery): Promise<Part[]> {
+    return await this.partRepository.findLowStockParts();
   }
 }

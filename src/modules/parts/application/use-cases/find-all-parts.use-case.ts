@@ -1,12 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Part } from '../../domain/entities/part.entity';
 import { PartRepository } from '../../domain/repositories/part.repository';
-
-export interface FindAllPartsFilters {
-  category?: string;
-  active?: boolean;
-  minStock?: number;
-}
+import { FindAllPartsQuery } from '../queries/find-all-parts.query';
 
 @Injectable()
 export class FindAllPartsUseCase {
@@ -14,18 +9,9 @@ export class FindAllPartsUseCase {
     private readonly partRepository: PartRepository,
   ) {}
 
-  async execute(filters?: FindAllPartsFilters): Promise<Part[]> {
-    if (!filters) {
-      return await this.partRepository.findAll();
-    }
-
-    // For now, return all parts, but in a real implementation,
-    // you would filter based on the provided filters
-    return await this.partRepository.findAll();
-  }
-
-  async findLowStock(): Promise<Part[]> {
-    return await this.partRepository.findLowStockParts();
+  async execute(query: FindAllPartsQuery): Promise<Part[]> {
+    const parts = await this.partRepository.findAll();
+    return parts || [];
   }
 
   async findByCategory(category: string): Promise<Part[]> {

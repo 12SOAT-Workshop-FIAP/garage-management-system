@@ -1,109 +1,86 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Part as PartEntity } from '../../../domain/entities/part.entity';
 import { PartRepository } from '../../../domain/repositories/part.repository';
-import { PartOrmEntity } from '../../entities/part-orm.entity';
+import { Part } from '../../../domain/entities/part.entity';
+import { PartEntity } from '../../entities/part.entity';
+import { PartMapper } from '../../mappers/part.mapper';
 
 @Injectable()
-export class PartTypeOrmRepository implements PartRepository {
+export class PartTypeOrmRepository extends PartRepository {
   constructor(
-    @InjectRepository(PartOrmEntity)
-    private readonly repository: Repository<PartOrmEntity>,
-  ) {}
-
-  async create(part: PartEntity): Promise<void> {
-    const newPart = this.repository.create(part);
-    await this.repository.save(newPart);
+    private readonly ormRepository: Repository<PartEntity>,
+  ) {
+    super();
   }
 
-  async update(part: PartEntity): Promise<void> {
-    await this.repository.save(part);
+  async findAll(): Promise<Part[] | null> {
+    const parts = await this.ormRepository.find();
+    return parts.length > 0 ? PartMapper.toDomainList(parts) : null;
   }
 
-  async delete(id: string): Promise<void> {
-    await this.repository.delete(id);
+  async findById(id: number): Promise<Part | null> {
+    const part = await this.ormRepository.findOne({ where: { id } });
+    return part ? PartMapper.toDomain(part) : null;
   }
 
-  async findAll(): Promise<PartEntity[]> {
-    const parts = await this.repository.find();
-    return parts.map((part) => this.toDomain(part));
+  async findByPartNumber(partNumber: string): Promise<Part | null> {
+    const part = await this.ormRepository.findOne({ where: { partNumber } });
+    return part ? PartMapper.toDomain(part) : null;
   }
 
-  async findById(id: string): Promise<PartEntity | null> {
-    const part = await this.repository.findOne({ where: { id } });
-    if (!part) {
-      return null;
-    }
-    return this.toDomain(part);
-  }
-
-  async save(part: PartEntity): Promise<PartEntity> {
-    const entity = this.repository.create({
-      id: part.id,
-      name: part.name,
-      description: part.description,
-      partNumber: part.partNumber,
-      category: part.category,
-      price: part.price,
-      costPrice: part.costPrice,
-      stockQuantity: part.stockQuantity,
-      minStockLevel: part.minStockLevel,
-      unit: part.unit,
-      supplier: part.supplier,
-      active: part.active,
-      createdAt: part.createdAt,
-      updatedAt: part.updatedAt,
-    });
-    
-    const saved = await this.repository.save(entity);
-    return this.toDomain(saved);
-  }
-
-  async findByPartNumber(partNumber: string): Promise<PartEntity | null> {
-    const part = await this.repository.findOne({ where: { partNumber } });
-    if (!part) {
-      return null;
-    }
-    return this.toDomain(part);
-  }
-
-  async findLowStockParts(): Promise<PartEntity[]> {
-    const parts = await this.repository
+  async findLowStockParts(): Promise<Part[]> {
+    const parts = await this.ormRepository
       .createQueryBuilder('part')
       .where('part.stockQuantity <= part.minStockLevel')
       .getMany();
     
-    return parts.map((part) => this.toDomain(part));
+    return PartMapper.toDomainList(parts);
   }
 
-  async findByCategory(category: string): Promise<PartEntity[]> {
-    const parts = await this.repository.find({ where: { category } });
-    return parts.map((part) => this.toDomain(part));
+  async findByCategory(category: string): Promise<Part[]> {
+    const parts = await this.ormRepository.find({ where: { category } });
+    return PartMapper.toDomainList(parts);
   }
 
-  private toDomain(part: PartOrmEntity): PartEntity {
-    const partEntity = new PartEntity(
-      {
-        name: part.name,
-        description: part.description,
-        partNumber: part.partNumber,
-        category: part.category,
-        price: part.price,
-        costPrice: part.costPrice,
-        stockQuantity: part.stockQuantity,
-        minStockLevel: part.minStockLevel,
-        unit: part.unit,
-        supplier: part.supplier,
-        active: part.active,
-      },
-      part.id,
-    );
+  async create(part: Part): Promise<Part> {
+    const ormEntity = PartMapper.toOrm(part);
+    const savedEntity = await this.ormRepository.save(ormEntity);
+    return PartMapper.toDomain(savedEntity);
+  }
 
-    // Re-assigning properties to ensure they are correctly set
-    partEntity.createdAt = part.createdAt;
-    partEntity.updatedAt = part.updatedAt;
+  async update(oldPart: Part, newPart: Part): Promise<Part | null> {
+    if (!oldPart.id) {
+      throw new Error('Cannot update part without ID');
+    }
 
-    return partEntity;
+    const ormEntity = PartMapper.toOrm(newPart);
+    ormEntity.id = oldPart.id.value;
+    
+    const updatedEntity = await this.ormRepository.save(ormEntity);
+    return PartMapper.toDomain(updatedEntity);
+  }
+
+  async delete(part: Part): Promise<void> {
+    if (!part.id) {
+      throw new Error('Cannot delete part without ID');
+    }
+    
+    await this.ormRepository.delete(part.id.value);
+  }
+
+  async updateStock(id: number, quantity: number): Promise<Part | null> {
+    const part = await this.findById(id);
+    if (!part) {
+      return null;
+    }
+
+    if (quantity >= 0) {
+      part.updateStock(quantity);
+    } else {
+      part.removeStock(Math.abs(quantity));
+    }
+
+    return await this.update(part, part);
   }
 }
