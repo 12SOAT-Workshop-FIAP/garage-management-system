@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ConflictException } from '@nestjs/common';
-import { UpdatePartService } from '../application/services/update-part.service';
-import { PartRepository } from '../domain/part.repository';
-import { Part } from '../domain/part.entity';
+import { UpdatePartUseCase } from '../application/use-cases/update-part.use-case';
+import { PartRepository } from '../domain/repositories/part.repository';
+import { Part } from '../domain/entities/part.entity';
 import { UpdatePartDto } from '../application/dtos/update-part.dto';
 
 
-describe('UpdatePartService', () => {
-  let service: UpdatePartService;
+describe('UpdatePartUseCase', () => {
+  let useCase: UpdatePartUseCase;
   let repository: jest.Mocked<PartRepository>;
 
   const mockPartRepository = {
@@ -24,7 +24,7 @@ describe('UpdatePartService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UpdatePartService,
+        UpdatePartUseCase,
         {
           provide: PartRepository,
           useValue: mockPartRepository,
@@ -32,7 +32,7 @@ describe('UpdatePartService', () => {
       ],
     }).compile();
 
-    service = module.get<UpdatePartService>(UpdatePartService);
+    useCase = module.get<UpdatePartUseCase>(UpdatePartUseCase);
     repository = module.get(PartRepository);
   });
 
@@ -68,7 +68,7 @@ describe('UpdatePartService', () => {
       repository.save.mockResolvedValue(updatedPart);
 
       // Act
-      const result = await service.execute('filter-oil-001', updateDto);
+      const result = await useCase.execute('filter-oil-001', updateDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('filter-oil-001');
@@ -102,7 +102,7 @@ describe('UpdatePartService', () => {
       repository.save.mockResolvedValue(updatedPart);
 
       // Act
-      const result = await service.execute('brake-pad-001', updateDto);
+      const result = await useCase.execute('brake-pad-001', updateDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('brake-pad-001');
@@ -127,7 +127,7 @@ describe('UpdatePartService', () => {
       repository.save.mockResolvedValue(updatedPart);
 
       // Act
-      const result = await service.execute('filter-oil-001', updateDto);
+      const result = await useCase.execute('filter-oil-001', updateDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('filter-oil-001');
@@ -155,7 +155,7 @@ describe('UpdatePartService', () => {
       repository.findByPartNumber.mockResolvedValue(existingPartWithSameNumber);
 
       // Act & Assert
-      await expect(service.execute('filter-oil-001', updateDto)).rejects.toThrow(ConflictException);
+      await expect(useCase.execute('filter-oil-001', updateDto)).rejects.toThrow(ConflictException);
       expect(repository.findById).toHaveBeenCalledWith('filter-oil-001');
       expect(repository.findByPartNumber).toHaveBeenCalledWith('PF-5570-VW');
       expect(repository.save).not.toHaveBeenCalled();
@@ -174,7 +174,7 @@ describe('UpdatePartService', () => {
       repository.save.mockResolvedValue(updatedPart);
 
       // Act
-      const result = await service.execute('filter-oil-001', updateDto);
+      const result = await useCase.execute('filter-oil-001', updateDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('filter-oil-001');
@@ -197,7 +197,7 @@ describe('UpdatePartService', () => {
       repository.findById.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.execute('non-existent-part', updateDto)).rejects.toThrow(NotFoundException);
+      await expect(useCase.execute('non-existent-part', updateDto)).rejects.toThrow(NotFoundException);
       expect(repository.findById).toHaveBeenCalledWith('non-existent-part');
       expect(repository.save).not.toHaveBeenCalled();
     });
@@ -224,7 +224,7 @@ describe('UpdatePartService', () => {
       repository.save.mockResolvedValue(updatedPart);
 
       // Act
-      const result = await service.execute('hydraulic-oil-001', updateDto);
+      const result = await useCase.execute('hydraulic-oil-001', updateDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('hydraulic-oil-001');

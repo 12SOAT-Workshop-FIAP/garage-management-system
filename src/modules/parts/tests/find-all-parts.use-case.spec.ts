@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FindAllPartsService } from '../application/services/find-all-parts.service';
-import { PartRepository } from '../domain/part.repository';
-import { Part } from '../domain/part.entity';
+import { FindAllPartsUseCase } from '../application/use-cases/find-all-parts.use-case';
+import { PartRepository } from '../domain/repositories/part.repository';
+import { Part } from '../domain/entities/part.entity';
 
 
-describe('FindAllPartsService', () => {
-  let service: FindAllPartsService;
+describe('FindAllPartsUseCase', () => {
+  let useCase: FindAllPartsUseCase;
   let repository: jest.Mocked<PartRepository>;
 
   const mockPartRepository = {
@@ -22,7 +22,7 @@ describe('FindAllPartsService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        FindAllPartsService,
+        FindAllPartsUseCase,
         {
           provide: PartRepository,
           useValue: mockPartRepository,
@@ -30,7 +30,7 @@ describe('FindAllPartsService', () => {
       ],
     }).compile();
 
-    service = module.get<FindAllPartsService>(FindAllPartsService);
+    useCase = module.get<FindAllPartsUseCase>(FindAllPartsUseCase);
     repository = module.get(PartRepository);
   });
 
@@ -123,7 +123,7 @@ describe('FindAllPartsService', () => {
       repository.findAll.mockResolvedValue(workshopParts);
 
       // Act
-      const result = await service.execute();
+      const result = await useCase.execute();
 
       // Assert
       expect(repository.findAll).toHaveBeenCalledWith();
@@ -137,7 +137,7 @@ describe('FindAllPartsService', () => {
       repository.findAll.mockResolvedValue(brakeParts);
 
       // Act
-      const result = await service.execute(filters);
+      const result = await useCase.execute(filters);
 
       // Assert
       expect(repository.findAll).toHaveBeenCalledWith();
@@ -151,7 +151,7 @@ describe('FindAllPartsService', () => {
       repository.findAll.mockResolvedValue(ignitionParts);
 
       // Act
-      const result = await service.execute(filters);
+      const result = await useCase.execute(filters);
 
       // Assert
       expect(repository.findAll).toHaveBeenCalledWith();
@@ -176,7 +176,7 @@ describe('FindAllPartsService', () => {
       repository.findLowStockParts.mockResolvedValue(lowStockParts);
 
       // Act
-      const result = await service.findLowStock();
+      const result = await useCase.findLowStock();
 
       // Assert
       expect(repository.findLowStockParts).toHaveBeenCalled();
@@ -209,7 +209,7 @@ describe('FindAllPartsService', () => {
       repository.findByCategory.mockResolvedValue(categoryParts);
 
       // Act
-      const result = await service.findByCategory(category);
+      const result = await useCase.findByCategory(category);
 
       // Assert
       expect(repository.findByCategory).toHaveBeenCalledWith(category);

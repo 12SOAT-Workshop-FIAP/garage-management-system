@@ -1,26 +1,26 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CreatePartService } from './application/services/create-part.service';
-import { DeletePartService } from './application/services/delete-part.service';
-import { FindAllPartsService } from './application/services/find-all-parts.service';
-import { FindPartByIdService } from './application/services/find-part-by-id.service';
-import { UpdatePartService } from './application/services/update-part.service';
-import { UpdateStockService } from './application/services/update-stock.service';
-import { Part } from './infrastructure/entities/part.entity';
-import { PartTypeOrmRepository } from './infrastructure/repositories/part.typeorm.repository';
+import { CreatePartUseCase } from './application/use-cases/create-part.use-case';
+import { DeletePartUseCase } from './application/use-cases/delete-part.use-case';
+import { FindAllPartsUseCase } from './application/use-cases/find-all-parts.use-case';
+import { FindPartByIdUseCase } from './application/use-cases/find-part-by-id.use-case';
+import { UpdatePartUseCase } from './application/use-cases/update-part.use-case';
+import { UpdateStockUseCase } from './application/use-cases/update-stock.use-case';
+import { PartOrmEntity } from './infrastructure/entities/part-orm.entity';
+import { PartTypeOrmRepository } from './infrastructure/adapters/repositories/part-typeorm.repository';
 import { PartController } from './presentation/controllers/part.controller';
-import { PartRepository } from './domain/part.repository';
+import { PartRepository } from './domain/repositories/part.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Part])],
+  imports: [TypeOrmModule.forFeature([PartOrmEntity])],
   controllers: [PartController],
   providers: [
-    CreatePartService,
-    UpdatePartService,
-    UpdateStockService,
-    DeletePartService,
-    FindAllPartsService,
-    FindPartByIdService,
+    CreatePartUseCase,
+    UpdatePartUseCase,
+    UpdateStockUseCase,
+    DeletePartUseCase,
+    FindAllPartsUseCase,
+    FindPartByIdUseCase,
     {
       provide: PartRepository,
       useClass: PartTypeOrmRepository,

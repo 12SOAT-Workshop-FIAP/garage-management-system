@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Part as PartEntity } from '../../domain/part.entity';
-import { PartRepository } from '../../domain/part.repository';
-import { Part as TypeOrmPart } from '../entities/part.entity';
+import { Part as PartEntity } from '../../../domain/entities/part.entity';
+import { PartRepository } from '../../../domain/repositories/part.repository';
+import { PartOrmEntity } from '../../entities/part-orm.entity';
 
 @Injectable()
 export class PartTypeOrmRepository implements PartRepository {
   constructor(
-    @InjectRepository(TypeOrmPart)
-    private readonly repository: Repository<TypeOrmPart>,
+    @InjectRepository(PartOrmEntity)
+    private readonly repository: Repository<PartOrmEntity>,
   ) {}
 
   async create(part: PartEntity): Promise<void> {
@@ -82,7 +82,7 @@ export class PartTypeOrmRepository implements PartRepository {
     return parts.map((part) => this.toDomain(part));
   }
 
-  private toDomain(part: TypeOrmPart): PartEntity {
+  private toDomain(part: PartOrmEntity): PartEntity {
     const partEntity = new PartEntity(
       {
         name: part.name,

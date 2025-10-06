@@ -1,4 +1,4 @@
-import { Part } from './part.entity';
+import { Part } from '../entities/part.entity';
 
 export abstract class PartRepository {
   abstract create(part: Part): Promise<void>;

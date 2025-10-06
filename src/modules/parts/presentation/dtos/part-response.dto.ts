@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Part } from '../../domain/part.entity';
+import { Part } from '../../domain/entities/part.entity';
 
 export class PartResponseDto {
   @ApiProperty({ description: 'Part unique identifier' })

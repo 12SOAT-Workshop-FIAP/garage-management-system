@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException } from '@nestjs/common';
-import { CreatePartService } from '../application/services/create-part.service';
-import { PartRepository } from '../domain/part.repository';
-import { Part } from '../domain/part.entity';
+import { CreatePartUseCase } from '../application/use-cases/create-part.use-case';
+import { PartRepository } from '../domain/repositories/part.repository';
+import { Part } from '../domain/entities/part.entity';
 import { CreatePartDto } from '../application/dtos/create-part.dto';
 
-describe('CreatePartService', () => {
-  let service: CreatePartService;
+describe('CreatePartUseCase', () => {
+  let useCase: CreatePartUseCase;
   let repository: jest.Mocked<PartRepository>;
 
   const mockPartRepository = {
@@ -25,7 +25,7 @@ describe('CreatePartService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CreatePartService,
+        CreatePartUseCase,
         {
           provide: PartRepository,
           useValue: mockPartRepository,
@@ -33,7 +33,7 @@ describe('CreatePartService', () => {
       ],
     }).compile();
 
-    service = module.get<CreatePartService>(CreatePartService);
+    useCase = module.get<CreatePartUseCase>(CreatePartUseCase);
     repository = module.get(PartRepository);
   });
 
@@ -63,7 +63,7 @@ describe('CreatePartService', () => {
       repository.save.mockResolvedValue(savedPart);
 
       // Act
-      const result = await service.execute(oilFilterDto);
+      const result = await useCase.execute(oilFilterDto);
 
       // Assert
       expect(repository.findByPartNumber).toHaveBeenCalledWith(oilFilterDto.partNumber);
@@ -92,7 +92,7 @@ describe('CreatePartService', () => {
       repository.save.mockResolvedValue(savedPart);
 
       // Act
-      const result = await service.execute(brakePadDto);
+      const result = await useCase.execute(brakePadDto);
 
       // Assert
       expect(repository.findByPartNumber).toHaveBeenCalledWith(brakePadDto.partNumber);
@@ -120,7 +120,7 @@ describe('CreatePartService', () => {
       repository.save.mockResolvedValue(savedPart);
 
       // Act
-      const result = await service.execute(sparkPlugDto);
+      const result = await useCase.execute(sparkPlugDto);
 
       // Assert
       expect(repository.findByPartNumber).not.toHaveBeenCalled();
@@ -134,7 +134,7 @@ describe('CreatePartService', () => {
       repository.findByPartNumber.mockResolvedValue(existingPart);
 
       // Act & Assert
-      await expect(service.execute(oilFilterDto)).rejects.toThrow(ConflictException);
+      await expect(useCase.execute(oilFilterDto)).rejects.toThrow(ConflictException);
       expect(repository.findByPartNumber).toHaveBeenCalledWith(oilFilterDto.partNumber);
       expect(repository.save).not.toHaveBeenCalled();
     });
@@ -160,7 +160,7 @@ describe('CreatePartService', () => {
       repository.save.mockResolvedValue(savedPart);
 
       // Act
-      const result = await service.execute(hydraulicOilDto);
+      const result = await useCase.execute(hydraulicOilDto);
 
       // Assert
       expect(repository.save).toHaveBeenCalledWith(

@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { WorkOrderORM } from '../infrastructure/entities/work-order.entity';
 import { WorkOrderServiceORM } from '../infrastructure/entities/work-order-service.entity';
 import { WorkOrderPartORM } from '../infrastructure/entities/work-order-part.entity';
-import { Part } from '../../parts/infrastructure/entities/part.entity';
+import { PartOrmEntity } from '../../parts/infrastructure/entities/part-orm.entity';
 import { CustomerEntity } from '../../customers/infrastructure/customer.entity';
 import { Vehicle } from '../../vehicles/domain/vehicle.entity';
 import { WorkOrderTypeOrmRepository } from '../infrastructure/repositories/work-order.typeorm.repository';
@@ -14,13 +14,13 @@ import { RemovePartFromWorkOrderService } from '../application/services/remove-p
 import { UpdatePartQuantityService } from '../application/services/update-part-quantity.service';
 import { ApprovePartService } from '../application/services/approve-part.service';
 import { ApplyPartService } from '../application/services/apply-part.service';
-import { PartRepository } from '../../parts/domain/part.repository';
-import { PartTypeOrmRepository } from '../../parts/infrastructure/repositories/part.typeorm.repository';
+import { PartRepository } from '../../parts/domain/repositories/part.repository';
+import { PartTypeOrmRepository } from '../../parts/infrastructure/adapters/repositories/part-typeorm.repository';
 import { WorkOrder } from '../domain/work-order.entity';
 import { WorkOrderStatus } from '../domain/work-order-status.enum';
 import { AddPartToWorkOrderDto } from '../application/dtos/add-part-to-work-order.dto';
 import { UpdatePartQuantityDto } from '../application/dtos/update-part-quantity.dto';
-import { Part as PartDomain } from '../../parts/domain/part.entity';
+import { Part as PartDomain } from '../../parts/domain/entities/part.entity';
 
 describe('WorkOrder Parts Integration', () => {
   let module: TestingModule;
@@ -43,11 +43,11 @@ describe('WorkOrder Parts Integration', () => {
           username: process.env.POSTGRES_USER || 'postgres',
           password: process.env.POSTGRES_PASSWORD || 'postgres',
           database: process.env.POSTGRES_TEST_DB || 'garage',
-          entities: [WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM, Part, CustomerEntity, Vehicle],
+          entities: [WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM, PartOrmEntity, CustomerEntity, Vehicle],
           synchronize: true,
           dropSchema: true,
         }),
-        TypeOrmModule.forFeature([WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM, Part]),
+        TypeOrmModule.forFeature([WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM, PartOrmEntity]),
       ],
       providers: [
         AddPartToWorkOrderService,

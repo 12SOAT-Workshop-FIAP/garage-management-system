@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { WorkOrderORM } from './work-order.entity';
-import { Part } from '../../../parts/infrastructure/entities/part.entity';
+import { PartOrmEntity } from '../../../parts/infrastructure/entities/part-orm.entity';
 
 /**
  * WorkOrderPartORM
@@ -57,7 +57,7 @@ export class WorkOrderPartORM {
   @JoinColumn({ name: 'workOrderId' })
   workOrder!: WorkOrderORM;
 
-  @ManyToOne(() => Part, { eager: false })
+  @ManyToOne(() => PartOrmEntity, { eager: false })
   @JoinColumn({ name: 'partId' })
-  part?: Part;
+  part?: PartOrmEntity;
 }

@@ -2,8 +2,8 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { AddPartToWorkOrderDto } from '../dtos/add-part-to-work-order.dto';
 import { WorkOrderPart } from '../../domain/work-order-part.value-object';
-import { Part } from '../../../parts/domain/part.entity';
-import { PartRepository } from '../../../parts/domain/part.repository';
+import { Part } from '../../../parts/domain/entities/part.entity';
+import { PartRepository } from '../../../parts/domain/repositories/part.repository';
 
 /**
  * AddPartToWorkOrderService

@@ -1,9 +1,9 @@
 import { dataSource } from 'ormconfig';
 import { faker } from '@faker-js/faker';
 
-import { Part as PartOrmEntity } from '@modules/parts/infrastructure/entities/part.entity';
+import { PartOrmEntity } from '@modules/parts/infrastructure/entities/part-orm.entity';
 import { type FactorizedAttrs, Factory } from '@jorgebodega/typeorm-factory';
-import { Part as PartDomain } from '@modules/parts/domain/part.entity';
+import { Part as PartDomain } from '@modules/parts/domain/entities/part.entity';
 
 export class PartsFactory extends Factory<PartOrmEntity> {
   protected entity = PartOrmEntity;

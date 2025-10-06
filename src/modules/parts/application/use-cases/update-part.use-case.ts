@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
-import { Part } from '../../domain/part.entity';
-import { PartRepository } from '../../domain/part.repository';
+import { Part } from '../../domain/entities/part.entity';
+import { PartRepository } from '../../domain/repositories/part.repository';
 import { UpdatePartDto } from '../dtos/update-part.dto';
 
 @Injectable()
-export class UpdatePartService {
+export class UpdatePartUseCase {
   constructor(
     private readonly partRepository: PartRepository,
   ) {}

@@ -1,18 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PartRepository } from '../../domain/part.repository';
+import { Part } from '../../domain/entities/part.entity';
+import { PartRepository } from '../../domain/repositories/part.repository';
 
 @Injectable()
-export class DeletePartService {
+export class FindPartByIdUseCase {
   constructor(
     private readonly partRepository: PartRepository,
   ) {}
 
-  async execute(id: string): Promise<void> {
+  async execute(id: string): Promise<Part> {
     const part = await this.partRepository.findById(id);
     if (!part) {
       throw new NotFoundException(`Part with ID ${id} not found`);
     }
-    
-    await this.partRepository.delete(id);
+    return part;
   }
 }

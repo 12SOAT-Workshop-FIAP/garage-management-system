@@ -12,24 +12,24 @@ import {
 } from '@nestjs/common';
 import { CreatePartDto } from '../../application/dtos/create-part.dto';
 import { UpdatePartDto } from '../../application/dtos/update-part.dto';
-import { CreatePartService } from '../../application/services/create-part.service';
-import { DeletePartService } from '../../application/services/delete-part.service';
-import { FindAllPartsService } from '../../application/services/find-all-parts.service';
-import { FindPartByIdService } from '../../application/services/find-part-by-id.service';
-import { UpdatePartService } from '../../application/services/update-part.service';
+import { CreatePartUseCase } from '../../application/use-cases/create-part.use-case';
+import { DeletePartUseCase } from '../../application/use-cases/delete-part.use-case';
+import { FindAllPartsUseCase } from '../../application/use-cases/find-all-parts.use-case';
+import { FindPartByIdUseCase } from '../../application/use-cases/find-part-by-id.use-case';
+import { UpdatePartUseCase } from '../../application/use-cases/update-part.use-case';
+import { UpdateStockUseCase } from '../../application/use-cases/update-stock.use-case';
 import { PartResponseDto } from '../dtos/part-response.dto';
-import { UpdateStockService } from '../../application/services/update-stock.service';
 import { UpdateStockDto } from '../../application/dtos/update-part.dto';
 
 @Controller('parts')
 export class PartController {
   constructor(
-    private readonly createPart: CreatePartService,
-    private readonly updatePart: UpdatePartService,
-    private readonly deletePart: DeletePartService,
-    private readonly findAllParts: FindAllPartsService,
-    private readonly findPartById: FindPartByIdService,
-    private readonly updateStockService: UpdateStockService,
+    private readonly createPart: CreatePartUseCase,
+    private readonly updatePart: UpdatePartUseCase,
+    private readonly deletePart: DeletePartUseCase,
+    private readonly findAllParts: FindAllPartsUseCase,
+    private readonly findPartById: FindPartByIdUseCase,
+    private readonly updateStockService: UpdateStockUseCase,
   ) {}
 
   @Post()
