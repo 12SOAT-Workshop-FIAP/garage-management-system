@@ -29,7 +29,7 @@ export class PartResponseDto {
     dto.minStockLevel = part.minStockLevel;
     dto.unit = part.unit.value;
     dto.supplier = part.supplier.value;
-    dto.active = part.status.value;
+    dto.active = part.isActive;
     dto.createdAt = part.createdAt;
     dto.updatedAt = part.updatedAt;
     return dto;

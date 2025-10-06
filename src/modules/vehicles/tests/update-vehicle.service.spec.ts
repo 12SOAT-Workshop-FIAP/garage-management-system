@@ -11,7 +11,8 @@ describe('UpdateVehicleService', () => {
       update: jest.fn(),
       findById: jest.fn()
     } as any;
-    service = new UpdateVehicleService(vehicleRepo);
+    const cryptographyService = {} as any;
+    service = new UpdateVehicleService(vehicleRepo, cryptographyService);
   });
 
   it('deve atualizar o veículo corretamente', async () => {

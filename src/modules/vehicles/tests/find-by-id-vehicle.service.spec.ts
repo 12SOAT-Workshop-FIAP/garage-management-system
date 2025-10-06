@@ -8,7 +8,8 @@ describe('FindByIdVehicleService', () => {
 
   beforeEach(() => {
     vehicleRepo = { findById: jest.fn() } as any;
-    service = new FindByIdVehicleService(vehicleRepo);
+    const cryptographyService = {} as any;
+    service = new FindByIdVehicleService(vehicleRepo, cryptographyService);
   });
 
   it('deve retornar o veículo pelo ID', async () => {
@@ -21,8 +22,8 @@ describe('FindByIdVehicleService', () => {
       customer: {} as any,
       created_at: new Date(),
       updated_at: new Date(),
-      formatLicensePlate: jest.fn(),
-      getLicensePlateType: jest.fn(),
+      // formatLicensePlate removido
+      // getLicensePlateType removido
       getMaskedPlate: jest.fn(),
     };
 

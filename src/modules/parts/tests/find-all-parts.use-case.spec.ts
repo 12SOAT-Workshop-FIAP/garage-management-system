@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FindAllPartsUseCase } from '../application/use-cases/find-all-parts.use-case';
 import { PartRepository } from '../domain/repositories/part.repository';
 import { Part } from '../domain/entities/part.entity';
+import { FindAllPartsQuery } from '../application/queries/find-all-parts.query';
 
 
 describe('FindAllPartsUseCase', () => {
@@ -123,7 +124,8 @@ describe('FindAllPartsUseCase', () => {
       repository.findAll.mockResolvedValue(workshopParts);
 
       // Act
-      const result = await useCase.execute();
+      const query = new FindAllPartsQuery();
+      const result = await useCase.execute(query);
 
       // Assert
       expect(repository.findAll).toHaveBeenCalledWith();
@@ -176,7 +178,8 @@ describe('FindAllPartsUseCase', () => {
       repository.findLowStockParts.mockResolvedValue(lowStockParts);
 
       // Act
-      const result = await useCase.findLowStock();
+      // Método findLowStock removido da arquitetura hexagonal
+      // const result = await useCase.findLowStock();
 
       // Assert
       expect(repository.findLowStockParts).toHaveBeenCalled();

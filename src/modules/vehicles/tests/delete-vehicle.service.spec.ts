@@ -25,8 +25,8 @@ describe('DeleteVehicleService', () => {
       customer: {} as any,
       created_at: new Date(),
       updated_at: new Date(),
-      formatLicensePlate: jest.fn(),
-      getLicensePlateType: jest.fn(),
+      // formatLicensePlate removido
+      // getLicensePlateType removido
       getMaskedPlate: jest.fn(),
     };
 
