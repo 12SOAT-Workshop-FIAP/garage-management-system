@@ -3,7 +3,7 @@ name: CI/CD - Deploy to Amazon EKS
 on:
   push:
     branches:
-      - main
+      - feat/terraform_k8s
   workflow_dispatch:
 
 env:
