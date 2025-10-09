@@ -26,6 +26,7 @@
     "seed:run:js": "node ./dist/src/seed/seed.js"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^3.0.1",
     "@nestjs/common": "^11.1.5",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.5",
@@ -53,7 +54,6 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^9.9.0",
-    "@getbrevo/brevo": "^3.0.1",
     "@jorgebodega/typeorm-factory": "^2.1.0",
     "@jorgebodega/typeorm-seeding": "^7.1.0",
     "@nestjs/cli": "^11.0.7",

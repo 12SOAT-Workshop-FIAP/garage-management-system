@@ -75,11 +75,12 @@ export class WorkOrderEmailNotificationService {
 
   private getStatusDisplayName(status: WorkOrderStatus): string {
     const statusMap: Record<WorkOrderStatus, string> = {
+      [WorkOrderStatus.RECEIVED]: 'Recebida',
+      [WorkOrderStatus.DIAGNOSIS]: 'Diagnóstico',
       [WorkOrderStatus.PENDING]: 'Pendente',
       [WorkOrderStatus.APPROVED]: 'Aprovada',
       [WorkOrderStatus.IN_PROGRESS]: 'Em Andamento',
       [WorkOrderStatus.WAITING_PARTS]: 'Aguardando Peças',
-      [WorkOrderStatus.WAITING_CUSTOMER]: 'Aguardando Cliente',
       [WorkOrderStatus.COMPLETED]: 'Concluída',
       [WorkOrderStatus.CANCELLED]: 'Cancelada',
       [WorkOrderStatus.DELIVERED]: 'Entregue',
@@ -94,7 +95,8 @@ export class WorkOrderEmailNotificationService {
       [WorkOrderStatus.IN_PROGRESS]: 'Os trabalhos em seu veículo foram iniciados.',
       [WorkOrderStatus.WAITING_PARTS]:
         'Estamos aguardando a chegada de peças para continuar o serviço.',
-      [WorkOrderStatus.WAITING_CUSTOMER]: 'Aguardamos sua aprovação para prosseguir com o serviço.',
+      [WorkOrderStatus.RECEIVED]: 'Sua ordem de serviço foi recebida.',
+      [WorkOrderStatus.DIAGNOSIS]: 'Sua ordem de serviço foi diagnosticada.',
       [WorkOrderStatus.COMPLETED]:
         'O serviço foi concluído. Seu veículo está pronto para retirada.',
       [WorkOrderStatus.CANCELLED]: 'A ordem de serviço foi cancelada.',
