@@ -9,6 +9,5 @@ data:
   EMAIL_SENDER: zoorack1995@gmail.com 
   SENDER_NAME: "FIAP Garage"         
   NODE_ENV: development              
-  POSTGRES_HOST: garage-postgres-service 
   POSTGRES_PORT: "5432"              
 

@@ -11,7 +11,6 @@ output "eks_cluster_name" {
 output "rds_db_endpoint" {
   description = "Endpoint de conexão do banco de dados RDS."
   value       = module.rds.db_endpoint
-  sensitive   = true
 }
 
 output "ecr_repository_url" {

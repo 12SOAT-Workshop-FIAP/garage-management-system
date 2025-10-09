@@ -7,11 +7,12 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: garagemanagement
+  EKS_CLUSTER_NAME: garagemanagement
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
@@ -79,24 +80,23 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
         run: |
-          kubectl delete secret db-credentials --ignore-not-found
-          kubectl create secret generic db-credentials \
-            --from-literal=DB_HOST=$DB_HOST \
-            --from-literal=POSTGRES_USER=$DB_USERNAME \
-            --from-literal=POSTGRES_PASSWORD=$DB_PASSWORD \
-            --from-literal=POSTGRES_DB=$DB_NAME
-
-      - name: 9. Run Database Migrations
-        run: |
-          sed -i 's|IMAGE_URL|${{ steps.build-image.outputs.image }}|g' k8s/job-migration.yml
-
-          kubectl delete job garage-management-migration-job --ignore-not-found
-          kubectl apply -f k8s/job-migration.yml
-          kubectl wait --for=condition=complete job/garage-management-migration-job --timeout=3m
+          kubectl create namespace fiap-garage --dry-run=client -o yaml | kubectl apply -f -
+          kubectl delete secret fiap-garage-secret -n fiap-garage --ignore-not-found
+          kubectl create secret generic fiap-garage-secret -n fiap-garage \
+            --from-literal=POSTGRES_HOST=${{ secrets.DB_HOST }} \
+            --from-literal=POSTGRES_USER=${{ secrets.DB_USERNAME }} \
+            --from-literal=POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            --from-literal=POSTGRES_DB=${{ secrets.DB_NAME }} \
+            --from-literal=JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            --from-literal=JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} \
+            --from-literal=BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
 
       - name: 10. Deploy Application to EKS
         run: |
-          sed -i 's|IMAGE_URL|${{ steps.build-image.outputs.image }}|g' k8s/deployment.yml
+          sed -i 's|image: fiap-garage-api:latest|image: ${{ steps.build-image.outputs.image }}|g' k8s/api.yaml
 
-          kubectl apply -f k8s/deployment.yml
-          kubectl apply -f k8s/service.yml
+          # Aplica todos os manifestos necessários
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/api.yaml
+          kubectl apply -f k8s/api-service.yaml
+          kubectl apply -f k8s/hpa.yaml
