@@ -64,8 +64,8 @@ spec:
               key: CRYPTO_SECRET_KEY
         - name: POSTGRES_HOST
           valueFrom:
-            configMapKeyRef:
-              name: fiap-garage-config
+            secretKeyRef:
+              name: fiap-garage-secret
               key: POSTGRES_HOST
         - name: POSTGRES_PORT
           valueFrom:
