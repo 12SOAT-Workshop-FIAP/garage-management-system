@@ -88,7 +88,7 @@ describe('CreatePartUseCase', () => {
       };
 
       repository.findByPartNumber.mockResolvedValue(null);
-      const savedPart = { ...brakePadDto, id: 'brake-pad-001' } as Part;
+      const savedPart = Part.create(brakePadDto);
       repository.create.mockResolvedValue(savedPart);
 
       // Act
@@ -116,7 +116,7 @@ describe('CreatePartUseCase', () => {
         active: true,
       };
       
-      const savedPart = { ...sparkPlugDto, id: 'spark-plug-001' } as Part;
+      const savedPart = Part.create(sparkPlugDto);
       repository.create.mockResolvedValue(savedPart);
 
       // Act
@@ -130,7 +130,7 @@ describe('CreatePartUseCase', () => {
 
     it('should throw ConflictException if oil filter part number already exists', async () => {
       // Arrange
-      const existingPart = { id: 'existing-filter', partNumber: oilFilterDto.partNumber } as Part;
+      const existingPart = Part.create(oilFilterDto);
       repository.findByPartNumber.mockResolvedValue(existingPart);
 
       // Act & Assert
@@ -156,7 +156,7 @@ describe('CreatePartUseCase', () => {
       };
 
       repository.findByPartNumber.mockResolvedValue(null);
-      const savedPart = { ...hydraulicOilDto, id: 'hydraulic-oil-001' } as Part;
+      const savedPart = Part.create(hydraulicOilDto);
       repository.create.mockResolvedValue(savedPart);
 
       // Act
