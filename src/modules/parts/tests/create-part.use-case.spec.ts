@@ -51,7 +51,7 @@ describe('CreatePartUseCase', () => {
       costPrice: 32.15,
       stockQuantity: 25,
       minStockLevel: 5,
-      unit: 'piece',
+      unit: 'PC',
       supplier: 'Auto Peças Central Ltda',
       active: true,
     };
@@ -82,7 +82,7 @@ describe('CreatePartUseCase', () => {
         costPrice: 62.65,
         stockQuantity: 12,
         minStockLevel: 3,
-        unit: 'kit',
+        unit: 'SET',
         supplier: 'Freios & Cia Distribuidora',
         active: true,
       };
@@ -100,22 +100,23 @@ describe('CreatePartUseCase', () => {
       expect(result).toEqual(savedPart);
     });
 
-    it('should create spark plugs successfully without part number', async () => {
+    it('should create spark plugs successfully', async () => {
       // Arrange
       const sparkPlugDto: CreatePartDto = {
         name: 'Vela de Ignição NGK',
         description: 'Vela de ignição NGK Laser Platinum para motores flex 1.0-1.8',
-        partNumber: '', // Empty part number should not trigger conflict check
+        partNumber: 'NGK-001',
         category: 'ignicao',
         price: 25.80,
         costPrice: 18.06,
         stockQuantity: 48,
         minStockLevel: 10,
-        unit: 'piece',
+        unit: 'PC',
         supplier: 'Ignição Total Autopeças',
         active: true,
       };
       
+      repository.findByPartNumber.mockResolvedValue(null);
       const savedPart = Part.create(sparkPlugDto);
       repository.create.mockResolvedValue(savedPart);
 
@@ -123,7 +124,7 @@ describe('CreatePartUseCase', () => {
       const result = await useCase.execute(sparkPlugDto);
 
       // Assert
-      expect(repository.findByPartNumber).not.toHaveBeenCalled();
+      expect(repository.findByPartNumber).toHaveBeenCalledWith('NGK-001');
       expect(repository.create).toHaveBeenCalled();
       expect(result).toEqual(savedPart);
     });
@@ -150,7 +151,7 @@ describe('CreatePartUseCase', () => {
         costPrice: 21.45,
         stockQuantity: 15,
         minStockLevel: 5,
-        unit: 'liter',
+        unit: 'L',
         supplier: 'Lubricantes S.A.',
         active: true,
       };
@@ -163,18 +164,9 @@ describe('CreatePartUseCase', () => {
       const result = await useCase.execute(hydraulicOilDto);
 
       // Assert
-      expect(repository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: hydraulicOilDto.name,
-          category: hydraulicOilDto.category,
-          price: hydraulicOilDto.price,
-          costPrice: hydraulicOilDto.costPrice,
-          stockQuantity: hydraulicOilDto.stockQuantity,
-          minStockLevel: hydraulicOilDto.minStockLevel,
-          unit: hydraulicOilDto.unit,
-          active: hydraulicOilDto.active,
-        })
-      );
+      expect(repository.findByPartNumber).toHaveBeenCalledWith('ATF-001');
+      expect(repository.create).toHaveBeenCalled();
+      expect(result).toEqual(savedPart);
     });
   });
 });

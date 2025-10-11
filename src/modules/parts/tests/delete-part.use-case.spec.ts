@@ -91,8 +91,8 @@ describe('DeletePartUseCase', () => {
       await useCase.execute(command);
 
       // Assert
-      expect(repository.findById).toHaveBeenCalledWith('brake-pad-worn-001');
-      expect(repository.delete).toHaveBeenCalledWith('brake-pad-worn-001');
+      expect(repository.findById).toHaveBeenCalledWith(1);
+      expect(repository.delete).toHaveBeenCalledWith(obsoleteBrakePart);
     });
 
     it('should delete discontinued air filter successfully', async () => {
@@ -105,8 +105,8 @@ describe('DeletePartUseCase', () => {
       await useCase.execute(command);
 
       // Assert
-      expect(repository.findById).toHaveBeenCalledWith('air-filter-obsolete-002');
-      expect(repository.delete).toHaveBeenCalledWith('air-filter-obsolete-002');
+      expect(repository.findById).toHaveBeenCalledWith(2);
+      expect(repository.delete).toHaveBeenCalledWith(discontinuedFilter);
     });
 
     it('should throw NotFoundException when trying to delete non-existent spark plug', async () => {
@@ -116,7 +116,7 @@ describe('DeletePartUseCase', () => {
       // Act & Assert
       const command = new DeletePartCommand(999);
       await expect(useCase.execute(command)).rejects.toThrow(NotFoundException);
-      expect(repository.findById).toHaveBeenCalledWith('spark-plug-missing-999');
+      expect(repository.findById).toHaveBeenCalledWith(999);
       expect(repository.delete).not.toHaveBeenCalled();
     });
   });

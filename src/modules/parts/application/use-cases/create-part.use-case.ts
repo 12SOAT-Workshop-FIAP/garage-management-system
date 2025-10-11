@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { PartRepository } from '../../domain/repositories/part.repository';
 import { CreatePartCommand } from '../commands/create-part.command';
 import { Part } from '../../domain/entities/part.entity';
@@ -13,7 +13,7 @@ export class CreatePartUseCase {
     // Verificar se part number já existe
     const existingPart = await this.partRepository.findByPartNumber(command.partNumber);
     if (existingPart) {
-      throw new Error('Part number already exists');
+      throw new ConflictException('Part number already exists');
     }
 
     const part = Part.create({
