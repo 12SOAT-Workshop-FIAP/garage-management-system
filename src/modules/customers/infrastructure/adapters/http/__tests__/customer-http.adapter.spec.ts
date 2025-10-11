@@ -145,7 +145,7 @@ describe('CustomerHttpAdapter', () => {
 
       await request(app.getHttpServer()).delete('/customers/1').expect(204);
 
-      expect(deleteUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));
+      expect(deleteUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({ id: '1' }));
     });
   });
 });

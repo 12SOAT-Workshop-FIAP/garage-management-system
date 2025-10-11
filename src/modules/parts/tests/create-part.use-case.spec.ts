@@ -59,15 +59,15 @@ describe('CreatePartUseCase', () => {
     it('should create an oil filter successfully', async () => {
       // Arrange
       repository.findByPartNumber.mockResolvedValue(null);
-      const savedPart = { ...oilFilterDto, id: 'filter-oil-001' } as Part;
-      repository.save.mockResolvedValue(savedPart);
+      const savedPart = Part.create(oilFilterDto);
+      repository.create.mockResolvedValue(savedPart);
 
       // Act
       const result = await useCase.execute(oilFilterDto);
 
       // Assert
       expect(repository.findByPartNumber).toHaveBeenCalledWith(oilFilterDto.partNumber);
-      expect(repository.save).toHaveBeenCalled();
+      expect(repository.create).toHaveBeenCalled();
       expect(result).toEqual(savedPart);
     });
 
@@ -89,14 +89,14 @@ describe('CreatePartUseCase', () => {
 
       repository.findByPartNumber.mockResolvedValue(null);
       const savedPart = { ...brakePadDto, id: 'brake-pad-001' } as Part;
-      repository.save.mockResolvedValue(savedPart);
+      repository.create.mockResolvedValue(savedPart);
 
       // Act
       const result = await useCase.execute(brakePadDto);
 
       // Assert
       expect(repository.findByPartNumber).toHaveBeenCalledWith(brakePadDto.partNumber);
-      expect(repository.save).toHaveBeenCalled();
+      expect(repository.create).toHaveBeenCalled();
       expect(result).toEqual(savedPart);
     });
 
@@ -117,14 +117,14 @@ describe('CreatePartUseCase', () => {
       };
       
       const savedPart = { ...sparkPlugDto, id: 'spark-plug-001' } as Part;
-      repository.save.mockResolvedValue(savedPart);
+      repository.create.mockResolvedValue(savedPart);
 
       // Act
       const result = await useCase.execute(sparkPlugDto);
 
       // Assert
       expect(repository.findByPartNumber).not.toHaveBeenCalled();
-      expect(repository.save).toHaveBeenCalled();
+      expect(repository.create).toHaveBeenCalled();
       expect(result).toEqual(savedPart);
     });
 
@@ -136,7 +136,7 @@ describe('CreatePartUseCase', () => {
       // Act & Assert
       await expect(useCase.execute(oilFilterDto)).rejects.toThrow(ConflictException);
       expect(repository.findByPartNumber).toHaveBeenCalledWith(oilFilterDto.partNumber);
-      expect(repository.save).not.toHaveBeenCalled();
+      expect(repository.create).not.toHaveBeenCalled();
     });
 
     it('should create hydraulic oil with provided values', async () => {
@@ -157,13 +157,13 @@ describe('CreatePartUseCase', () => {
 
       repository.findByPartNumber.mockResolvedValue(null);
       const savedPart = { ...hydraulicOilDto, id: 'hydraulic-oil-001' } as Part;
-      repository.save.mockResolvedValue(savedPart);
+      repository.create.mockResolvedValue(savedPart);
 
       // Act
       const result = await useCase.execute(hydraulicOilDto);
 
       // Assert
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           name: hydraulicOilDto.name,
           category: hydraulicOilDto.category,

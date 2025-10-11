@@ -26,11 +26,16 @@ describe('CreateVehicleService', () => {
     const repoCustomerMock: jest.Mocked<CustomerRepository> = {
       findById: jest.fn(),
     } as any;
+    const cryptoMock = {
+      hash: jest.fn().mockResolvedValue('hashed-value'),
+      compare: jest.fn().mockResolvedValue(true),
+    };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateVehicleService,
         { provide: VehicleRepository, useValue: repoMock },
         { provide: CustomerRepository, useValue: repoCustomerMock },
+        { provide: 'CryptographyService', useValue: cryptoMock },
       ],
     }).compile();
 

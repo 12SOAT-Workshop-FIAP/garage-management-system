@@ -22,7 +22,9 @@ export class FindByIdVehicleService {
         vehicle.plate,
         'license-plate',
       );
-      vehicle.plate = plateVo.value;
+      if (plateVo && plateVo.value) {
+        vehicle.plate = plateVo.value;
+      }
     }
 
     return vehicle;
