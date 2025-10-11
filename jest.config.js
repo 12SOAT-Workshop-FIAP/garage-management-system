@@ -1,12 +1,16 @@
-import { pathsToModuleNameMapper } from 'ts-jest';
-import { compilerOptions } from './tsconfig.json';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { pathsToModuleNameMapper } = require('ts-jest');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { compilerOptions } = require('./tsconfig.json');
 
-export default {
+module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testRegex: '.*\\.spec\\.ts$',
   testEnvironment: 'node',
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
+    prefix: '<rootDir>/',
+  }),
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/main.ts',
@@ -20,7 +24,7 @@ export default {
     '!src/**/*.orm.ts',
     '!src/**/examples/**',
     '!src/migrations/**',
-    '!src/data-source.ts'
+    '!src/data-source.ts',
   ],
   coverageDirectory: './coverage',
   coverageReporters: ['text', 'lcov', 'html'],
@@ -31,7 +35,7 @@ export default {
   preset: 'ts-jest',
   testTimeout: 30000,
   maxWorkers: 1,
-  collectCoverage: false, // Disabled by default, enable with --coverage flag
+  collectCoverage: false, // Desabilitado por padrão, habilite com a flag --coverage
   coverageThreshold: {
     global: {
       branches: 50,

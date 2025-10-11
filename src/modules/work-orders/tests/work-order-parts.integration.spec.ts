@@ -38,12 +38,19 @@ describe('WorkOrder Parts Integration', () => {
       imports: [
         TypeOrmModule.forRoot({
           type: 'postgres',
-          host: process.env.POSTGRES_HOST || 'localhost',
+          host: process.env.POSTGRES_HOST || 'host.docker.internal',
           port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
           username: process.env.POSTGRES_USER || 'postgres',
           password: process.env.POSTGRES_PASSWORD || 'postgres',
           database: process.env.POSTGRES_TEST_DB || 'garage',
-          entities: [WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM, Part, CustomerEntity, Vehicle],
+          entities: [
+            WorkOrderORM,
+            WorkOrderServiceORM,
+            WorkOrderPartORM,
+            Part,
+            CustomerEntity,
+            Vehicle,
+          ],
           synchronize: true,
           dropSchema: true,
         }),
@@ -126,8 +133,8 @@ describe('WorkOrder Parts Integration', () => {
         description: 'Front brake pads for sedans',
         partNumber: 'BP-001',
         category: 'Brakes',
-        price: 150.00,
-        costPrice: 100.00,
+        price: 150.0,
+        costPrice: 100.0,
         stockQuantity: 10,
         minStockLevel: 2,
         unit: 'set',
@@ -149,13 +156,13 @@ describe('WorkOrder Parts Integration', () => {
       const updatedWorkOrder = await workOrderRepository.findById(workOrder.id);
       expect(updatedWorkOrder).toBeDefined();
       expect(updatedWorkOrder!.parts).toHaveLength(1);
-      
+
       const addedPart = updatedWorkOrder!.parts[0];
       expect(addedPart.partId).toBe(part.id);
       expect(addedPart.partName).toBe(part.name);
       expect(addedPart.quantity).toBe(2);
       expect(parseFloat(addedPart.unitPrice.toString())).toBe(part.price);
-      expect(parseFloat(addedPart.totalPrice.toString())).toBe(300.00); // 2 * 150.00
+      expect(parseFloat(addedPart.totalPrice.toString())).toBe(300.0); // 2 * 150.00
       expect(addedPart.notes).toBe('Replace worn brake pads');
       expect(addedPart.isApproved).toBe(false);
     });
@@ -176,7 +183,7 @@ describe('WorkOrder Parts Integration', () => {
 
       const updatedWorkOrder = await workOrderRepository.findById(workOrder.id);
       expect(updatedWorkOrder!.parts[0].quantity).toBe(4);
-      expect(updatedWorkOrder!.parts[0].totalPrice).toBe(600.00); // 4 * 150.00
+      expect(updatedWorkOrder!.parts[0].totalPrice).toBe(600.0); // 4 * 150.00
     });
 
     it('should approve part successfully', async () => {
@@ -235,15 +242,15 @@ describe('WorkOrder Parts Integration', () => {
       const addPartDto: AddPartToWorkOrderDto = {
         partId: part.id,
         quantity: 2,
-        unitPrice: 175.00, // Custom price
+        unitPrice: 175.0, // Custom price
       };
       await addPartService.execute(workOrder.id, addPartDto);
 
       const updatedWorkOrder = await workOrderRepository.findById(workOrder.id);
-      
+
       // Check that estimated cost includes parts cost
-      expect(parseFloat(updatedWorkOrder!.getTotalPartsCost().toString())).toBe(350.00); // 2 * 175.00
-      expect(parseFloat(updatedWorkOrder!.estimatedCost.toString())).toBe(350.00); // Only parts, no services
+      expect(parseFloat(updatedWorkOrder!.getTotalPartsCost().toString())).toBe(350.0); // 2 * 175.00
+      expect(parseFloat(updatedWorkOrder!.estimatedCost.toString())).toBe(350.0); // Only parts, no services
     });
 
     it('should handle multiple parts correctly', async () => {
@@ -253,8 +260,8 @@ describe('WorkOrder Parts Integration', () => {
         description: 'Engine oil filter',
         partNumber: 'OF-001',
         category: 'Engine',
-        price: 25.00,
-        costPrice: 15.00,
+        price: 25.0,
+        costPrice: 15.0,
         stockQuantity: 20,
         minStockLevel: 5,
         unit: 'piece',
@@ -277,7 +284,7 @@ describe('WorkOrder Parts Integration', () => {
 
       const updatedWorkOrder = await workOrderRepository.findById(workOrder.id);
       expect(updatedWorkOrder!.parts).toHaveLength(2);
-      expect(updatedWorkOrder!.getTotalPartsCost()).toBe(225.00); // 150 + (3 * 25)
+      expect(updatedWorkOrder!.getTotalPartsCost()).toBe(225.0); // 150 + (3 * 25)
     });
   });
 });

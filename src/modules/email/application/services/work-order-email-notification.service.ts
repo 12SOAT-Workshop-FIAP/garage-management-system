@@ -90,13 +90,13 @@ export class WorkOrderEmailNotificationService {
 
   private getDefaultStatusMessage(status: WorkOrderStatus): string {
     const messageMap: Record<WorkOrderStatus, string> = {
-      [WorkOrderStatus.RECEIVED]: 'Sua ordem de serviço foi recebida e está em análise.',
-      [WorkOrderStatus.DIAGNOSIS]: 'Sua ordem de serviço está em processo de diagnóstico.',
       [WorkOrderStatus.PENDING]: 'Sua ordem de serviço foi criada e está aguardando aprovação.',
       [WorkOrderStatus.APPROVED]: 'Sua ordem de serviço foi aprovada e será iniciada em breve.',
       [WorkOrderStatus.IN_PROGRESS]: 'Os trabalhos em seu veículo foram iniciados.',
       [WorkOrderStatus.WAITING_PARTS]:
         'Estamos aguardando a chegada de peças para continuar o serviço.',
+      [WorkOrderStatus.RECEIVED]: 'Sua ordem de serviço foi recebida.',
+      [WorkOrderStatus.DIAGNOSIS]: 'Sua ordem de serviço foi diagnosticada.',
       [WorkOrderStatus.COMPLETED]:
         'O serviço foi concluído. Seu veículo está pronto para retirada.',
       [WorkOrderStatus.CANCELLED]: 'A ordem de serviço foi cancelada.',

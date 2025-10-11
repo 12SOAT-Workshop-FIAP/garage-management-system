@@ -1,42 +1,44 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { VehicleController } from './controllers/vehicle.controller';
+import { CreateVehicleUseCase } from '../application/use-cases/create-vehicle.usecase';
+import { VehicleRepositoryAdapter } from '../infrastructure/repositories/vehicle.repository.adapter';
+import { CustomerRepositoryAdapter } from '../infrastructure/repositories/customer.repository.adapter';
+import { VEHICLE_REPOSITORY, CUSTOMER_REPOSITORY } from '../domain/ports/tokens';
+import { VehiclesController } from './controllers/vehicle.controller';
+import { UpdateVehicleUseCase } from '../application/use-cases/update-vehicle.usecase';
+import { FindVehicleByIdUseCase } from '../application/use-cases/find-vehicle-by-id.usecase';
+import { FindAllVehiclesUseCase } from '../application/use-cases/find-all-vehicles.usecase';
+import { DeleteVehicleUseCase } from '../application/use-cases/delete-vehicle.usecase';
 
-// Importação dos serviços de aplicação
-import { CreateVehicleService } from '../application/services/create-vehicle.service';
-import { FindAllVehicleService } from '../application/services/find-all-vehicle.service';
-import { UpdateVehicleService } from '../application/services/update-vehicle.service';
-import { DeleteVehicleService } from '../application/services/delete-vehicle.service';
-import { FindByIdVehicleService } from '../application/services/find-by-id-vehicle.service';
-import { FindVehicleByPlateService } from '../application/services/find-vehicle-by-plate.service';
-
-// Importação da implementação do repositório TypeORM
-// CORREÇÃO AQUI: Ajustado para 'vehicle-typeorm.repository' conforme sua estrutura.
-import { TypeOrmVehicleRepository } from '../infrastructure/vehicle-typeorm.repository';
-
-// IMPORTAÇÃO DA INTERFACE VehicleRepository (necessária para tipagem em 'exports')
-import { VehicleRepository } from '../domain/vehicle.repository';
-import { Vehicle } from '../domain/vehicle.entity';
-import { CustomersModule } from '@modules/customers/customers.module';
-import { CryptographyModule } from '@modules/cryptography/presentation/cryptography.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Vehicle]), CustomersModule, CryptographyModule],
-  controllers: [VehicleController],
+  controllers: [VehiclesController],
+  
   providers: [
-    CreateVehicleService,
-    FindAllVehicleService,
-    UpdateVehicleService,
-    DeleteVehicleService,
-    FindByIdVehicleService,
-    FindVehicleByPlateService,
+  // Ports -> Adapters
 
-    {
-      provide: VehicleRepository,
-      useClass: TypeOrmVehicleRepository,
-    },
-  ],
+  { provide: VEHICLE_REPOSITORY, useClass: VehicleRepositoryAdapter },
+  { provide: CUSTOMER_REPOSITORY, useClass: CustomerRepositoryAdapter },
 
-  exports: [FindByIdVehicleService],
+  // Use cases
+  
+  CreateVehicleUseCase,
+  UpdateVehicleUseCase,
+  FindVehicleByIdUseCase,
+  FindAllVehiclesUseCase,
+  DeleteVehicleUseCase,
+],
+
+  exports: [
+    // exporte se outros módulos precisarem
+
+    CreateVehicleUseCase,
+    UpdateVehicleUseCase,
+    FindVehicleByIdUseCase,
+    FindAllVehiclesUseCase,
+    DeleteVehicleUseCase,
+    VEHICLE_REPOSITORY,
+    CUSTOMER_REPOSITORY,
+],
+
 })
 export class VehiclesModule {}

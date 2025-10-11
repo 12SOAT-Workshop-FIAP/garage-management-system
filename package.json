@@ -26,6 +26,7 @@
     "seed:run:js": "node ./dist/src/seed/seed.js"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^3.0.1",
     "@nestjs/common": "^11.1.5",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.5",
@@ -53,7 +54,6 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^9.9.0",
-    "@getbrevo/brevo": "^3.0.1",
     "@jorgebodega/typeorm-factory": "^2.1.0",
     "@jorgebodega/typeorm-seeding": "^7.1.0",
     "@nestjs/cli": "^11.0.7",
@@ -62,8 +62,9 @@
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.0.15",
+    "@types/node": "^24.6.2",
     "@types/passport-jwt": "^4.0.1",
+    "@types/pg": "^8.15.5",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
