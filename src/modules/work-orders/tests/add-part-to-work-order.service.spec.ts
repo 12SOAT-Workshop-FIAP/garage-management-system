@@ -16,9 +16,9 @@ describe('AddPartToWorkOrderService', () => {
     customerId: '123e4567-e89b-12d3-a456-426614174000',
     vehicleId: '123e4567-e89b-12d3-a456-426614174001',
     description: 'Test work order',
-  });
+  }, '123e4567-e89b-12d3-a456-426614174002');
 
-  const mockPart = new Part({
+  const mockPart = Part.create({
     name: 'Brake Pad',
     description: 'Front brake pads',
     partNumber: 'BP-001',
@@ -29,7 +29,6 @@ describe('AddPartToWorkOrderService', () => {
     minStockLevel: 2,
     unit: 'pair',
     supplier: 'Test Supplier',
-    active: true,
   });
 
   beforeEach(async () => {
@@ -72,7 +71,7 @@ describe('AddPartToWorkOrderService', () => {
 
   describe('execute', () => {
     const dto: AddPartToWorkOrderDto = {
-      partId: mockPart.id,
+      partId: '1',
       quantity: 2,
       notes: 'Replace front brake pads',
     };
@@ -113,9 +112,17 @@ describe('AddPartToWorkOrderService', () => {
     });
 
     it('should throw BadRequestException when insufficient stock', async () => {
-      const lowStockPart = new Part({
-        ...mockPart,
+      const lowStockPart = Part.create({
+        name: 'Brake Pad',
+        description: 'Front brake pads',
+        partNumber: 'BP-001',
+        category: 'Brakes',
+        price: 150.00,
+        costPrice: 100.00,
         stockQuantity: 1, // Less than required quantity
+        minStockLevel: 2,
+        unit: 'pair',
+        supplier: 'Test Supplier',
       });
 
       workOrderRepository.findById.mockResolvedValue(mockWorkOrder);
@@ -128,9 +135,21 @@ describe('AddPartToWorkOrderService', () => {
     });
 
     it('should throw BadRequestException when part is not active', async () => {
-      const inactivePart = new Part({
-        ...mockPart,
+      const inactivePart = Part.restore({
+        id: 1,
+        name: 'Brake Pad',
+        description: 'Front brake pads',
+        partNumber: 'BP-001',
+        category: 'Brakes',
+        price: 150.00,
+        costPrice: 100.00,
+        stockQuantity: 10,
+        minStockLevel: 2,
+        unit: 'pair',
+        supplier: 'Test Supplier',
         active: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       workOrderRepository.findById.mockResolvedValue(mockWorkOrder);
