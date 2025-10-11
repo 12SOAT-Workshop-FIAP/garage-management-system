@@ -4,7 +4,7 @@ import { UpdateWorkOrderDto } from '../dtos/update-work-order.dto';
 import { WorkOrder } from '../../domain/work-order.entity';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 import { WorkOrderEmailNotificationService } from '@modules/email/application/services/work-order-email-notification.service';
-import { CustomerRepository } from '@modules/customers/domain/customer.repository';
+import { CustomerRepository } from '@modules/customers/domain/repositories/customer.repository';
 import { FindByIdVehicleService } from '@modules/vehicles/application/services/find-by-id-vehicle.service';
 
 /**
@@ -113,8 +113,8 @@ export class UpdateWorkOrderService {
 
       await this.workOrderEmailNotificationService.sendStatusChangeNotification({
         workOrderId: workOrder.id,
-        customerName: customer.name,
-        customerEmail: customer.email,
+        customerName: customer.name.value,
+        customerEmail: customer.email?.value || '',
         vehicleBrand: vehicle.brand || 'N/A',
         vehicleModel: vehicle.model || 'N/A',
         vehiclePlate: vehicle.plate || 'N/A',

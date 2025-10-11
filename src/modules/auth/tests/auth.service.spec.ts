@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../application/services/auth.service';
-import { UserRepository } from '../../users/domain/user.repository';
+import { UserRepository } from '../../users/domain/repositories/user.repository';
 
 import { User } from '../../users/domain/user.entity';
 import * as bcrypt from 'bcrypt';
@@ -16,15 +16,15 @@ describe('AuthService', () => {
   let jwtService: jest.Mocked<JwtService>;
   let configService: jest.Mocked<ConfigService>;
 
-  const mockUser = new User(
-    {
-      name: 'Test User',
-      email: 'test@example.com',
-      password: 'hashedPassword123',
-      isActive: true,
-    },
-    'user-id-123',
-  );
+  const mockUser = User.restore({
+    id: 'user-id-123',
+    name: 'Test User',
+    email: 'test@example.com',
+    password: 'hashedPassword123',
+    status: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
 
   beforeEach(async () => {
     const mockUserRepository = {
@@ -86,11 +86,11 @@ describe('AuthService', () => {
 
       const result = await service.login(loginDto);
 
-      expect(result.user.email).toBe(mockUser.email);
+      expect(result.user.email).toBe(mockUser.email.value);
       expect(result.tokens.accessToken).toBe('access-token');
       expect(result.tokens.refreshToken).toBe('refresh-token');
       expect(userRepository.findByEmail).toHaveBeenCalledWith(loginDto.email);
-      expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, mockUser.password);
+      expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, mockUser.password.value);
     });
 
     it('should throw UnauthorizedException for invalid email', async () => {
@@ -105,19 +105,19 @@ describe('AuthService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, mockUser.password);
+      expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, mockUser.password.value);
     });
 
     it('should throw UnauthorizedException for inactive user', async () => {
-      const inactiveUser = new User(
-        {
-          name: 'Inactive User',
-          email: 'inactive@example.com',
-          password: 'hashedPassword123',
-          isActive: false,
-        },
-        'inactive-user-id',
-      );
+      const inactiveUser = User.restore({
+        id: 'inactive-user-id',
+        name: 'Inactive User',
+        email: 'inactive@example.com',
+        password: 'hashedPassword123',
+        status: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       userRepository.findByEmail.mockResolvedValue(inactiveUser);
 
@@ -157,10 +157,10 @@ describe('AuthService', () => {
       const result = await service.validateUser('test@example.com', 'password123');
 
       expect(result).toEqual({
-        id: mockUser.id,
-        name: mockUser.name,
-        email: mockUser.email,
-        isActive: mockUser.isActive,
+        id: mockUser.id?.value,
+        name: mockUser.name.value,
+        email: mockUser.email.value,
+        isActive: mockUser.status.isActive,
         createdAt: mockUser.createdAt,
         updatedAt: mockUser.updatedAt,
       });
@@ -184,4 +184,3 @@ describe('AuthService', () => {
     });
   });
 });
-

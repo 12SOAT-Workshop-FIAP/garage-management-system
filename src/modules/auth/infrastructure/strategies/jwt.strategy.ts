@@ -4,7 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '../../domain/jwt-payload.interface';
-import { UserRepository } from '../../../users/domain/user.repository';
+import { UserRepository } from '../../../users/domain/repositories/user.repository';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -36,15 +36,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found');
     }
 
-    if (!user.isActive) {
+    if (!user.status.isActive) {
       throw new UnauthorizedException('User account is deactivated');
     }
 
     return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      isActive: user.isActive,
+      id: user.id?.value || '',
+      email: user.email.value,
+      name: user.name.value,
+      isActive: user.status.isActive,
     };
   }
 }

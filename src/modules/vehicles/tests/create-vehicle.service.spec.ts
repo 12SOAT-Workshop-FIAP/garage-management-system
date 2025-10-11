@@ -3,7 +3,7 @@ import { CreateVehicleService } from '../application/services/create-vehicle.ser
 import { VehicleRepository } from '../domain/vehicle.repository';
 import { CreateVehicleDto } from '../application/dtos/create-vehicle.dto';
 import { Vehicle } from '../domain/vehicle.entity';
-import { CustomerRepository } from '@modules/customers/domain/customer.repository';
+import { CustomerRepository } from '@modules/customers/domain/repositories/customer.repository';
 import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
 import { NotFoundException } from '@nestjs/common';
 
@@ -60,7 +60,7 @@ describe('CreateVehicleService', () => {
       updated_at: new Date(),
     } as Vehicle;
 
-    customerRepo.findById.mockResolvedValue(mockCustomer);
+    customerRepo.findById.mockResolvedValue(mockCustomer as any);
     repo.findByPlate.mockResolvedValue(null); // No existing vehicle with same plate
     repo.save.mockResolvedValue(mockVehicle);
 
@@ -108,7 +108,7 @@ describe('CreateVehicleService', () => {
       updated_at: new Date(),
     } as Vehicle;
 
-    customerRepo.findById.mockResolvedValue(mockCustomer);
+    customerRepo.findById.mockResolvedValue(mockCustomer as any);
     repo.findByPlate.mockResolvedValue(null);
     repo.save.mockResolvedValue(mockVehicle);
 
@@ -121,4 +121,3 @@ describe('CreateVehicleService', () => {
     expect(result.customer).toEqual(mockCustomer);
   });
 });
-

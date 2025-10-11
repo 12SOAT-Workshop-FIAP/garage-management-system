@@ -9,9 +9,10 @@ describe('UpdateVehicleService', () => {
   beforeEach(() => {
     vehicleRepo = {
       update: jest.fn(),
-      findById: jest.fn()
+      findById: jest.fn(),
     } as any;
-    service = new UpdateVehicleService(vehicleRepo);
+    const mockCryptographyService = { decryptSensitiveData: jest.fn() } as any;
+    service = new UpdateVehicleService(vehicleRepo, mockCryptographyService);
   });
 
   it('deve atualizar o veículo corretamente', async () => {
@@ -24,9 +25,6 @@ describe('UpdateVehicleService', () => {
       customer: {} as any,
       created_at: new Date(),
       updated_at: new Date(),
-      formatLicensePlate: jest.fn(),
-      getLicensePlateType: jest.fn(),
-      getMaskedPlate: jest.fn(),
     };
 
     const dto = {
@@ -35,12 +33,9 @@ describe('UpdateVehicleService', () => {
     };
 
     vehicleRepo.findById.mockResolvedValue(existingVehicle);
-    vehicleRepo.update.mockResolvedValue({ 
-      ...existingVehicle, 
+    vehicleRepo.update.mockResolvedValue({
+      ...existingVehicle,
       ...dto,
-      formatLicensePlate: jest.fn(),
-      getLicensePlateType: jest.fn(),
-      getMaskedPlate: jest.fn(),
     });
 
     const result = await service.execute(1, dto);
@@ -49,4 +44,3 @@ describe('UpdateVehicleService', () => {
     expect(vehicleRepo.update).toHaveBeenCalled();
   });
 });
-

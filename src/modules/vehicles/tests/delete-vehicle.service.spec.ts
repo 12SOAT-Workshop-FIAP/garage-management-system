@@ -25,16 +25,12 @@ describe('DeleteVehicleService', () => {
       customer: {} as any,
       created_at: new Date(),
       updated_at: new Date(),
-      formatLicensePlate: jest.fn(),
-      getLicensePlateType: jest.fn(),
-      getMaskedPlate: jest.fn(),
     };
 
     vehicleRepo.findById.mockResolvedValue(vehicle);
-    
+
     await service.execute(id);
     expect(vehicleRepo.findById).toHaveBeenCalledWith(id);
     expect(vehicleRepo.delete).toHaveBeenCalledWith(id);
   });
 });
-

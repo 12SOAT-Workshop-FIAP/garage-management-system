@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { CreateWorkOrderWithCustomerDto } from '../dtos/create-work-order-with-customer-identification.dto';
 import { WorkOrder } from '../../domain/work-order.entity';
-import { FindByDocumentCustomerService } from '../../../customers/application/services/find-by-document-customer.service';
+import { FindCustomerByDocumentUseCase } from '@modules/customers/application/use-cases/find-customer-by-document.use-case';
 
 /**
  * CreateWorkOrderWithCustomerIdentificationService
@@ -12,10 +12,12 @@ import { FindByDocumentCustomerService } from '../../../customers/application/se
 export class CreateWorkOrderWithCustomerIdentificationService {
   constructor(
     private readonly workOrderRepository: WorkOrderRepository,
-    private readonly findByDocumentCustomerService: FindByDocumentCustomerService,
+    private readonly findByDocumentCustomerService: FindCustomerByDocumentUseCase,
   ) {}
 
-  async execute(dto: CreateWorkOrderWithCustomerDto): Promise<{ workOrder: WorkOrder; customer: any }> {
+  async execute(
+    dto: CreateWorkOrderWithCustomerDto,
+  ): Promise<{ workOrder: WorkOrder; customer: any }> {
     let customer: any;
 
     // Determine customer
@@ -25,7 +27,8 @@ export class CreateWorkOrderWithCustomerIdentificationService {
       customer = { id: dto.customerId };
     } else if (dto.customerDocument) {
       // Find customer by CPF/CNPJ
-      customer = await this.findByDocumentCustomerService.execute(dto.customerDocument);
+      const query = { document: dto.customerDocument } as any;
+      customer = await this.findByDocumentCustomerService.execute(query);
     } else {
       throw new BadRequestException('Either customerId or customerDocument must be provided');
     }
@@ -49,7 +52,7 @@ export class CreateWorkOrderWithCustomerIdentificationService {
 
       return {
         workOrder: savedWorkOrder,
-        customer: customer
+        customer: customer,
       };
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
