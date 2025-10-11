@@ -90,7 +90,7 @@ describe('FindPartByIdUseCase', () => {
       const result = await useCase.execute(query);
 
       // Assert
-      expect(repository.findById).toHaveBeenCalledWith('brake-disc-001');
+      expect(repository.findById).toHaveBeenCalledWith(1);
       expect(result).toEqual(brakeDiscPart);
     });
 
@@ -103,18 +103,21 @@ describe('FindPartByIdUseCase', () => {
       const result = await useCase.execute(query);
 
       // Assert
-      expect(repository.findById).toHaveBeenCalledWith('air-filter-002');
+      expect(repository.findById).toHaveBeenCalledWith(2);
       expect(result).toEqual(airFilterPart);
     });
 
-    it('should throw NotFoundException when timing belt not found', async () => {
+    it('should return null when timing belt not found', async () => {
       // Arrange
       repository.findById.mockResolvedValue(null);
 
-      // Act & Assert
+      // Act
       const query = new FindPartByIdQuery(999);
-      await expect(useCase.execute(query)).rejects.toThrow(NotFoundException);
-      expect(repository.findById).toHaveBeenCalledWith('timing-belt-999');
+      const result = await useCase.execute(query);
+
+      // Assert
+      expect(repository.findById).toHaveBeenCalledWith(999);
+      expect(result).toBeNull();
     });
   });
 });

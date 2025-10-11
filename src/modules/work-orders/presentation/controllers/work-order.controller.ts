@@ -4,17 +4,35 @@ import { CreateWorkOrderDto } from '../../application/dtos/create-work-order.dto
 import { UpdateWorkOrderDto } from '../../application/dtos/update-work-order.dto';
 import { WorkOrderResponseDto } from '../dtos/work-order-response.dto';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
-import { CreateWorkOrderService } from '../../application/services/create-work-order.service';
-import { UpdateWorkOrderService } from '../../application/services/update-work-order.service';
-import { FindWorkOrderService } from '../../application/services/find-work-order.service';
+import { CreateWorkOrderUseCase } from '../../application/use-cases/create-work-order.use-case';
+import { UpdateWorkOrderUseCase } from '../../application/use-cases/update-work-order.use-case';
+import { GetWorkOrderByIdUseCase } from '../../application/use-cases/get-work-order-by-id.use-case';
+import { GetAllWorkOrdersUseCase } from '../../application/use-cases/get-all-work-orders.use-case';
+import { GetWorkOrdersByCustomerUseCase } from '../../application/use-cases/get-work-orders-by-customer.use-case';
+import { GetWorkOrdersByStatusUseCase } from '../../application/use-cases/get-work-orders-by-status.use-case';
+import { GetWorkOrdersByVehicleUseCase } from '../../application/use-cases/get-work-orders-by-vehicle.use-case';
+import { DeleteWorkOrderUseCase } from '../../application/use-cases/delete-work-order.use-case';
+import { CreateWorkOrderCommand } from '../../application/commands/create-work-order.command';
+import { UpdateWorkOrderCommand } from '../../application/commands/update-work-order.command';
+import { DeleteWorkOrderCommand } from '../../application/commands/delete-work-order.command';
+import { GetWorkOrderByIdQuery } from '../../application/queries/get-work-order-by-id.query';
+import { GetAllWorkOrdersQuery } from '../../application/queries/get-all-work-orders.query';
+import { GetWorkOrdersByCustomerQuery } from '../../application/queries/get-work-orders-by-customer.query';
+import { GetWorkOrdersByStatusQuery } from '../../application/queries/get-work-orders-by-status.query';
+import { GetWorkOrdersByVehicleQuery } from '../../application/queries/get-work-orders-by-vehicle.query';
 
 @ApiTags('work-orders')
 @Controller('work-orders')
 export class WorkOrderController {
   constructor(
-    private readonly createWorkOrderService: CreateWorkOrderService,
-    private readonly updateWorkOrderService: UpdateWorkOrderService,
-    private readonly findWorkOrderService: FindWorkOrderService,
+    private readonly createWorkOrderUseCase: CreateWorkOrderUseCase,
+    private readonly updateWorkOrderUseCase: UpdateWorkOrderUseCase,
+    private readonly getWorkOrderByIdUseCase: GetWorkOrderByIdUseCase,
+    private readonly getAllWorkOrdersUseCase: GetAllWorkOrdersUseCase,
+    private readonly getWorkOrdersByCustomerUseCase: GetWorkOrdersByCustomerUseCase,
+    private readonly getWorkOrdersByStatusUseCase: GetWorkOrdersByStatusUseCase,
+    private readonly getWorkOrdersByVehicleUseCase: GetWorkOrdersByVehicleUseCase,
+    private readonly deleteWorkOrderUseCase: DeleteWorkOrderUseCase,
   ) {}
 
   @Post()
@@ -22,7 +40,14 @@ export class WorkOrderController {
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Work order created successfully', type: WorkOrderResponseDto })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
   async create(@Body() dto: CreateWorkOrderDto): Promise<WorkOrderResponseDto> {
-    const workOrder = await this.createWorkOrderService.execute(dto);
+    const command = new CreateWorkOrderCommand(
+      dto.vehicleId.toString(),
+      dto.vehicleId.toString(),
+      dto.description,
+      dto.estimatedCost,
+      dto.diagnosis,
+    );
+    const workOrder = await this.createWorkOrderUseCase.execute(command);
     return WorkOrderResponseDto.fromDomain(workOrder);
   }
 
@@ -40,13 +65,17 @@ export class WorkOrderController {
     let workOrders;
 
     if (status) {
-      workOrders = await this.findWorkOrderService.findByStatus(status);
+      const query = new GetWorkOrdersByStatusQuery(status);
+      workOrders = await this.getWorkOrdersByStatusUseCase.execute(query);
     } else if (customerId) {
-      workOrders = await this.findWorkOrderService.findByCustomerId(customerId);
+      const query = new GetWorkOrdersByCustomerQuery(customerId);
+      workOrders = await this.getWorkOrdersByCustomerUseCase.execute(query);
     } else if (vehicleId) {
-      workOrders = await this.findWorkOrderService.findByVehicleId(vehicleId);
+      const query = new GetWorkOrdersByVehicleQuery(vehicleId);
+      workOrders = await this.getWorkOrdersByVehicleUseCase.execute(query);
     } else {
-      workOrders = await this.findWorkOrderService.findAll();
+      const query = new GetAllWorkOrdersQuery();
+      workOrders = await this.getAllWorkOrdersUseCase.execute(query);
     }
 
     return workOrders.map(workOrder => WorkOrderResponseDto.fromDomain(workOrder));
@@ -58,7 +87,8 @@ export class WorkOrderController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Work order retrieved successfully', type: WorkOrderResponseDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<WorkOrderResponseDto> {
-    const workOrder = await this.findWorkOrderService.findById(id);
+    const query = new GetWorkOrderByIdQuery(id);
+    const workOrder = await this.getWorkOrderByIdUseCase.execute(query);
     return WorkOrderResponseDto.fromDomain(workOrder);
   }
 
@@ -69,7 +99,15 @@ export class WorkOrderController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
   async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateWorkOrderDto): Promise<WorkOrderResponseDto> {
-    const workOrder = await this.updateWorkOrderService.execute(id, dto);
+    const command = new UpdateWorkOrderCommand(
+      id,
+      dto.description,
+      dto.status,
+      dto.diagnosis,
+      dto.technicianNotes,
+      dto.estimatedCompletionDate,
+    );
+    const workOrder = await this.updateWorkOrderUseCase.execute(command);
     return WorkOrderResponseDto.fromDomain(workOrder);
   }
 
@@ -79,8 +117,7 @@ export class WorkOrderController {
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Work order deleted successfully' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
-    // Note: In a real implementation, you might want to create a delete service
-    // For now, we'll throw an error since deletion might not be allowed for work orders
-    throw new Error('Work order deletion not implemented - consider status change instead');
+    const command = new DeleteWorkOrderCommand(id);
+    await this.deleteWorkOrderUseCase.execute(command);
   }
 }

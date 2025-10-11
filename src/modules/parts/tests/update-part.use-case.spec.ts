@@ -65,14 +65,14 @@ describe('UpdatePartUseCase', () => {
 
       repository.findById.mockResolvedValue(existingOilFilter);
       const updatedPart = { ...existingOilFilter, ...updateDto } as Part;
-      repository.save.mockResolvedValue(updatedPart);
+      repository.update.mockResolvedValue(updatedPart);
 
       // Act
       const result = await useCase.execute('filter-oil-001', updateDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('filter-oil-001');
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.update).toHaveBeenCalledWith(
         expect.objectContaining({
           price: 52.50,
           costPrice: 36.75,
@@ -99,14 +99,14 @@ describe('UpdatePartUseCase', () => {
 
       repository.findById.mockResolvedValue(existingBrakePad);
       const updatedPart = { ...existingBrakePad, ...updateDto } as Part;
-      repository.save.mockResolvedValue(updatedPart);
+      repository.update.mockResolvedValue(updatedPart);
 
       // Act
       const result = await useCase.execute('brake-pad-001', updateDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('brake-pad-001');
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.update).toHaveBeenCalledWith(
         expect.objectContaining({
           description: 'Pastilha de freio para VW Gol/Voyage G5-G6 - Fras-le Premium',
           category: 'sistema-freios',
@@ -124,7 +124,7 @@ describe('UpdatePartUseCase', () => {
       repository.findById.mockResolvedValue(existingOilFilter);
       repository.findByPartNumber.mockResolvedValue(null); // No conflict
       const updatedPart = { ...existingOilFilter, partNumber: 'FO-1620-VW-NEW' } as Part;
-      repository.save.mockResolvedValue(updatedPart);
+      repository.update.mockResolvedValue(updatedPart);
 
       // Act
       const result = await useCase.execute('filter-oil-001', updateDto);
@@ -132,7 +132,7 @@ describe('UpdatePartUseCase', () => {
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('filter-oil-001');
       expect(repository.findByPartNumber).toHaveBeenCalledWith('FO-1620-VW-NEW');
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.update).toHaveBeenCalledWith(
         expect.objectContaining({
           partNumber: 'FO-1620-VW-NEW',
         })
@@ -158,7 +158,7 @@ describe('UpdatePartUseCase', () => {
       await expect(useCase.execute('filter-oil-001', updateDto)).rejects.toThrow(ConflictException);
       expect(repository.findById).toHaveBeenCalledWith('filter-oil-001');
       expect(repository.findByPartNumber).toHaveBeenCalledWith('PF-5570-VW');
-      expect(repository.save).not.toHaveBeenCalled();
+      expect(repository.update).not.toHaveBeenCalled();
     });
 
     it('should allow updating part number to the same value', async () => {
@@ -171,7 +171,7 @@ describe('UpdatePartUseCase', () => {
       repository.findById.mockResolvedValue(existingOilFilter);
       repository.findByPartNumber.mockResolvedValue(existingOilFilter); // Same part
       const updatedPart = { ...existingOilFilter, price: 50.00 } as Part;
-      repository.save.mockResolvedValue(updatedPart);
+      repository.update.mockResolvedValue(updatedPart);
 
       // Act
       const result = await useCase.execute('filter-oil-001', updateDto);
@@ -179,7 +179,7 @@ describe('UpdatePartUseCase', () => {
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('filter-oil-001');
       expect(repository.findByPartNumber).toHaveBeenCalledWith('FO-1620-VW');
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.update).toHaveBeenCalledWith(
         expect.objectContaining({
           partNumber: 'FO-1620-VW',
           price: 50.00,
@@ -199,7 +199,7 @@ describe('UpdatePartUseCase', () => {
       // Act & Assert
       await expect(useCase.execute('non-existent-part', updateDto)).rejects.toThrow(NotFoundException);
       expect(repository.findById).toHaveBeenCalledWith('non-existent-part');
-      expect(repository.save).not.toHaveBeenCalled();
+      expect(repository.update).not.toHaveBeenCalled();
     });
 
     it('should update hydraulic oil supplier and active status', async () => {
@@ -221,14 +221,14 @@ describe('UpdatePartUseCase', () => {
 
       repository.findById.mockResolvedValue(hydraulicOil);
       const updatedPart = { ...hydraulicOil, ...updateDto } as Part;
-      repository.save.mockResolvedValue(updatedPart);
+      repository.update.mockResolvedValue(updatedPart);
 
       // Act
       const result = await useCase.execute('hydraulic-oil-001', updateDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('hydraulic-oil-001');
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.update).toHaveBeenCalledWith(
         expect.objectContaining({
           supplier: 'Novo Fornecedor Premium',
           active: false,

@@ -179,7 +179,7 @@ describe('WorkOrder Parts Integration', () => {
       const updateQuantityDto: UpdatePartQuantityDto = {
         quantity: 4,
       };
-      await updatePartQuantityService.execute(workOrder.id, part.id, updateQuantityDto);
+      await updatePartQuantityService.execute(workOrder.id, part.id!.value.toString(), updateQuantityDto);
 
       const updatedWorkOrder = await workOrderRepository.findById(workOrder.id);
       expect(updatedWorkOrder!.parts[0].quantity).toBe(4);

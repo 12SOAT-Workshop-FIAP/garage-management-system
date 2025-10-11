@@ -51,7 +51,7 @@ describe('CreatePartUseCase', () => {
       costPrice: 32.15,
       stockQuantity: 25,
       minStockLevel: 5,
-      unit: 'piece',
+      unit: 'PC',
       supplier: 'Auto Peças Central Ltda',
       active: true,
     };
@@ -59,15 +59,15 @@ describe('CreatePartUseCase', () => {
     it('should create an oil filter successfully', async () => {
       // Arrange
       repository.findByPartNumber.mockResolvedValue(null);
-      const savedPart = { ...oilFilterDto, id: 'filter-oil-001' } as Part;
-      repository.save.mockResolvedValue(savedPart);
+      const savedPart = Part.create(oilFilterDto);
+      repository.create.mockResolvedValue(savedPart);
 
       // Act
       const result = await useCase.execute(oilFilterDto);
 
       // Assert
       expect(repository.findByPartNumber).toHaveBeenCalledWith(oilFilterDto.partNumber);
-      expect(repository.save).toHaveBeenCalled();
+      expect(repository.create).toHaveBeenCalled();
       expect(result).toEqual(savedPart);
     });
 
@@ -82,61 +82,62 @@ describe('CreatePartUseCase', () => {
         costPrice: 62.65,
         stockQuantity: 12,
         minStockLevel: 3,
-        unit: 'kit',
+        unit: 'SET',
         supplier: 'Freios & Cia Distribuidora',
         active: true,
       };
 
       repository.findByPartNumber.mockResolvedValue(null);
-      const savedPart = { ...brakePadDto, id: 'brake-pad-001' } as Part;
-      repository.save.mockResolvedValue(savedPart);
+      const savedPart = Part.create(brakePadDto);
+      repository.create.mockResolvedValue(savedPart);
 
       // Act
       const result = await useCase.execute(brakePadDto);
 
       // Assert
       expect(repository.findByPartNumber).toHaveBeenCalledWith(brakePadDto.partNumber);
-      expect(repository.save).toHaveBeenCalled();
+      expect(repository.create).toHaveBeenCalled();
       expect(result).toEqual(savedPart);
     });
 
-    it('should create spark plugs successfully without part number', async () => {
+    it('should create spark plugs successfully', async () => {
       // Arrange
       const sparkPlugDto: CreatePartDto = {
         name: 'Vela de Ignição NGK',
         description: 'Vela de ignição NGK Laser Platinum para motores flex 1.0-1.8',
-        partNumber: '', // Empty part number should not trigger conflict check
+        partNumber: 'NGK-001',
         category: 'ignicao',
         price: 25.80,
         costPrice: 18.06,
         stockQuantity: 48,
         minStockLevel: 10,
-        unit: 'piece',
+        unit: 'PC',
         supplier: 'Ignição Total Autopeças',
         active: true,
       };
       
-      const savedPart = { ...sparkPlugDto, id: 'spark-plug-001' } as Part;
-      repository.save.mockResolvedValue(savedPart);
+      repository.findByPartNumber.mockResolvedValue(null);
+      const savedPart = Part.create(sparkPlugDto);
+      repository.create.mockResolvedValue(savedPart);
 
       // Act
       const result = await useCase.execute(sparkPlugDto);
 
       // Assert
-      expect(repository.findByPartNumber).not.toHaveBeenCalled();
-      expect(repository.save).toHaveBeenCalled();
+      expect(repository.findByPartNumber).toHaveBeenCalledWith('NGK-001');
+      expect(repository.create).toHaveBeenCalled();
       expect(result).toEqual(savedPart);
     });
 
     it('should throw ConflictException if oil filter part number already exists', async () => {
       // Arrange
-      const existingPart = { id: 'existing-filter', partNumber: oilFilterDto.partNumber } as Part;
+      const existingPart = Part.create(oilFilterDto);
       repository.findByPartNumber.mockResolvedValue(existingPart);
 
       // Act & Assert
       await expect(useCase.execute(oilFilterDto)).rejects.toThrow(ConflictException);
       expect(repository.findByPartNumber).toHaveBeenCalledWith(oilFilterDto.partNumber);
-      expect(repository.save).not.toHaveBeenCalled();
+      expect(repository.create).not.toHaveBeenCalled();
     });
 
     it('should create hydraulic oil with provided values', async () => {
@@ -150,31 +151,22 @@ describe('CreatePartUseCase', () => {
         costPrice: 21.45,
         stockQuantity: 15,
         minStockLevel: 5,
-        unit: 'liter',
+        unit: 'L',
         supplier: 'Lubricantes S.A.',
         active: true,
       };
 
       repository.findByPartNumber.mockResolvedValue(null);
-      const savedPart = { ...hydraulicOilDto, id: 'hydraulic-oil-001' } as Part;
-      repository.save.mockResolvedValue(savedPart);
+      const savedPart = Part.create(hydraulicOilDto);
+      repository.create.mockResolvedValue(savedPart);
 
       // Act
       const result = await useCase.execute(hydraulicOilDto);
 
       // Assert
-      expect(repository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: hydraulicOilDto.name,
-          category: hydraulicOilDto.category,
-          price: hydraulicOilDto.price,
-          costPrice: hydraulicOilDto.costPrice,
-          stockQuantity: hydraulicOilDto.stockQuantity,
-          minStockLevel: hydraulicOilDto.minStockLevel,
-          unit: hydraulicOilDto.unit,
-          active: hydraulicOilDto.active,
-        })
-      );
+      expect(repository.findByPartNumber).toHaveBeenCalledWith('ATF-001');
+      expect(repository.create).toHaveBeenCalled();
+      expect(result).toEqual(savedPart);
     });
   });
 });

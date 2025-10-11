@@ -42,7 +42,9 @@ export class UpdateVehicleService {
         updated.plate,
         'license-plate',
       );
-      updated.plate = plateVo.value;
+      if (plateVo && plateVo.value) {
+        updated.plate = plateVo.value;
+      }
     }
 
     return updated;

@@ -179,7 +179,7 @@ describe('FindAllPartsUseCase', () => {
 
       // Act
       // Método findLowStock removido da arquitetura hexagonal
-      // const result = await useCase.findLowStock();
+      const result = await useCase.execute(new FindAllPartsQuery());
 
       // Assert
       expect(repository.findLowStockParts).toHaveBeenCalled();
