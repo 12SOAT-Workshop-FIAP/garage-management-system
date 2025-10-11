@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User as UserEntity } from '../../domain/user.entity';
-import { UserRepository } from '../../domain/user.repository';
+import { User as UserEntity } from '../../../domain/user.entity';
+import { UserRepository } from '../../domain/repositories/user.repository';
 import { User as TypeOrmUser } from '../entities/user.entity';
+import { UserMapper } from '../mappers/user.mapper';
 
 @Injectable()
 export class UserTypeOrmRepository implements UserRepository {
@@ -12,54 +13,47 @@ export class UserTypeOrmRepository implements UserRepository {
     private readonly repository: Repository<TypeOrmUser>,
   ) {}
 
-  async create(user: UserEntity): Promise<void> {
-    const newUser = this.repository.create(user);
-    await this.repository.save(newUser);
-  }
-
-  async update(user: UserEntity): Promise<void> {
-    await this.repository.save(user);
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.repository.delete(id);
-  }
-
-  async findAll(): Promise<UserEntity[]> {
-    const users = await this.repository.find();
-    return users.map((user) => this.toDomain(user));
+  async findAll(): Promise<UserEntity[] | null> {
+    const entities = await this.repository.find({
+      order: {
+        createdAt: 'ASC',
+      },
+    });
+    return entities.map(UserMapper.toDomain);
   }
 
   async findById(id: string): Promise<UserEntity | null> {
-    const user = await this.repository.findOne({ where: { id } });
-    if (!user) {
-      return null;
-    }
-    return this.toDomain(user);
+    const entity = await this.repository.findOne({
+      where: { id },
+    });
+    return entity ? UserMapper.toDomain(entity) : null;
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
-    const user = await this.repository.findOne({ where: { email } });
-    if (!user) {
-      return null;
-    }
-    return this.toDomain(user);
+    const entity = await this.repository.findOne({
+      where: { email },
+    });
+    return entity ? UserMapper.toDomain(entity) : null;
   }
 
-  private toDomain(user: TypeOrmUser): UserEntity {
-    const userEntity = new UserEntity(
-      {
-        name: user.name,
-        email: user.email,
-        password: user.password,
-        isActive: user.isActive,
-      },
-      user.id,
-    );
+  async create(user: UserEntity): Promise<UserEntity> {
+    const entityData = UserMapper.toInfrastructure(user);
+    const entity = this.repository.create(entityData);
+    const savedEntity = await this.repository.save(entity);
+    return UserMapper.toDomain(savedEntity);
+  }
 
-    userEntity.createdAt = user.createdAt;
-    userEntity.updatedAt = user.updatedAt;
+  async update(oldUser: UserEntity, newUser: UserEntity): Promise<UserEntity | null> {
+    const entityData = UserMapper.toInfrastructureUpdate(newUser);
+    const result = await this.repository.update(oldUser.id?.value || '', entityData);
+    if (result.affected === 0) {
+      return null;
+    }
+    return newUser;
+  }
 
-    return userEntity;
+  async delete(user: UserEntity): Promise<void> {
+    user.deactivate();
+    await this.update(user, user);
   }
 }

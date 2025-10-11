@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fiap-garage-config
+  namespace: fiap-garage
+data:
+  BCRYPT_ROUNDS: "12"                
+  CRYPTO_SECRET_KEY: abc             
+  EMAIL_SENDER: zoorack1995@gmail.com 
+  SENDER_NAME: "FIAP Garage"         
+  NODE_ENV: development              
+  POSTGRES_PORT: "5432"              
+

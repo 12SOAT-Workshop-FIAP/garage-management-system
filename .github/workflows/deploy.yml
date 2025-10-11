@@ -1,0 +1,102 @@
+name: CI/CD - Deploy to Amazon EKS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: garagemanagement
+  EKS_CLUSTER_NAME: garagemanagement
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: garage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: 1. Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 2. Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 3. Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 4. Setup Node.js and Install Dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm install
+
+      # - name: 5. Run Automated Tests
+      #   run: npm test
+
+      - name: 6. Build and Push Docker Image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $FULL_IMAGE_NAME --target production .
+          docker push $FULL_IMAGE_NAME
+          echo "image=$FULL_IMAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: 7. Connect to EKS Cluster
+        run: aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
+
+      - name: 8. Create/Update Kubernetes Secrets
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: |
+          kubectl create namespace fiap-garage --dry-run=client -o yaml | kubectl apply -f -
+          kubectl delete secret fiap-garage-secret -n fiap-garage --ignore-not-found
+          kubectl create secret generic fiap-garage-secret -n fiap-garage \
+            --from-literal=POSTGRES_HOST=${{ secrets.DB_HOST }} \
+            --from-literal=POSTGRES_USER=${{ secrets.DB_USERNAME }} \
+            --from-literal=POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            --from-literal=POSTGRES_DB=${{ secrets.DB_NAME }} \
+            --from-literal=JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            --from-literal=JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} \
+            --from-literal=BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+
+      - name: 10. Deploy Application to EKS
+        run: |
+          sed -i 's|image: fiap-garage-api:latest|image: ${{ steps.build-image.outputs.image }}|g' k8s/api.yaml
+
+          # Aplica todos os manifestos necessários
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/api.yaml
+          kubectl apply -f k8s/api-service.yaml
+          kubectl apply -f k8s/hpa.yaml

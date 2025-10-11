@@ -8,8 +8,8 @@ describe('FindAllVehicleService', () => {
 
   beforeEach(() => {
     vehicleRepo = { findAll: jest.fn() } as any;
-    const cryptographyService = {} as any;
-    service = new FindAllVehicleService(vehicleRepo, cryptographyService);
+    const mockCryptographyService = { decryptSensitiveData: jest.fn() } as any;
+    service = new FindAllVehicleService(vehicleRepo, mockCryptographyService);
   });
 
   it('deve retornar todos os veículos', async () => {
@@ -23,12 +23,8 @@ describe('FindAllVehicleService', () => {
         customer: {} as any,
         created_at: new Date(),
         updated_at: new Date(),
-        // formatLicensePlate removido
-        // getLicensePlateType removido
-        getMaskedPlate: jest.fn(),
       },
     ];
-    
 
     vehicleRepo.findAll.mockResolvedValue(vehicles);
 
@@ -37,4 +33,3 @@ describe('FindAllVehicleService', () => {
     expect(vehicleRepo.findAll).toHaveBeenCalled();
   });
 });
-

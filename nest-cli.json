@@ -2,7 +2,7 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "assets": ["**/*.json"],
+    "assets": ["**/*.json", { "include": "modules/email/templates/**/*", "outDir": "dist/src" }],
     "watchAssets": true,
     "deleteOutDir": true
   }

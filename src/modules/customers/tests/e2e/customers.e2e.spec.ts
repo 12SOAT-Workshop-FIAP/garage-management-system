@@ -4,7 +4,7 @@ import * as request from 'supertest';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomersModule } from '../../customers.module';
 import { CustomerEntity } from '../../infrastructure/customer.entity';
-import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
+// Note: Vehicle entity handled separately
 
 const INVALID_CPF = '12345678909';
 const INVALID_CNPJ = '12345678000100';
@@ -17,12 +17,12 @@ describe('Customers (e2e)', () => {
       imports: [
         TypeOrmModule.forRoot({
           type: 'postgres',
-          host: process.env.POSTGRES_HOST || 'localhost',
+          host: process.env.POSTGRES_HOST || 'host.docker.internal',
           port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
           username: process.env.POSTGRES_USER || 'postgres',
           password: process.env.POSTGRES_PASSWORD || 'postgres',
           database: process.env.POSTGRES_TEST_DB || 'garage',
-          entities: [CustomerEntity, Vehicle],
+          entities: [CustomerEntity],
           synchronize: true,
           dropSchema: true,
           logging: false,

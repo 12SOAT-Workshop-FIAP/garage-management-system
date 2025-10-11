@@ -1,10 +1,10 @@
 # Node
 node_modules/
 dist/
+build/
 
 # Env
 .env
-.env.*
 
 # Logs
 logs/
@@ -18,8 +18,9 @@ coverage/
 
 # Docker
 *.local
-Dockerfile*
-docker-compose*
+docker-compose.override.yml
+docker-compose.local.yml
+Dockerfile.local
 
 # TypeORM
 ormconfig.ts
@@ -30,9 +31,13 @@ ormconfig.ts
 .DS_Store
 Thumbs.db
 
-# Build
-build/
-
 # Misc
 *.tgz
 *.swp 
+
+# Terraform
+**/*.tfstate
+**/*.tfstate.backup
+**/.terraform
+**/terraform.tfvars
+!**/terraform.tfvars.example

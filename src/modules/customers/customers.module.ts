@@ -1,31 +1,36 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomerEntity } from './infrastructure/customer.entity';
-import { CustomerController } from './presentation/controllers/customer.controller';
-import { FindAllCustomerService } from './application/services/find-all-customer.service';
-import { FindOneCustomerService } from './application/services/find-one-customer.sevice';
-import { FindByDocumentCustomerService } from './application/services/find-by-document-customer.service';
-import { CreateCustomerService } from './application/services/create-customer.service';
-import { UpdateCustomerService } from './application/services/update-customer.service';
-import { DeleteCustomerService } from './application/services/delete-customer.service';
-import { CustomerRepository } from './domain/customer.repository';
+import { CustomerHttpAdapter } from './infrastructure/adapters/http/customer-http.adapter';
+import { CreateCustomerUseCase } from './application/use-cases/create-customer.use-case';
+import { UpdateCustomerUseCase } from './application/use-cases/update-customer.use-case';
+import { DeleteCustomerUseCase } from './application/use-cases/delete-customer.use-case';
+import { FindCustomerByIdUseCase } from './application/use-cases/find-customer-by-id.use-case';
+import { FindCustomerByDocumentUseCase } from './application/use-cases/find-customer-by-document.use-case';
+import { FindAllCustomersUseCase } from './application/use-cases/find-all-customers.use-case';
+import { CustomerRepository } from './domain/repositories/customer.repository';
 import { CustomerTypeOrmRepository } from './infrastructure/customer.typeorm.repository';
+import { CryptographyPort } from './domain/ports/cryptography.port';
+import { CryptographyAdapter } from './infrastructure/adapters/cryptography/cryptography.adapter';
 import { CryptographyModule } from '@modules/cryptography/presentation/cryptography.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([CustomerEntity]), CryptographyModule],
-  controllers: [CustomerController],
+  controllers: [CustomerHttpAdapter],
   providers: [
-    FindAllCustomerService,
-    FindOneCustomerService,
-    FindByDocumentCustomerService,
-    CreateCustomerService,
-    UpdateCustomerService,
-    DeleteCustomerService,
+    // Use Cases
+    CreateCustomerUseCase,
+    UpdateCustomerUseCase,
+    DeleteCustomerUseCase,
+    FindCustomerByIdUseCase,
+    FindCustomerByDocumentUseCase,
+    FindAllCustomersUseCase,
+    // Ports and Adapters
     { provide: CustomerRepository, useClass: CustomerTypeOrmRepository },
+    { provide: CryptographyPort, useClass: CryptographyAdapter },
   ],
   exports: [
-    FindByDocumentCustomerService,
+    FindCustomerByDocumentUseCase,
     { provide: CustomerRepository, useClass: CustomerTypeOrmRepository },
   ],
 })
