@@ -28,7 +28,7 @@ module.exports = {
   ],
   coverageDirectory: './coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-  setupFilesAfterEnv: [],
+  setupFilesAfterEnv: ['<rootDir>/test/jest.setup.ts'],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },

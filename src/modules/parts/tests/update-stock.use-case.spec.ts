@@ -1,28 +1,28 @@
-import { Test, TestingModule } from '@nestjs/testing';import { Test, TestingModule } from '@nestjs/testing';import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';import { Test, TestingModule } from '@nestjs/testing';import { Test, TestingModule } from '@nestjs/testing';import { Test, TestingModule } from '@nestjs/testing';
 
 import { UpdateStockUseCase } from '../application/use-cases/update-stock.use-case';
 
-import { PartRepository } from '../domain/repositories/part.repository';import { UpdateStockUseCase } from '../application/use-cases/update-stock.use-case';import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { PartRepository } from '../domain/repositories/part.repository';import { UpdateStockUseCase } from '../application/use-cases/update-stock.use-case';
 
 import { Part } from '../domain/entities/part.entity';
 
-import { UpdateStockCommand } from '../application/commands/update-stock.command';import { PartRepository } from '../domain/repositories/part.repository';import { UpdateStockUseCase } from '../application/use-cases/update-stock.use-case';
+import { UpdateStockCommand } from '../application/commands/update-stock.command';import { PartRepository } from '../domain/repositories/part.repository';import { UpdateStockUseCase } from '../application/use-cases/update-stock.use-case';import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 
 
-describe('UpdateStockUseCase', () => {import { Part } from '../domain/entities/part.entity';import { PartRepository } from '../domain/repositories/part.repository';
+describe('UpdateStockUseCase', () => {import { Part } from '../domain/entities/part.entity';
 
   let useCase: UpdateStockUseCase;
 
-  let repository: jest.Mocked<PartRepository>;import { UpdateStockCommand } from '../application/commands/update-stock.command';import { Part } from '../domain/entities/part.entity';
+  let repository: jest.Mocked<PartRepository>;import { UpdateStockCommand } from '../application/commands/update-stock.command';import { PartRepository } from '../domain/repositories/part.repository';import { UpdateStockUseCase } from '../application/use-cases/update-stock.use-case';
 
 
 
-  const mockPartRepository = {import { UpdateStockDto } from '../application/dtos/update-part.dto';
+  const mockPartRepository = {
 
     findById: jest.fn(),
 
-    findAll: jest.fn(),describe('UpdateStockUseCase', () => {
+    findAll: jest.fn(),describe('UpdateStockUseCase', () => {import { Part } from '../domain/entities/part.entity';import { PartRepository } from '../domain/repositories/part.repository';
 
     findByPartNumber: jest.fn(),
 
@@ -30,15 +30,15 @@ describe('UpdateStockUseCase', () => {import { Part } from '../domain/entities/p
 
     findLowStockParts: jest.fn(),
 
-    create: jest.fn(),  let repository: jest.Mocked<PartRepository>;describe('UpdateStockUseCase', () => {
+    create: jest.fn(),  let repository: jest.Mocked<PartRepository>;import { UpdateStockCommand } from '../application/commands/update-stock.command';import { Part } from '../domain/entities/part.entity';
 
     update: jest.fn(),
 
-    delete: jest.fn(),  let useCase: UpdateStockUseCase;
+    delete: jest.fn(),
 
     updateStock: jest.fn(),
 
-  };  const mockPartRepository = {  let repository: jest.Mocked<PartRepository>;
+  };  const mockPartRepository = {import { UpdateStockDto } from '../application/dtos/update-part.dto';
 
 
 
@@ -46,91 +46,225 @@ describe('UpdateStockUseCase', () => {import { Part } from '../domain/entities/p
 
     const module: TestingModule = await Test.createTestingModule({
 
-      providers: [    findAll: jest.fn(),  const mockPartRepository = {
+      providers: [    findAll: jest.fn(),describe('UpdateStockUseCase', () => {
 
         UpdateStockUseCase,
 
-        {    findByPartNumber: jest.fn(),    findById: jest.fn(),
+        {    findByPartNumber: jest.fn(),
 
           provide: PartRepository,
 
-          useValue: mockPartRepository,    findByCategory: jest.fn(),    findAll: jest.fn(),
+          useValue: mockPartRepository,    findByCategory: jest.fn(),  let useCase: UpdateStockUseCase;
 
         },
 
-      ],    findLowStockParts: jest.fn(),    findByPartNumber: jest.fn(),
+      ],    findLowStockParts: jest.fn(),
 
     }).compile();
 
-    create: jest.fn(),    findByCategory: jest.fn(),
+    create: jest.fn(),  let repository: jest.Mocked<PartRepository>;describe('UpdateStockUseCase', () => {
 
     useCase = module.get<UpdateStockUseCase>(UpdateStockUseCase);
 
-    repository = module.get(PartRepository);    update: jest.fn(),    findLowStockParts: jest.fn(),
+    repository = module.get(PartRepository);    update: jest.fn(),
 
   });
 
-    delete: jest.fn(),    save: jest.fn(),
+    delete: jest.fn(),  let useCase: UpdateStockUseCase;
 
   afterEach(() => {
 
-    jest.clearAllMocks();    updateStock: jest.fn(),    delete: jest.fn(),
+    jest.clearAllMocks();    updateStock: jest.fn(),
 
   });
 
-  };    count: jest.fn(),
+  };  const mockPartRepository = {  let repository: jest.Mocked<PartRepository>;
 
   describe('execute', () => {
 
-    it('should increase oil filter stock when receiving new shipment', async () => {  };
+    it('should increase oil filter stock when receiving new shipment', async () => {
 
       // Arrange
 
-      const oilFilterPart = Part.create({  beforeEach(async () => {
+      const oilFilterPart = Part.create({  beforeEach(async () => {    findById: jest.fn(),
 
         name: 'Filtro de Óleo do Motor',
 
-        description: 'Filtro de óleo para motores 1.0 a 2.0 16V - VW/Ford/GM',    const module: TestingModule = await Test.createTestingModule({  beforeEach(async () => {
+        description: 'Filtro de óleo para motores 1.0 a 2.0 16V - VW/Ford/GM',    const module: TestingModule = await Test.createTestingModule({
 
         partNumber: 'FO-1620-VW',
 
-        category: 'filtros',      providers: [    const module: TestingModule = await Test.createTestingModule({
+        category: 'filtros',      providers: [    findAll: jest.fn(),  const mockPartRepository = {
 
         price: 45.90,
 
-        costPrice: 32.15,        UpdateStockUseCase,      providers: [
+        costPrice: 32.15,        UpdateStockUseCase,
 
         stockQuantity: 25,
 
-        minStockLevel: 5,        {        UpdateStockUseCase,
+        minStockLevel: 5,        {    findByPartNumber: jest.fn(),    findById: jest.fn(),
 
-        unit: 'piece',
+        unit: 'PC',
 
-        supplier: 'Auto Peças Central Ltda',          provide: PartRepository,        {
+        supplier: 'Auto Peças Central Ltda',          provide: PartRepository,
 
       });
 
-                useValue: mockPartRepository,          provide: PartRepository,
+                useValue: mockPartRepository,    findByCategory: jest.fn(),    findAll: jest.fn(),
 
       const command = new UpdateStockCommand(1, 20);
 
-      repository.updateStock.mockResolvedValue(oilFilterPart);        },          useValue: mockPartRepository,
+      repository.updateStock.mockResolvedValue(oilFilterPart);        },
 
 
 
-      // Act      ],        },
+      // Act      ],    findLowStockParts: jest.fn(),    findByPartNumber: jest.fn(),
 
       const result = await useCase.execute(command);
 
-    }).compile();      ],
+    }).compile();
 
       // Assert
 
-      expect(repository.updateStock).toHaveBeenCalledWith(1, 20);    }).compile();
+      expect(repository.updateStock).toHaveBeenCalledWith(1, 20);    create: jest.fn(),    findByCategory: jest.fn(),
 
       expect(result).toEqual(oilFilterPart);
 
     });    useCase = module.get<UpdateStockUseCase>(UpdateStockUseCase);
+
+
+
+    it('should decrease brake fluid stock when used in service', async () => {    repository = module.get(PartRepository);    update: jest.fn(),    findLowStockParts: jest.fn(),
+
+      // Arrange
+
+      const brakeFluidPart = Part.create({  });
+
+        name: 'Fluido de Freio DOT 4',
+
+        description: 'Fluido de freio sintético DOT 4 Bosch para sistemas de freio e embreagem',    delete: jest.fn(),    save: jest.fn(),
+
+        partNumber: 'FF-DOT4-500ML',
+
+        category: 'lubrificantes',  afterEach(() => {
+
+        price: 32.50,
+
+        costPrice: 22.75,    jest.clearAllMocks();    updateStock: jest.fn(),    delete: jest.fn(),
+
+        stockQuantity: 3,
+
+        minStockLevel: 8,  });
+
+        unit: 'BOX',
+
+        supplier: 'Bosch Automotive',  };    count: jest.fn(),
+
+      });
+
+  describe('execute', () => {
+
+      const command = new UpdateStockCommand(2, -2);
+
+      repository.updateStock.mockResolvedValue(brakeFluidPart);    it('should increase oil filter stock when receiving new shipment', async () => {  };
+
+
+
+      // Act      // Arrange
+
+      const result = await useCase.execute(command);
+
+      const oilFilterPart = Part.create({  beforeEach(async () => {
+
+      // Assert
+
+      expect(repository.updateStock).toHaveBeenCalledWith(2, -2);        name: 'Filtro de Óleo do Motor',
+
+      expect(result).toEqual(brakeFluidPart);
+
+    });        description: 'Filtro de óleo para motores 1.0 a 2.0 16V - VW/Ford/GM',    const module: TestingModule = await Test.createTestingModule({  beforeEach(async () => {
+
+
+
+    it('should adjust stock due to inventory count discrepancy', async () => {        partNumber: 'FO-1620-VW',
+
+      // Arrange
+
+      const oilFilterPart = Part.create({        category: 'filtros',      providers: [    const module: TestingModule = await Test.createTestingModule({
+
+        name: 'Filtro de Óleo do Motor',
+
+        description: 'Filtro de óleo para motores 1.0 a 2.0 16V - VW/Ford/GM',        price: 45.90,
+
+        partNumber: 'FO-1620-VW',
+
+        category: 'filtros',        costPrice: 32.15,        UpdateStockUseCase,      providers: [
+
+        price: 45.90,
+
+        costPrice: 32.15,        stockQuantity: 25,
+
+        stockQuantity: 25,
+
+        minStockLevel: 5,        minStockLevel: 5,        {        UpdateStockUseCase,
+
+        unit: 'PC',
+
+        supplier: 'Auto Peças Central Ltda',        unit: 'piece',
+
+      });
+
+        supplier: 'Auto Peças Central Ltda',          provide: PartRepository,        {
+
+      const command = new UpdateStockCommand(1, -5);
+
+      repository.updateStock.mockResolvedValue(oilFilterPart);      });
+
+
+
+      // Act                useValue: mockPartRepository,          provide: PartRepository,
+
+      const result = await useCase.execute(command);
+
+      const command = new UpdateStockCommand(1, 20);
+
+      // Assert
+
+      expect(repository.updateStock).toHaveBeenCalledWith(1, -5);      repository.updateStock.mockResolvedValue(oilFilterPart);        },          useValue: mockPartRepository,
+
+      expect(result).toEqual(oilFilterPart);
+
+    });
+
+
+
+    it('should return null when timing belt part not found', async () => {      // Act      ],        },
+
+      // Arrange
+
+      const command = new UpdateStockCommand(999, 10);      const result = await useCase.execute(command);
+
+      repository.updateStock.mockResolvedValue(null);
+
+    }).compile();      ],
+
+      // Act
+
+      const result = await useCase.execute(command);      // Assert
+
+
+
+      // Assert      expect(repository.updateStock).toHaveBeenCalledWith(1, 20);    }).compile();
+
+      expect(repository.updateStock).toHaveBeenCalledWith(999, 10);
+
+      expect(result).toBeNull();      expect(result).toEqual(oilFilterPart);
+
+    });
+
+  });    });    useCase = module.get<UpdateStockUseCase>(UpdateStockUseCase);
+
+});
 
 
 
