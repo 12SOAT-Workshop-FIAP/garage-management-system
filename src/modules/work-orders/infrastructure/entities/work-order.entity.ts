@@ -53,6 +53,12 @@ export class WorkOrderORM {
   @Column('uuid', { nullable: true })
   assignedTechnicianId?: string;
 
+  @Column('timestamp', { nullable: true })
+  estimatedCompletionDate?: Date;
+
+  @Column('timestamp', { nullable: true })
+  completedAt?: Date;
+
   @CreateDateColumn()
   createdAt!: Date;
 

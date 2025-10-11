@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { WorkOrder } from '../../domain/work-order.entity';
+import { WorkOrder } from '../../domain/entities/work-order.entity';
 import { WorkOrderService } from '../../domain/work-order-service.value-object';
 
 /**
@@ -126,17 +126,17 @@ export class WorkOrderDetailedResponseDto {
   };
 
   constructor(workOrder: WorkOrder) {
-    this.id = workOrder.id;
+    this.id = workOrder.id.value;
     this.customerId = workOrder.customerId;
     this.vehicleId = workOrder.vehicleId;
-    this.description = workOrder.description;
+    this.description = workOrder.description.value;
     this.status = workOrder.status;
-    this.estimatedCost = workOrder.estimatedCost;
-    this.actualCost = workOrder.actualCost;
-    this.laborCost = workOrder.laborCost;
-    this.partsCost = workOrder.partsCost;
-    this.diagnosis = workOrder.diagnosis;
-    this.technicianNotes = workOrder.technicianNotes;
+    this.estimatedCost = workOrder.estimatedCost.value;
+    this.actualCost = workOrder.actualCost?.value;
+    this.laborCost = workOrder.laborCost?.value;
+    this.partsCost = workOrder.partsCost?.value;
+    this.diagnosis = workOrder.diagnosis?.value;
+    this.technicianNotes = workOrder.technicianNotes?.value;
     this.customerApproval = workOrder.customerApproval;
     this.estimatedCompletionDate = workOrder.estimatedCompletionDate;
     this.completedAt = workOrder.completedAt;
@@ -177,14 +177,14 @@ export class WorkOrderCostBreakdownResponseDto {
   };
 
   constructor(workOrder: WorkOrder) {
-    this.workOrderId = workOrder.id;
+    this.workOrderId = workOrder.id.value;
     this.services = workOrder.services.map(service => new WorkOrderServiceResponseDto(service));
     
     this.costSummary = {
       totalServicesCost: workOrder.getTotalServicesCost(),
-      partsCost: workOrder.partsCost || 0,
-      totalEstimatedCost: workOrder.estimatedCost,
-      totalActualCost: workOrder.actualCost || 0,
+      partsCost: workOrder.partsCost?.value || 0,
+      totalEstimatedCost: workOrder.estimatedCost.value,
+      totalActualCost: workOrder.actualCost?.value || 0,
     };
   }
 }

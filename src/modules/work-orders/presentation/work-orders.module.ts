@@ -17,8 +17,20 @@ import { RemovePartFromWorkOrderService } from '../application/services/remove-p
 import { UpdatePartQuantityService } from '../application/services/update-part-quantity.service';
 import { ApprovePartService } from '../application/services/approve-part.service';
 import { ApplyPartService } from '../application/services/apply-part.service';
-import { WorkOrderTypeOrmRepository } from '../infrastructure/repositories/work-order.typeorm.repository';
-import { WorkOrderRepository } from '../domain/work-order.repository';
+import { WorkOrderTypeOrmRepository as OldWorkOrderTypeOrmRepository } from '../infrastructure/repositories/work-order.typeorm.repository';
+import { WorkOrderTypeOrmRepository } from '../infrastructure/adapters/repositories/work-order-typeorm.repository';
+import { WorkOrderRepository as OldWorkOrderRepository } from '../domain/work-order.repository';
+import { WorkOrderRepository } from '../domain/repositories/work-order.repository';
+// Use Cases
+import { CreateWorkOrderUseCase } from '../application/use-cases/create-work-order.use-case';
+import { UpdateWorkOrderUseCase } from '../application/use-cases/update-work-order.use-case';
+import { DeleteWorkOrderUseCase } from '../application/use-cases/delete-work-order.use-case';
+import { GetWorkOrderByIdUseCase } from '../application/use-cases/get-work-order-by-id.use-case';
+import { GetAllWorkOrdersUseCase } from '../application/use-cases/get-all-work-orders.use-case';
+import { GetWorkOrdersByCustomerUseCase } from '../application/use-cases/get-work-orders-by-customer.use-case';
+import { GetWorkOrdersByStatusUseCase } from '../application/use-cases/get-work-orders-by-status.use-case';
+import { GetWorkOrdersByVehicleUseCase } from '../application/use-cases/get-work-orders-by-vehicle.use-case';
+import { ApproveWorkOrderUseCase } from '../application/use-cases/approve-work-order.use-case';
 import { ServicesModule } from '../../services/services.module';
 import { PartsModule } from '../../parts/parts.module';
 import { CustomersModule } from '@modules/customers/customers.module';
@@ -36,6 +48,7 @@ import { VehiclesModule } from '@modules/vehicles/presentation/vehicles.module';
   ],
   controllers: [WorkOrderController, PublicWorkOrderController],
   providers: [
+    // Legacy services (mantidos para compatibilidade)
     CreateWorkOrderService,
     CreateWorkOrderWithCustomerIdentificationService,
     UpdateWorkOrderService,
@@ -48,14 +61,33 @@ import { VehiclesModule } from '@modules/vehicles/presentation/vehicles.module';
     UpdatePartQuantityService,
     ApprovePartService,
     ApplyPartService,
+    // Hexagonal architecture repositories
     { provide: WorkOrderRepository, useClass: WorkOrderTypeOrmRepository },
+    { provide: OldWorkOrderRepository, useClass: OldWorkOrderTypeOrmRepository },
+    // Use Cases
+    CreateWorkOrderUseCase,
+    UpdateWorkOrderUseCase,
+    DeleteWorkOrderUseCase,
+    GetWorkOrderByIdUseCase,
+    GetAllWorkOrdersUseCase,
+    GetWorkOrdersByCustomerUseCase,
+    GetWorkOrdersByStatusUseCase,
+    GetWorkOrdersByVehicleUseCase,
+    ApproveWorkOrderUseCase,
   ],
   exports: [
+    // Legacy services exports
     CreateWorkOrderService,
     CreateWorkOrderWithCustomerIdentificationService,
     UpdateWorkOrderService,
     FindWorkOrderService,
     WorkOrderRepository,
+    OldWorkOrderRepository,
+    // Use Cases exports
+    CreateWorkOrderUseCase,
+    UpdateWorkOrderUseCase,
+    GetWorkOrderByIdUseCase,
+    GetAllWorkOrdersUseCase,
   ],
 })
 export class WorkOrdersModule {}

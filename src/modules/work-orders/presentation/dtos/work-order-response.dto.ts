@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { WorkOrder } from '../../domain/work-order.entity';
+import { WorkOrder } from '../../domain/entities/work-order.entity';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 
 /**
@@ -75,18 +75,18 @@ export class WorkOrderResponseDto {
   static fromDomain(workOrder: WorkOrder): WorkOrderResponseDto {
     const dto = new WorkOrderResponseDto();
     
-    dto.id = workOrder.id;
+    dto.id = workOrder.id.value;
     dto.customerId = workOrder.customerId;
     dto.vehicleId = workOrder.vehicleId;
-    dto.description = workOrder.description;
+    dto.description = workOrder.description.value;
     dto.status = workOrder.status;
-    dto.estimatedCost = workOrder.estimatedCost;
-    dto.actualCost = workOrder.actualCost;
-    dto.laborCost = workOrder.laborCost;
-    dto.partsCost = workOrder.partsCost;
-    dto.diagnosis = workOrder.diagnosis;
-    dto.technicianNotes = workOrder.technicianNotes;
-    dto.customerApproval = workOrder.customerApproval || false;
+    dto.estimatedCost = workOrder.estimatedCost.value;
+    dto.actualCost = workOrder.actualCost?.value;
+    dto.laborCost = workOrder.laborCost?.value;
+    dto.partsCost = workOrder.partsCost?.value;
+    dto.diagnosis = workOrder.diagnosis?.value;
+    dto.technicianNotes = workOrder.technicianNotes?.value;
+    dto.customerApproval = workOrder.customerApproval;
     dto.estimatedCompletionDate = workOrder.estimatedCompletionDate;
     dto.completedAt = workOrder.completedAt;
     dto.createdAt = workOrder.createdAt;
