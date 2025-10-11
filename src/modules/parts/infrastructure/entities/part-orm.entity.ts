@@ -1,5 +1,5 @@
-export class PartEntity {
-  id!: number;
+export class PartOrmEntity {
+  id!: string;
   name!: string;
   description!: string;
   partNumber!: string;

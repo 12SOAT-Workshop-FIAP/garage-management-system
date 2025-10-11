@@ -1,68 +1,62 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-  Patch,
-} from '@nestjs/common';
 import { CreatePartDto } from '../../application/dtos/create-part.dto';
 import { UpdatePartDto } from '../../application/dtos/update-part.dto';
-import { CreatePartService } from '../../application/services/create-part.service';
-import { DeletePartService } from '../../application/services/delete-part.service';
-import { FindAllPartsService } from '../../application/services/find-all-parts.service';
-import { FindPartByIdService } from '../../application/services/find-part-by-id.service';
-import { UpdatePartService } from '../../application/services/update-part.service';
+import { CreatePartUseCase } from '../../application/use-cases/create-part.use-case';
+import { DeletePartUseCase } from '../../application/use-cases/delete-part.use-case';
+import { FindAllPartsUseCase } from '../../application/use-cases/find-all-parts.use-case';
+import { FindPartByIdUseCase } from '../../application/use-cases/find-part-by-id.use-case';
+import { UpdatePartUseCase } from '../../application/use-cases/update-part.use-case';
+import { UpdateStockUseCase } from '../../application/use-cases/update-stock.use-case';
 import { PartResponseDto } from '../dtos/part-response.dto';
-import { UpdateStockService } from '../../application/services/update-stock.service';
 import { UpdateStockDto } from '../../application/dtos/update-part.dto';
+import { FindAllPartsQuery } from '../../application/queries/find-all-parts.query';
+import { FindPartByIdQuery } from '../../application/queries/find-part-by-id.query';
+import { DeletePartCommand } from '../../application/commands/delete-part.command';
+import { UpdateStockCommand } from '../../application/commands/update-stock.command';
 
-@Controller('parts')
 export class PartController {
   constructor(
-    private readonly createPart: CreatePartService,
-    private readonly updatePart: UpdatePartService,
-    private readonly deletePart: DeletePartService,
-    private readonly findAllParts: FindAllPartsService,
-    private readonly findPartById: FindPartByIdService,
-    private readonly updateStockService: UpdateStockService,
+    private readonly createPart: CreatePartUseCase,
+    private readonly updatePart: UpdatePartUseCase,
+    private readonly deletePart: DeletePartUseCase,
+    private readonly findAllParts: FindAllPartsUseCase,
+    private readonly findPartById: FindPartByIdUseCase,
+    private readonly updateStockService: UpdateStockUseCase,
   ) {}
 
-  @Post()
-  async create(@Body() createPartDto: CreatePartDto) {
-    await this.createPart.execute(createPartDto);
+  async create(createPartDto: CreatePartDto) {
+    return await this.createPart.execute(createPartDto);
   }
 
-  @Get()
   async findAll() {
-    const parts = await this.findAllParts.execute();
-    return parts.map((part) => new PartResponseDto(part));
+    const query = new FindAllPartsQuery();
+    const parts = await this.findAllParts.execute(query);
+    return parts.map((part) => PartResponseDto.from(part));
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const part = await this.findPartById.execute(id);
-    return new PartResponseDto(part);
+  async findOne(id: string) {
+    const query = new FindPartByIdQuery(parseInt(id));
+    const part = await this.findPartById.execute(query);
+    if (!part) {
+      throw new Error('Part not found');
+    }
+    return PartResponseDto.from(part);
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() updatePartDto: UpdatePartDto) {
-    await this.updatePart.execute(id, updatePartDto);
+  async update(id: string, updatePartDto: UpdatePartDto) {
+    return await this.updatePart.execute(id, updatePartDto);
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string) {
-    await this.deletePart.execute(id);
+  async remove(id: string) {
+    const command = new DeletePartCommand(parseInt(id));
+    await this.deletePart.execute(command);
   }
 
-  @Patch(':id/stock')
-  async updateStock(@Param('id') id: string, @Body() dto: UpdateStockDto) {
-    const part = await this.updateStockService.execute(id, dto);
-    return new PartResponseDto(part);
+  async updateStock(id: string, dto: UpdateStockDto) {
+    const command = new UpdateStockCommand(parseInt(id), dto.quantity);
+    const part = await this.updateStockService.execute(command);
+    if (!part) {
+      throw new Error('Part not found');
+    }
+    return PartResponseDto.from(part);
   }
 }

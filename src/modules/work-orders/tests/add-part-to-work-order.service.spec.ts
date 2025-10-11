@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { AddPartToWorkOrderService } from '../application/services/add-part-to-work-order.service';
 import { WorkOrderRepository } from '../domain/work-order.repository';
-import { PartRepository } from '../../parts/domain/part.repository';
+import { PartRepository } from '../../parts/domain/repositories/part.repository';
 import { WorkOrder } from '../domain/work-order.entity';
-import { Part } from '../../parts/domain/part.entity';
+import { Part } from '../../parts/domain/entities/part.entity';
 import { AddPartToWorkOrderDto } from '../application/dtos/add-part-to-work-order.dto';
 
 describe('AddPartToWorkOrderService', () => {

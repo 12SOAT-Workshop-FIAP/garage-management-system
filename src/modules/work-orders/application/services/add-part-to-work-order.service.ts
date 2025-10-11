@@ -2,8 +2,8 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { AddPartToWorkOrderDto } from '../dtos/add-part-to-work-order.dto';
 import { WorkOrderPart } from '../../domain/work-order-part.value-object';
-import { Part } from '../../../parts/domain/part.entity';
-import { PartRepository } from '../../../parts/domain/part.repository';
+import { Part } from '../../../parts/domain/entities/part.entity';
+import { PartRepository } from '../../../parts/domain/repositories/part.repository';
 
 /**
  * AddPartToWorkOrderService
@@ -24,32 +24,32 @@ export class AddPartToWorkOrderService {
     }
 
     // Buscar informações da peça
-    const part = await this.partRepository.findById(dto.partId);
+    const part = await this.partRepository.findById(parseInt(dto.partId));
     if (!part) {
       throw new NotFoundException(`Part with ID ${dto.partId} not found`);
     }
 
     // Verificar se há estoque suficiente
-    if (part.stockQuantity < dto.quantity) {
+    if (part.stockQuantity.value < dto.quantity) {
       throw new BadRequestException(
-        `Insufficient stock for part ${part.name}. Available: ${part.stockQuantity}, Required: ${dto.quantity}`
+        `Insufficient stock for part ${part.name.value}. Available: ${part.stockQuantity.value}, Required: ${dto.quantity}`
       );
     }
 
     // Verificar se a peça está ativa
-    if (!part.active) {
-      throw new BadRequestException(`Part ${part.name} is not active`);
+    if (!part.isActive) {
+      throw new BadRequestException(`Part ${part.name.value} is not active`);
     }
 
     // Usar preço da peça ou preço personalizado
-    const unitPrice = dto.unitPrice ?? part.price;
+    const unitPrice = dto.unitPrice ?? part.price.value;
 
     // Criar value object da peça
     const workOrderPart = new WorkOrderPart(
-      part.id,
-      part.name,
-      part.description,
-      part.partNumber,
+      part.id?.value?.toString() || '',
+      part.name.value,
+      part.description.value,
+      part.partNumber.value,
       dto.quantity,
       unitPrice,
       dto.notes,

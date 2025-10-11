@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { UpdateStockService } from '../application/services/update-stock.service';
-import { PartRepository } from '../domain/part.repository';
-import { Part } from '../domain/part.entity';
+import { UpdateStockUseCase } from '../application/use-cases/update-stock.use-case';
+import { PartRepository } from '../domain/repositories/part.repository';
+import { Part } from '../domain/entities/part.entity';
 import { UpdateStockDto } from '../application/dtos/update-part.dto';
 
 
-describe('UpdateStockService', () => {
-  let service: UpdateStockService;
+describe('UpdateStockUseCase', () => {
+  let useCase: UpdateStockUseCase;
   let repository: jest.Mocked<PartRepository>;
 
   const mockPartRepository = {
@@ -24,7 +24,7 @@ describe('UpdateStockService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UpdateStockService,
+        UpdateStockUseCase,
         {
           provide: PartRepository,
           useValue: mockPartRepository,
@@ -32,7 +32,7 @@ describe('UpdateStockService', () => {
       ],
     }).compile();
 
-    service = module.get<UpdateStockService>(UpdateStockService);
+    useCase = module.get<UpdateStockUseCase>(UpdateStockUseCase);
     repository = module.get(PartRepository);
   });
 
@@ -90,7 +90,7 @@ describe('UpdateStockService', () => {
       repository.save.mockResolvedValue(oilFilterPart);
 
       // Act
-      const result = await service.execute('oil-filter-001', updateStockDto);
+      const result = await useCase.execute('oil-filter-001', updateStockDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('oil-filter-001');
@@ -108,7 +108,7 @@ describe('UpdateStockService', () => {
       repository.save.mockResolvedValue(brakeFluidPart);
 
       // Act
-      const result = await service.execute('brake-fluid-001', updateStockDto);
+      const result = await useCase.execute('brake-fluid-001', updateStockDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('brake-fluid-001');
@@ -126,7 +126,7 @@ describe('UpdateStockService', () => {
       repository.save.mockResolvedValue(oilFilterPart);
 
       // Act
-      const result = await service.execute('oil-filter-001', updateStockDto);
+      const result = await useCase.execute('oil-filter-001', updateStockDto);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('oil-filter-001');
@@ -143,7 +143,7 @@ describe('UpdateStockService', () => {
       repository.findById.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.execute('timing-belt-missing-999', updateStockDto)).rejects.toThrow(NotFoundException);
+      await expect(useCase.execute('timing-belt-missing-999', updateStockDto)).rejects.toThrow(NotFoundException);
       expect(repository.findById).toHaveBeenCalledWith('timing-belt-missing-999');
       expect(repository.save).not.toHaveBeenCalled();
     });
@@ -163,7 +163,7 @@ describe('UpdateStockService', () => {
       repository.findById.mockResolvedValue(criticalStockPart);
 
       // Act & Assert
-      await expect(service.execute('brake-fluid-001', updateStockDto)).rejects.toThrow(BadRequestException);
+      await expect(useCase.execute('brake-fluid-001', updateStockDto)).rejects.toThrow(BadRequestException);
       expect(repository.findById).toHaveBeenCalledWith('brake-fluid-001');
       expect(repository.save).not.toHaveBeenCalled();
     });

@@ -1,11 +1,17 @@
-import { PartialType } from '@nestjs/swagger';
 import { CreatePartDto } from './create-part.dto';
-import { IsNumber } from 'class-validator';
 
-export class UpdatePartDto extends PartialType(CreatePartDto) {}
+export class UpdatePartDto {
+  name?: string;
+  description?: string;
+  category?: string;
+  price?: number;
+  costPrice?: number;
+  minStockLevel?: number;
+  unit?: string;
+  supplier?: string;
+  active?: boolean;
+}
 
 export class UpdateStockDto {
-  // delta: positivo (entrada) ou negativo (baixa)
-  @IsNumber()
-  stockQuantity!: number;
+  quantity!: number;
 }

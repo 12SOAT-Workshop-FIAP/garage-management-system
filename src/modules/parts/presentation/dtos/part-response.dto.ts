@@ -1,63 +1,37 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Part } from '../../domain/part.entity';
+import { Part } from '../../domain/entities/part.entity';
 
 export class PartResponseDto {
-  @ApiProperty({ description: 'Part unique identifier' })
-  id: string;
+  id?: number;
+  name!: string;
+  description!: string;
+  partNumber!: string;
+  category!: string;
+  price!: number;
+  costPrice!: number;
+  stockQuantity!: number;
+  minStockLevel!: number;
+  unit!: string;
+  supplier!: string;
+  active!: boolean;
+  createdAt!: Date;
+  updatedAt!: Date;
 
-  @ApiProperty({ description: 'Part name' })
-  name: string;
-
-  @ApiProperty({ description: 'Part description' })
-  description: string;
-
-  @ApiProperty({ description: 'Part number' })
-  partNumber: string;
-
-  @ApiProperty({ description: 'Part category' })
-  category: string;
-
-  @ApiProperty({ description: 'Part price' })
-  price: number;
-
-  @ApiProperty({ description: 'Part cost price' })
-  costPrice: number;
-
-  @ApiProperty({ description: 'Stock quantity' })
-  stockQuantity: number;
-
-  @ApiProperty({ description: 'Minimum stock level' })
-  minStockLevel: number;
-
-  @ApiProperty({ description: 'Unit of measurement' })
-  unit: string;
-
-  @ApiProperty({ description: 'Supplier' })
-  supplier: string;
-
-  @ApiProperty({ description: 'Part active status' })
-  active: boolean;
-
-  @ApiProperty({ description: 'Part creation date' })
-  createdAt: Date;
-
-  @ApiProperty({ description: 'Part last update date' })
-  updatedAt: Date;
-
-  constructor(part: Part) {
-    this.id = part.id;
-    this.name = part.name;
-    this.description = part.description;
-    this.partNumber = part.partNumber;
-    this.category = part.category;
-    this.price = part.price;
-    this.costPrice = part.costPrice;
-    this.stockQuantity = part.stockQuantity;
-    this.minStockLevel = part.minStockLevel;
-    this.unit = part.unit;
-    this.supplier = part.supplier;
-    this.active = part.active;
-    this.createdAt = part.createdAt;
-    this.updatedAt = part.updatedAt;
+  static from(part: Part): PartResponseDto {
+    const dto = new PartResponseDto();
+    dto.id = part.id?.value;
+    dto.name = part.name.value;
+    dto.description = part.description.value;
+    dto.partNumber = part.partNumber.value;
+    dto.category = part.category.value;
+    dto.price = part.price.value;
+    dto.costPrice = part.costPrice.value;
+    dto.stockQuantity = part.stockQuantity.value;
+    dto.minStockLevel = part.minStockLevel;
+    dto.unit = part.unit.value;
+    dto.supplier = part.supplier.value;
+    dto.active = part.isActive;
+    dto.createdAt = part.createdAt;
+    dto.updatedAt = part.updatedAt;
+    return dto;
   }
 }

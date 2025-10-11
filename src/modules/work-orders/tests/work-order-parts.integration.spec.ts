@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { WorkOrderORM } from '../infrastructure/entities/work-order.entity';
 import { WorkOrderServiceORM } from '../infrastructure/entities/work-order-service.entity';
 import { WorkOrderPartORM } from '../infrastructure/entities/work-order-part.entity';
-import { Part } from '../../parts/infrastructure/entities/part.entity';
+import { PartOrmEntity } from '../../parts/infrastructure/entities/part-orm.entity';
 import { CustomerEntity } from '../../customers/infrastructure/customer.entity';
 import { Vehicle } from '../../vehicles/domain/vehicle.entity';
 import { WorkOrderTypeOrmRepository } from '../infrastructure/repositories/work-order.typeorm.repository';
@@ -14,13 +14,13 @@ import { RemovePartFromWorkOrderService } from '../application/services/remove-p
 import { UpdatePartQuantityService } from '../application/services/update-part-quantity.service';
 import { ApprovePartService } from '../application/services/approve-part.service';
 import { ApplyPartService } from '../application/services/apply-part.service';
-import { PartRepository } from '../../parts/domain/part.repository';
-import { PartTypeOrmRepository } from '../../parts/infrastructure/repositories/part.typeorm.repository';
+import { PartRepository } from '../../parts/domain/repositories/part.repository';
+import { PartTypeOrmRepository } from '../../parts/infrastructure/adapters/repositories/part-typeorm.repository';
 import { WorkOrder } from '../domain/work-order.entity';
 import { WorkOrderStatus } from '../domain/work-order-status.enum';
 import { AddPartToWorkOrderDto } from '../application/dtos/add-part-to-work-order.dto';
 import { UpdatePartQuantityDto } from '../application/dtos/update-part-quantity.dto';
-import { Part as PartDomain } from '../../parts/domain/part.entity';
+import { Part as PartDomain } from '../../parts/domain/entities/part.entity';
 
 describe('WorkOrder Parts Integration', () => {
   let module: TestingModule;
@@ -47,14 +47,14 @@ describe('WorkOrder Parts Integration', () => {
             WorkOrderORM,
             WorkOrderServiceORM,
             WorkOrderPartORM,
-            Part,
+            PartOrmEntity,
             CustomerEntity,
             Vehicle,
           ],
           synchronize: true,
           dropSchema: true,
         }),
-        TypeOrmModule.forFeature([WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM, Part]),
+        TypeOrmModule.forFeature([WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM, PartOrmEntity]),
       ],
       providers: [
         AddPartToWorkOrderService,
@@ -141,12 +141,12 @@ describe('WorkOrder Parts Integration', () => {
         supplier: 'Brake Masters Inc',
         active: true,
       });
-      await partRepository.save(part);
+      await partRepository.create(part);
     });
 
     it('should add part to work order successfully', async () => {
       const addPartDto: AddPartToWorkOrderDto = {
-        partId: part.id,
+        partId: part.id?.value?.toString() || '',
         quantity: 2,
         notes: 'Replace worn brake pads',
       };
@@ -158,7 +158,7 @@ describe('WorkOrder Parts Integration', () => {
       expect(updatedWorkOrder!.parts).toHaveLength(1);
 
       const addedPart = updatedWorkOrder!.parts[0];
-      expect(addedPart.partId).toBe(part.id);
+      expect(addedPart.partId).toBe(part.id?.value?.toString() || '');
       expect(addedPart.partName).toBe(part.name);
       expect(addedPart.quantity).toBe(2);
       expect(parseFloat(addedPart.unitPrice.toString())).toBe(part.price);
@@ -170,7 +170,7 @@ describe('WorkOrder Parts Integration', () => {
     it('should update part quantity successfully', async () => {
       // First add a part
       const addPartDto: AddPartToWorkOrderDto = {
-        partId: part.id,
+        partId: part.id?.value?.toString() || '',
         quantity: 2,
       };
       await addPartService.execute(workOrder.id, addPartDto);
@@ -189,13 +189,13 @@ describe('WorkOrder Parts Integration', () => {
     it('should approve part successfully', async () => {
       // First add a part
       const addPartDto: AddPartToWorkOrderDto = {
-        partId: part.id,
+        partId: part.id?.value?.toString() || '',
         quantity: 1,
       };
       await addPartService.execute(workOrder.id, addPartDto);
 
       // Then approve the part
-      await approvePartService.execute(workOrder.id, part.id);
+      await approvePartService.execute(workOrder.id, part.id?.value?.toString() || '');
 
       const updatedWorkOrder = await workOrderRepository.findById(workOrder.id);
       expect(updatedWorkOrder!.parts[0].isApproved).toBe(true);
@@ -204,16 +204,16 @@ describe('WorkOrder Parts Integration', () => {
     it('should apply part successfully when approved', async () => {
       // First add a part
       const addPartDto: AddPartToWorkOrderDto = {
-        partId: part.id,
+        partId: part.id?.value?.toString() || '',
         quantity: 1,
       };
       await addPartService.execute(workOrder.id, addPartDto);
 
       // Approve the part
-      await approvePartService.execute(workOrder.id, part.id);
+      await approvePartService.execute(workOrder.id, part.id?.value?.toString() || '');
 
       // Then apply the part
-      await applyPartService.execute(workOrder.id, part.id);
+      await applyPartService.execute(workOrder.id, part.id?.value?.toString() || '');
 
       const updatedWorkOrder = await workOrderRepository.findById(workOrder.id);
       expect(updatedWorkOrder!.parts[0].appliedAt).toBeInstanceOf(Date);
@@ -222,7 +222,7 @@ describe('WorkOrder Parts Integration', () => {
     it('should remove part from work order successfully', async () => {
       // First add a part
       const addPartDto: AddPartToWorkOrderDto = {
-        partId: part.id,
+        partId: part.id?.value?.toString() || '',
         quantity: 1,
       };
       await addPartService.execute(workOrder.id, addPartDto);
@@ -231,7 +231,7 @@ describe('WorkOrder Parts Integration', () => {
       expect(updatedWorkOrder!.parts).toHaveLength(1);
 
       // Then remove the part
-      await removePartService.execute(workOrder.id, part.id);
+      await removePartService.execute(workOrder.id, part.id?.value?.toString() || '');
 
       updatedWorkOrder = await workOrderRepository.findById(workOrder.id);
       expect(updatedWorkOrder!.parts).toHaveLength(0);
@@ -240,7 +240,7 @@ describe('WorkOrder Parts Integration', () => {
     it('should calculate total costs correctly with parts', async () => {
       // Add a part
       const addPartDto: AddPartToWorkOrderDto = {
-        partId: part.id,
+        partId: part.id?.value?.toString() || '',
         quantity: 2,
         unitPrice: 175.0, // Custom price
       };
@@ -268,17 +268,17 @@ describe('WorkOrder Parts Integration', () => {
         supplier: 'Engine Parts Co',
         active: true,
       });
-      await partRepository.save(part2);
+      await partRepository.create(part2);
 
       // Add first part
       await addPartService.execute(workOrder.id, {
-        partId: part.id,
+        partId: part.id?.value?.toString() || '',
         quantity: 1,
       });
 
       // Add second part
       await addPartService.execute(workOrder.id, {
-        partId: part2.id,
+        partId: part2.id?.value?.toString() || '',
         quantity: 3,
       });
 

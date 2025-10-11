@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { DeletePartService } from '../application/services/delete-part.service';
-import { PartRepository } from '../domain/part.repository';
-import { Part } from '../domain/part.entity';
+import { DeletePartUseCase } from '../application/use-cases/delete-part.use-case';
+import { PartRepository } from '../domain/repositories/part.repository';
+import { Part } from '../domain/entities/part.entity';
+import { DeletePartCommand } from '../application/commands/delete-part.command';
 
 
-describe('DeletePartService', () => {
-  let service: DeletePartService;
+describe('DeletePartUseCase', () => {
+  let useCase: DeletePartUseCase;
   let repository: jest.Mocked<PartRepository>;
 
   const mockPartRepository = {
@@ -23,7 +24,7 @@ describe('DeletePartService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        DeletePartService,
+        DeletePartUseCase,
         {
           provide: PartRepository,
           useValue: mockPartRepository,
@@ -31,7 +32,7 @@ describe('DeletePartService', () => {
       ],
     }).compile();
 
-    service = module.get<DeletePartService>(DeletePartService);
+    useCase = module.get<DeletePartUseCase>(DeletePartUseCase);
     repository = module.get(PartRepository);
   });
 
@@ -86,7 +87,8 @@ describe('DeletePartService', () => {
       repository.delete.mockResolvedValue(undefined);
 
       // Act
-      await service.execute('brake-pad-worn-001');
+      const command = new DeletePartCommand(1);
+      await useCase.execute(command);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('brake-pad-worn-001');
@@ -99,7 +101,8 @@ describe('DeletePartService', () => {
       repository.delete.mockResolvedValue(undefined);
 
       // Act
-      await service.execute('air-filter-obsolete-002');
+      const command = new DeletePartCommand(2);
+      await useCase.execute(command);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('air-filter-obsolete-002');
@@ -111,7 +114,8 @@ describe('DeletePartService', () => {
       repository.findById.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.execute('spark-plug-missing-999')).rejects.toThrow(NotFoundException);
+      const command = new DeletePartCommand(999);
+      await expect(useCase.execute(command)).rejects.toThrow(NotFoundException);
       expect(repository.findById).toHaveBeenCalledWith('spark-plug-missing-999');
       expect(repository.delete).not.toHaveBeenCalled();
     });

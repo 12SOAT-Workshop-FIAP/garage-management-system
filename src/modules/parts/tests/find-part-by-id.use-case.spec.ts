@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { FindPartByIdService } from '../application/services/find-part-by-id.service';
-import { PartRepository } from '../domain/part.repository';
-import { Part } from '../domain/part.entity';
+import { FindPartByIdUseCase } from '../application/use-cases/find-part-by-id.use-case';
+import { PartRepository } from '../domain/repositories/part.repository';
+import { Part } from '../domain/entities/part.entity';
+import { FindPartByIdQuery } from '../application/queries/find-part-by-id.query';
 
 
-describe('FindPartByIdService', () => {
-  let service: FindPartByIdService;
+describe('FindPartByIdUseCase', () => {
+  let useCase: FindPartByIdUseCase;
   let repository: jest.Mocked<PartRepository>;
 
   const mockPartRepository = {
@@ -23,7 +24,7 @@ describe('FindPartByIdService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        FindPartByIdService,
+        FindPartByIdUseCase,
         {
           provide: PartRepository,
           useValue: mockPartRepository,
@@ -31,7 +32,7 @@ describe('FindPartByIdService', () => {
       ],
     }).compile();
 
-    service = module.get<FindPartByIdService>(FindPartByIdService);
+    useCase = module.get<FindPartByIdUseCase>(FindPartByIdUseCase);
     repository = module.get(PartRepository);
   });
 
@@ -85,7 +86,8 @@ describe('FindPartByIdService', () => {
       repository.findById.mockResolvedValue(brakeDiscPart);
 
       // Act
-      const result = await service.execute('brake-disc-001');
+      const query = new FindPartByIdQuery(1);
+      const result = await useCase.execute(query);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('brake-disc-001');
@@ -97,7 +99,8 @@ describe('FindPartByIdService', () => {
       repository.findById.mockResolvedValue(airFilterPart);
 
       // Act
-      const result = await service.execute('air-filter-002');
+      const query = new FindPartByIdQuery(2);
+      const result = await useCase.execute(query);
 
       // Assert
       expect(repository.findById).toHaveBeenCalledWith('air-filter-002');
@@ -109,7 +112,8 @@ describe('FindPartByIdService', () => {
       repository.findById.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.execute('timing-belt-999')).rejects.toThrow(NotFoundException);
+      const query = new FindPartByIdQuery(999);
+      await expect(useCase.execute(query)).rejects.toThrow(NotFoundException);
       expect(repository.findById).toHaveBeenCalledWith('timing-belt-999');
     });
   });
