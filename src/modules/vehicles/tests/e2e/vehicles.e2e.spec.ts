@@ -4,9 +4,9 @@ import * as request from 'supertest';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
 import { CustomersModule } from '@modules/customers/customers.module';
-import { VehiclesModule } from '@modules/vehicles/presentation/vehicles.module';
-import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
+import { VehiclesModule } from '@modules/vehicles/vehicles.module';
 import { CryptographyPort } from '@modules/customers/domain/ports/cryptography.port';
+import { VehicleOrmEntity } from '@modules/vehicles/infrastructure/entities/vehicle-orm.entity';
 
 describe('Vehicles (e2e)', () => {
   let app: INestApplication;
@@ -28,7 +28,7 @@ describe('Vehicles (e2e)', () => {
           username: process.env.POSTGRES_USER || 'postgres',
           password: process.env.POSTGRES_PASSWORD || 'postgres',
           database: process.env.POSTGRES_TEST_DB || 'garage',
-          entities: [Vehicle, CustomerEntity],
+          entities: [CustomerEntity, VehicleOrmEntity],
           synchronize: true,
           dropSchema: true,
           logging: false,
@@ -98,8 +98,8 @@ describe('Vehicles (e2e)', () => {
 
       expect(res.body).toHaveProperty('id');
       expect(res.body.brand).toBe(dto.brand);
-      expect(res.body.customerId).toBe(createdCustomerId);
-      createdVehicleId = res.body.id;
+      expect(res.body.customer.id).toBe(createdCustomerId);
+      createdVehicleId = parseInt(res.body.id);
     });
 
     it('deve falhar com dados inválidos', () => {
@@ -125,8 +125,8 @@ describe('Vehicles (e2e)', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       res.body.forEach((veh: any) => {
-        expect(veh).toHaveProperty('customerId');
-        expect(typeof veh.customerId).toBe('number');
+        expect(veh).toHaveProperty('customer');
+        expect(typeof veh.customer.id).toBe('number');
       });
     });
   });
@@ -137,8 +137,8 @@ describe('Vehicles (e2e)', () => {
         .get(`/vehicles/${createdVehicleId}`)
         .expect(200);
 
-      expect(res.body.id).toBe(createdVehicleId);
-      expect(res.body.customerId).toBe(createdCustomerId);
+      expect(res.body.id).toBe(createdVehicleId.toString());
+      expect(res.body.customer.id).toBe(createdCustomerId);
     });
 
     it('deve retornar 404 para um veículo inexistente', () => {
@@ -159,7 +159,7 @@ describe('Vehicles (e2e)', () => {
         .expect(200);
 
       expect(res.body.model).toBe(dto.model);
-      expect(res.body.customerId).toBe(createdCustomerId);
+      expect(res.body.customer.id).toBe(createdCustomerId);
     });
 
     it('deve retornar 404 ao atualizar veículo inexistente', () => {
