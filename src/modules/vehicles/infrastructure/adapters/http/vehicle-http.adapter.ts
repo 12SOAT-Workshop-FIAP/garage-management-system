@@ -1,17 +1,17 @@
-import { 
-  Injectable, 
-  NotFoundException, 
+import {
+  Injectable,
+  NotFoundException,
   BadRequestException,
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Delete, 
-  Body, 
-  Param, 
-  HttpCode, 
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
   HttpStatus,
-  ParseIntPipe
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CreateVehicleUseCase } from '../../../application/use-cases/create-vehicle.usecase';
 import { UpdateVehicleUseCase } from '../../../application/use-cases/update-vehicle.usecase';
@@ -49,7 +49,7 @@ export class VehicleHttpAdapter {
   async findAll(): Promise<VehicleResponseDto[]> {
     try {
       const vehicles = await this.findAllVehiclesUseCase.execute();
-      return vehicles.map(vehicle => this.toResponse(vehicle));
+      return vehicles.map((vehicle) => this.toResponse(vehicle));
     } catch (error) {
       this.mapError(error);
     }
@@ -67,8 +67,8 @@ export class VehicleHttpAdapter {
 
   @Put(':id')
   async update(
-    @Param('id', ParseIntPipe) id: number, 
-    @Body() updateVehicleDto: UpdateVehicleDto
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateVehicleDto: UpdateVehicleDto,
   ): Promise<VehicleResponseDto> {
     try {
       const vehicle = await this.updateVehicleUseCase.execute({ id, ...updateVehicleDto });
@@ -102,7 +102,11 @@ export class VehicleHttpAdapter {
 
   private mapError(error: unknown): never {
     if (error instanceof DomainError) {
-      if (error.code.includes('NOT_FOUND') || error.code === 'CUSTOMER_NOT_FOUND' || error.code === 'VEHICLE_NOT_FOUND') {
+      if (
+        error.code.includes('NOT_FOUND') ||
+        error.code === 'CUSTOMER_NOT_FOUND' ||
+        error.code === 'VEHICLE_NOT_FOUND'
+      ) {
         throw new NotFoundException(error.message);
       }
       throw new BadRequestException({ code: error.code, message: error.message });
