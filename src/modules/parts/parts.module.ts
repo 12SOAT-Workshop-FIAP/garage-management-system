@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PartEntity } from './infrastructure/entities/part.entity';
-import { PartController } from './presentation/controllers/part.controller';
+import { PartHttpAdapter } from './infrastructure/adapters/http/part-http.adapter';
 import { CreatePartUseCase } from './application/use-cases/create-part.use-case';
 import { FindAllPartsUseCase } from './application/use-cases/find-all-parts.use-case';
 import { FindPartByIdUseCase } from './application/use-cases/find-part-by-id.use-case';
@@ -16,7 +15,7 @@ import { UpdatePartUseCase } from './application/use-cases/update-part.use-case'
 
 @Module({
   imports: [TypeOrmModule.forFeature([PartOrmEntity])],
-  controllers: [PartController],
+  controllers: [PartHttpAdapter],
   providers: [
     // Use Cases
     CreatePartUseCase,

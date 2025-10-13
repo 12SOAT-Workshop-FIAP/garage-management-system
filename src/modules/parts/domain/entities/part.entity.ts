@@ -41,7 +41,7 @@ export class Part {
     createdAt,
     updatedAt,
   }: {
-    id?: number;
+    id?: string;
     name: string;
     description: string;
     partNumber: string;
@@ -67,7 +67,7 @@ export class Part {
     this._unit = new PartUnit(unit);
     this._supplier = new PartSupplier(supplier);
     this._status = new PartStatus(active);
-    
+
     if (id) {
       this._id = new PartId(id);
     }
@@ -130,7 +130,7 @@ export class Part {
     createdAt,
     updatedAt,
   }: {
-    id: number;
+    id: string;
     name: string;
     description: string;
     partNumber: string;
@@ -262,6 +262,7 @@ export class Part {
   update({
     name,
     description,
+    partNumber,
     category,
     price,
     costPrice,
@@ -271,6 +272,7 @@ export class Part {
   }: {
     name?: string;
     description?: string;
+    partNumber?: string;
     category?: string;
     price?: number;
     costPrice?: number;
@@ -280,15 +282,14 @@ export class Part {
   }): void {
     if (name) this._name = new PartName(name);
     if (description) this._description = new PartDescription(description);
+    if (partNumber) this._partNumber = new PartNumber(partNumber);
     if (category) this._category = new PartCategory(category);
     if (price !== undefined) this._price = new Money(price);
     if (costPrice !== undefined) this._costPrice = new Money(costPrice);
     if (minStockLevel !== undefined) this._minStockLevel = minStockLevel;
     if (unit) this._unit = new PartUnit(unit);
     if (supplier) this._supplier = new PartSupplier(supplier);
-    
+
     this._updatedAt = new Date();
   }
-
-
 }

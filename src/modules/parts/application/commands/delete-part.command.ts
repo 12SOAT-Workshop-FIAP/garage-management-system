@@ -1,5 +1,5 @@
 export class DeletePartCommand {
   constructor(
-    public readonly id: number,
+    public readonly id: string,
   ) {}
 }

@@ -5,20 +5,17 @@ import { UpdatePartDto } from '../dtos/update-part.dto';
 
 @Injectable()
 export class UpdatePartUseCase {
-  constructor(
-    private readonly partRepository: PartRepository,
-  ) {}
+  constructor(private readonly partRepository: PartRepository) {}
 
   async execute(id: string, updatePartDto: UpdatePartDto): Promise<Part> {
-    const partId = parseInt(id);
-    const originalPart = await this.partRepository.findById(partId);
+    const originalPart = await this.partRepository.findById(id);
     if (!originalPart) {
       throw new NotFoundException(`Part with ID ${id} not found`);
     }
 
     // Create a copy of the part for update
     const updatedPart = Part.restore({
-      id: partId,
+      id: id,
       name: originalPart.name.value,
       description: originalPart.description.value,
       partNumber: originalPart.partNumber.value,
@@ -34,10 +31,19 @@ export class UpdatePartUseCase {
       updatedAt: originalPart.updatedAt,
     });
 
+    // Check if partNumber is being updated and if it conflicts
+    if (updatePartDto.partNumber && updatePartDto.partNumber !== originalPart.partNumber.value) {
+      const existingPart = await this.partRepository.findByPartNumber(updatePartDto.partNumber);
+      if (existingPart && existingPart.id?.value !== id) {
+        throw new ConflictException('Part number already exists');
+      }
+    }
+
     // Update the part using the entity's update method
     updatedPart.update({
       name: updatePartDto.name,
       description: updatePartDto.description,
+      partNumber: updatePartDto.partNumber,
       category: updatePartDto.category,
       price: updatePartDto.price,
       costPrice: updatePartDto.costPrice,

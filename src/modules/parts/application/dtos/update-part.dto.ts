@@ -3,6 +3,7 @@ import { CreatePartDto } from './create-part.dto';
 export class UpdatePartDto {
   name?: string;
   description?: string;
+  partNumber?: string;
   category?: string;
   price?: number;
   costPrice?: number;

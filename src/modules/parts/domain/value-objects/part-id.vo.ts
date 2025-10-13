@@ -1,18 +1,22 @@
 export class PartId {
-  private readonly _value: number;
+  private readonly _value: string;
 
-  constructor(value: number) {
-    if (!value || value <= 0) {
-      throw new Error('Part ID must be a positive number');
+  constructor(value: string) {
+    if (!value || value.trim().length === 0) {
+      throw new Error('Part ID cannot be empty');
     }
-    this._value = value;
+    this._value = value.trim();
   }
 
-  get value(): number {
+  get value(): string {
     return this._value;
   }
 
   equals(other: PartId): boolean {
     return this._value === other._value;
+  }
+
+  toString(): string {
+    return this._value;
   }
 }

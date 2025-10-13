@@ -5,7 +5,6 @@ import { PartRepository } from '../domain/repositories/part.repository';
 import { Part } from '../domain/entities/part.entity';
 import { FindPartByIdQuery } from '../application/queries/find-part-by-id.query';
 
-
 describe('FindPartByIdUseCase', () => {
   let useCase: FindPartByIdUseCase;
   let repository: jest.Mocked<PartRepository>;
@@ -41,56 +40,50 @@ describe('FindPartByIdUseCase', () => {
   });
 
   describe('execute', () => {
-    const brakeDiscPart: Part = {
+    const brakeDiscPart = Part.restore({
       id: 'brake-disc-001',
       name: 'Disco de Freio Ventilado',
       description: 'Disco de freio ventilado para VW Gol/Voyage - par',
       partNumber: 'DF-280-VW',
       category: 'freios',
-      price: 156.90,
+      price: 156.9,
       costPrice: 109.83,
       stockQuantity: 8,
       minStockLevel: 2,
-      unit: 'pair',
+      unit: 'PAIR',
       supplier: 'Freios Premium Ltda',
       active: true,
-      created_at: new Date('2024-01-15T10:30:00Z'),
-      updated_at: new Date('2024-01-15T10:30:00Z'),
-      isLowStock: jest.fn().mockReturnValue(false),
-      updateStock: jest.fn(),
-      hasStock: jest.fn().mockReturnValue(true),
-    } as any;
+      createdAt: new Date('2024-01-15T10:30:00Z'),
+      updatedAt: new Date('2024-01-15T10:30:00Z'),
+    });
 
-    const airFilterPart: Part = {
+    const airFilterPart = Part.restore({
       id: 'air-filter-002',
       name: 'Filtro de Ar do Motor',
       description: 'Filtro de ar esportivo K&N para motores 1.6-2.0 turbo',
       partNumber: 'FA-KN-33-2865',
       category: 'filtros',
-      price: 285.00,
-      costPrice: 199.50,
+      price: 285.0,
+      costPrice: 199.5,
       stockQuantity: 6,
       minStockLevel: 2,
-      unit: 'piece',
+      unit: 'PC',
       supplier: 'K&N Filtros Brasil',
       active: true,
-      created_at: new Date('2024-02-20T14:15:00Z'),
-      updated_at: new Date('2024-02-20T14:15:00Z'),
-      isLowStock: jest.fn().mockReturnValue(false),
-      updateStock: jest.fn(),
-      hasStock: jest.fn().mockReturnValue(true),
-    } as any;
+      createdAt: new Date('2024-02-20T14:15:00Z'),
+      updatedAt: new Date('2024-02-20T14:15:00Z'),
+    });
 
     it('should return brake disc when found by id', async () => {
       // Arrange
       repository.findById.mockResolvedValue(brakeDiscPart);
 
       // Act
-      const query = new FindPartByIdQuery(1);
+      const query = new FindPartByIdQuery('brake-disc-001');
       const result = await useCase.execute(query);
 
       // Assert
-      expect(repository.findById).toHaveBeenCalledWith(1);
+      expect(repository.findById).toHaveBeenCalledWith('brake-disc-001');
       expect(result).toEqual(brakeDiscPart);
     });
 
@@ -99,11 +92,11 @@ describe('FindPartByIdUseCase', () => {
       repository.findById.mockResolvedValue(airFilterPart);
 
       // Act
-      const query = new FindPartByIdQuery(2);
+      const query = new FindPartByIdQuery('air-filter-002');
       const result = await useCase.execute(query);
 
       // Assert
-      expect(repository.findById).toHaveBeenCalledWith(2);
+      expect(repository.findById).toHaveBeenCalledWith('air-filter-002');
       expect(result).toEqual(airFilterPart);
     });
 
@@ -112,13 +105,12 @@ describe('FindPartByIdUseCase', () => {
       repository.findById.mockResolvedValue(null);
 
       // Act
-      const query = new FindPartByIdQuery(999);
+      const query = new FindPartByIdQuery('non-existent-id');
       const result = await useCase.execute(query);
 
       // Assert
-      expect(repository.findById).toHaveBeenCalledWith(999);
+      expect(repository.findById).toHaveBeenCalledWith('non-existent-id');
       expect(result).toBeNull();
     });
   });
 });
-

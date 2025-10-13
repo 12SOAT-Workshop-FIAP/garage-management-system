@@ -5,7 +5,6 @@ import { PartRepository } from '../domain/repositories/part.repository';
 import { Part } from '../domain/entities/part.entity';
 import { DeletePartCommand } from '../application/commands/delete-part.command';
 
-
 describe('DeletePartUseCase', () => {
   let useCase: DeletePartUseCase;
   let repository: jest.Mocked<PartRepository>;
@@ -41,45 +40,39 @@ describe('DeletePartUseCase', () => {
   });
 
   describe('execute', () => {
-    const obsoleteBrakePart: Part = {
+    const obsoleteBrakePart = Part.restore({
       id: 'brake-pad-worn-001',
       name: 'Pastilha de Freio Traseira',
       description: 'Pastilha de freio traseira para Chevrolet Corsa/Celta',
       partNumber: 'PT-7845-GM',
       category: 'freios',
-      price: 67.90,
+      price: 67.9,
       costPrice: 47.53,
       stockQuantity: 3,
       minStockLevel: 2,
-      unit: 'kit',
+      unit: 'SET',
       supplier: 'Freios Premium Ltda',
       active: true,
-      created_at: new Date('2023-12-15T16:20:00Z'),
-      updated_at: new Date('2023-12-15T16:20:00Z'),
-      isLowStock: jest.fn().mockReturnValue(false),
-      updateStock: jest.fn(),
-      hasStock: jest.fn().mockReturnValue(true),
-    } as any;
+      createdAt: new Date('2023-12-15T16:20:00Z'),
+      updatedAt: new Date('2023-12-15T16:20:00Z'),
+    });
 
-    const discontinuedFilter: Part = {
+    const discontinuedFilter = Part.restore({
       id: 'air-filter-obsolete-002',
       name: 'Filtro de Ar Cabine',
       description: 'Filtro de ar condicionado para Ford Ka 2008-2013 (descontinuado)',
       partNumber: 'FC-KA-0813-FD',
       category: 'filtros',
-      price: 35.40,
+      price: 35.4,
       costPrice: 24.78,
       stockQuantity: 1,
       minStockLevel: 0,
-      unit: 'piece',
+      unit: 'PC',
       supplier: 'Filtros & Acessórios Ltda',
       active: false,
-      created_at: new Date('2023-08-10T11:15:00Z'),
-      updated_at: new Date('2024-01-20T14:30:00Z'),
-      isLowStock: jest.fn().mockReturnValue(true),
-      updateStock: jest.fn(),
-      hasStock: jest.fn().mockReturnValue(true),
-    } as any;
+      createdAt: new Date('2023-08-10T11:15:00Z'),
+      updatedAt: new Date('2024-01-20T14:30:00Z'),
+    });
 
     it('should delete worn brake pad successfully', async () => {
       // Arrange
@@ -87,11 +80,11 @@ describe('DeletePartUseCase', () => {
       repository.delete.mockResolvedValue(undefined);
 
       // Act
-      const command = new DeletePartCommand(1);
+      const command = new DeletePartCommand('brake-pad-worn-001');
       await useCase.execute(command);
 
       // Assert
-      expect(repository.findById).toHaveBeenCalledWith(1);
+      expect(repository.findById).toHaveBeenCalledWith('brake-pad-worn-001');
       expect(repository.delete).toHaveBeenCalledWith(obsoleteBrakePart);
     });
 
@@ -101,11 +94,11 @@ describe('DeletePartUseCase', () => {
       repository.delete.mockResolvedValue(undefined);
 
       // Act
-      const command = new DeletePartCommand(2);
+      const command = new DeletePartCommand('air-filter-obsolete-002');
       await useCase.execute(command);
 
       // Assert
-      expect(repository.findById).toHaveBeenCalledWith(2);
+      expect(repository.findById).toHaveBeenCalledWith('air-filter-obsolete-002');
       expect(repository.delete).toHaveBeenCalledWith(discontinuedFilter);
     });
 
@@ -114,11 +107,10 @@ describe('DeletePartUseCase', () => {
       repository.findById.mockResolvedValue(null);
 
       // Act & Assert
-      const command = new DeletePartCommand(999);
+      const command = new DeletePartCommand('non-existent-id');
       await expect(useCase.execute(command)).rejects.toThrow(NotFoundException);
-      expect(repository.findById).toHaveBeenCalledWith(999);
+      expect(repository.findById).toHaveBeenCalledWith('non-existent-id');
       expect(repository.delete).not.toHaveBeenCalled();
     });
   });
 });
-

@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PartRepository } from '../../../domain/repositories/part.repository';
 import { Part } from '../../../domain/entities/part.entity';
-import { PartEntity } from '../../entities/part.entity';
 import { PartMapper } from '../../mappers/part.mapper';
 import { PartOrmEntity } from '../../entities/part-orm.entity';
 
@@ -11,7 +10,7 @@ import { PartOrmEntity } from '../../entities/part-orm.entity';
 export class PartTypeOrmRepository extends PartRepository {
   constructor(
     @InjectRepository(PartOrmEntity)
-    private readonly ormRepository: Repository<PartEntity>,
+    private readonly ormRepository: Repository<PartOrmEntity>,
   ) {
     super();
   }
@@ -21,7 +20,7 @@ export class PartTypeOrmRepository extends PartRepository {
     return parts.length > 0 ? PartMapper.toDomainList(parts) : null;
   }
 
-  async findById(id: number): Promise<Part | null> {
+  async findById(id: string): Promise<Part | null> {
     const part = await this.ormRepository.findOne({ where: { id } });
     return part ? PartMapper.toDomain(part) : null;
   }
@@ -71,7 +70,7 @@ export class PartTypeOrmRepository extends PartRepository {
     await this.ormRepository.delete(part.id.value);
   }
 
-  async updateStock(id: number, quantity: number): Promise<Part | null> {
+  async updateStock(id: string, quantity: number): Promise<Part | null> {
     const part = await this.findById(id);
     if (!part) {
       return null;

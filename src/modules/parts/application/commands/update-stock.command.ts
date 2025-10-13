@@ -1,6 +1,6 @@
 export class UpdateStockCommand {
   constructor(
-    public readonly id: number,
+    public readonly id: string,
     public readonly quantity: number,
   ) {}
 }

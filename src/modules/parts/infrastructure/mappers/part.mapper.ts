@@ -1,8 +1,8 @@
 import { Part } from '../../domain/entities/part.entity';
-import { PartEntity } from '../entities/part.entity';
+import { PartOrmEntity } from '../entities/part-orm.entity';
 
 export class PartMapper {
-  static toDomain(ormEntity: PartEntity): Part {
+  static toDomain(ormEntity: PartOrmEntity): Part {
     return Part.restore({
       id: ormEntity.id,
       name: ormEntity.name,
@@ -21,13 +21,13 @@ export class PartMapper {
     });
   }
 
-  static toOrm(domainEntity: Part): PartEntity {
-    const ormEntity = new PartEntity();
-    
+  static toOrm(domainEntity: Part): PartOrmEntity {
+    const ormEntity = new PartOrmEntity();
+
     if (domainEntity.id) {
       ormEntity.id = domainEntity.id.value;
     }
-    
+
     ormEntity.name = domainEntity.name.value;
     ormEntity.description = domainEntity.description.value;
     ormEntity.partNumber = domainEntity.partNumber.value;
@@ -45,7 +45,7 @@ export class PartMapper {
     return ormEntity;
   }
 
-  static toDomainList(ormEntities: PartEntity[]): Part[] {
-    return ormEntities.map(entity => this.toDomain(entity));
+  static toDomainList(ormEntities: PartOrmEntity[]): Part[] {
+    return ormEntities.map((entity) => this.toDomain(entity));
   }
 }

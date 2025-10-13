@@ -1,5 +1,5 @@
 export class FindPartByIdQuery {
   constructor(
-    public readonly id: number,
+    public readonly id: string,
   ) {}
 }
