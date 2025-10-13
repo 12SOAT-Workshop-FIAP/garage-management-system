@@ -6,6 +6,7 @@ import { CustomerEntity } from '@modules/customers/infrastructure/customer.entit
 import { CustomersModule } from '@modules/customers/customers.module';
 import { VehiclesModule } from '@modules/vehicles/presentation/vehicles.module';
 import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
+import { CryptographyPort } from '@modules/customers/domain/ports/cryptography.port';
 
 describe('Vehicles (e2e)', () => {
   let app: INestApplication;
@@ -13,6 +14,11 @@ describe('Vehicles (e2e)', () => {
   let createdCustomerId: number;
 
   beforeAll(async () => {
+    // Set environment variables for testing
+    process.env.BREVO_API_KEY = 'test-api-key';
+    process.env.EMAIL_SENDER = 'test@example.com';
+    process.env.SENDER_NAME = 'Test Sender';
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({
@@ -30,7 +36,19 @@ describe('Vehicles (e2e)', () => {
         VehiclesModule,
         CustomersModule,
       ],
-    }).compile();
+    })
+      .overrideProvider(CryptographyPort)
+      .useValue({
+        encryptSensitiveData: jest.fn().mockImplementation(async (data: string) => ({
+          encryptedValue: data, // Return original value for testing
+          getMaskedValue: () => '***.***.***-**',
+        })),
+        decryptSensitiveData: jest.fn().mockImplementation(async (data: string) => ({
+          value: data, // Return original value for testing
+        })),
+        validateSensitiveData: jest.fn().mockReturnValue(true),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
 
@@ -53,7 +71,7 @@ describe('Vehicles (e2e)', () => {
       personType: 'INDIVIDUAL',
       document: uniqueDocument,
       email: uniqueEmail,
-      phone: '5518996787172',
+      phone: '+5518996787172',
       status: true,
     });
 
@@ -66,7 +84,7 @@ describe('Vehicles (e2e)', () => {
   });
 
   describe('POST /vehicles', () => {
-    it('deve criar um veículo com sucesso e retornar customer dentro do response', async () => {
+    it('deve criar um veículo com sucesso e retornar customerId no response', async () => {
       const randomPlate = `ABC${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`;
       const dto = {
         brand: 'Fiat',
@@ -80,8 +98,7 @@ describe('Vehicles (e2e)', () => {
 
       expect(res.body).toHaveProperty('id');
       expect(res.body.brand).toBe(dto.brand);
-      expect(res.body.customer).toBeDefined();
-      expect(res.body.customer.id).toBe(createdCustomerId);
+      expect(res.body.customerId).toBe(createdCustomerId);
       createdVehicleId = res.body.id;
     });
 
@@ -91,7 +108,7 @@ describe('Vehicles (e2e)', () => {
         model: '',
         plate: '',
         year: -1,
-        customer: 'invalid' as any,
+        customerId: 'invalid' as any,
       };
 
       return request(app.getHttpServer()).post('/vehicles').send(dto).expect(400);
@@ -103,26 +120,25 @@ describe('Vehicles (e2e)', () => {
   });
 
   describe('GET /vehicles', () => {
-    it('deve retornar todos os veículos com relação de customer', async () => {
+    it('deve retornar todos os veículos com customerId', async () => {
       const res = await request(app.getHttpServer()).get('/vehicles').expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
       res.body.forEach((veh: any) => {
-        expect(veh).toHaveProperty('customer');
-        expect(veh.customer).toHaveProperty('id');
+        expect(veh).toHaveProperty('customerId');
+        expect(typeof veh.customerId).toBe('number');
       });
     });
   });
 
   describe('GET /vehicles/:id', () => {
-    it('deve retornar um veículo específico com customer', async () => {
+    it('deve retornar um veículo específico com customerId', async () => {
       const res = await request(app.getHttpServer())
         .get(`/vehicles/${createdVehicleId}`)
         .expect(200);
 
       expect(res.body.id).toBe(createdVehicleId);
-      expect(res.body.customer).toBeDefined();
-      expect(res.body.customer.id).toBe(createdCustomerId);
+      expect(res.body.customerId).toBe(createdCustomerId);
     });
 
     it('deve retornar 404 para um veículo inexistente', () => {
@@ -131,7 +147,7 @@ describe('Vehicles (e2e)', () => {
   });
 
   describe('PUT /vehicles/:id', () => {
-    it('deve atualizar um veículo e manter relação de customer', async () => {
+    it('deve atualizar um veículo e manter customerId', async () => {
       const dto = {
         model: 'Uno Mille',
         year: 2015,
@@ -143,8 +159,7 @@ describe('Vehicles (e2e)', () => {
         .expect(200);
 
       expect(res.body.model).toBe(dto.model);
-      expect(res.body.customer).toBeDefined();
-      expect(res.body.customer.id).toBe(createdCustomerId);
+      expect(res.body.customerId).toBe(createdCustomerId);
     });
 
     it('deve retornar 404 ao atualizar veículo inexistente', () => {

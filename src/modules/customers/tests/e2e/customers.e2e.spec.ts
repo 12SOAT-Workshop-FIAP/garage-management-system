@@ -4,6 +4,7 @@ import * as request from 'supertest';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomersModule } from '../../customers.module';
 import { CustomerEntity } from '../../infrastructure/customer.entity';
+import { CryptographyPort } from '../../domain/ports/cryptography.port';
 // Note: Vehicle entity handled separately
 
 const INVALID_CPF = '12345678909';
@@ -13,6 +14,11 @@ describe('Customers (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
+    // Set environment variables for testing
+    process.env.BREVO_API_KEY = 'test-api-key';
+    process.env.EMAIL_SENDER = 'test@example.com';
+    process.env.SENDER_NAME = 'Test Sender';
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({
@@ -29,7 +35,19 @@ describe('Customers (e2e)', () => {
         }),
         CustomersModule,
       ],
-    }).compile();
+    })
+      .overrideProvider(CryptographyPort)
+      .useValue({
+        encryptSensitiveData: jest.fn().mockImplementation(async (data: string) => ({
+          encryptedValue: data, // Return original value for testing
+          getMaskedValue: () => '***.***.***-**',
+        })),
+        decryptSensitiveData: jest.fn().mockImplementation(async (data: string) => ({
+          value: data, // Return original value for testing
+        })),
+        validateSensitiveData: jest.fn().mockReturnValue(true),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
 
@@ -49,34 +67,48 @@ describe('Customers (e2e)', () => {
   });
 
   function generateValidCpf(): string {
-    const randomDigits = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10));
-    const calcDigit = (base: number[]) => {
-      const factorStart = base.length + 1;
-      const sum = base.reduce((acc, num, idx) => acc + num * (factorStart - idx), 0);
+    // Generate first 9 digits
+    const digits = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10));
+
+    // Calculate first check digit using the same logic as Document.vo.ts
+    const calculateDigit = (base: string, multipliers: number[]): number => {
+      const sum = base.split('').reduce((acc, digit, index) => {
+        return acc + parseInt(digit) * multipliers[index];
+      }, 0);
       const remainder = sum % 11;
       return remainder < 2 ? 0 : 11 - remainder;
     };
-    const d1 = calcDigit(randomDigits);
-    const d2 = calcDigit([...randomDigits, d1]);
-    return [...randomDigits, d1, d2].join('');
+
+    const baseString = digits.join('');
+    const firstDigit = calculateDigit(baseString, [10, 9, 8, 7, 6, 5, 4, 3, 2]);
+    const secondDigit = calculateDigit(baseString + firstDigit, [11, 10, 9, 8, 7, 6, 5, 4, 3, 2]);
+
+    return baseString + firstDigit + secondDigit;
   }
 
   function generateValidCnpj(): string {
-    const base = Array.from({ length: 12 }, (_, i) =>
+    // Generate first 12 digits
+    const digits = Array.from({ length: 12 }, (_, i) =>
       i < 8 ? Math.floor(Math.random() * 10) : i <= 10 ? 0 : 1,
     );
-    const calcDigit = (nums: number[]) => {
-      const multipliers =
-        nums.length === 12
-          ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-          : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-      const sum = nums.reduce((acc, n, i) => acc + n * multipliers[i], 0);
+
+    // Calculate check digits using the same logic as Document.vo.ts
+    const calculateDigit = (base: string, multipliers: number[]): number => {
+      const sum = base.split('').reduce((acc, digit, index) => {
+        return acc + parseInt(digit) * multipliers[index];
+      }, 0);
       const remainder = sum % 11;
       return remainder < 2 ? 0 : 11 - remainder;
     };
-    const d1 = calcDigit(base);
-    const d2 = calcDigit([...base, d1]);
-    return [...base, d1, d2].join('');
+
+    const baseString = digits.join('');
+    const firstDigit = calculateDigit(baseString, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+    const secondDigit = calculateDigit(
+      baseString + firstDigit,
+      [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2],
+    );
+
+    return baseString + firstDigit + secondDigit;
   }
 
   describe('POST /customers', () => {

@@ -47,9 +47,11 @@ export class CustomerTypeOrmRepository implements CustomerRepository {
 
   async update(oldCustomer: Customer, newCustomer: Customer): Promise<Customer | null> {
     const entityData = CustomerMapper.toInfrastructureUpdate(newCustomer);
-    const updated = this.repository.merge(oldCustomer as any, entityData);
-    const saved = await this.repository.save(updated);
-    return CustomerMapper.toDomain(saved);
+    const result = await this.repository.update(oldCustomer.id?.value || 0, entityData);
+    if (result.affected === 0) {
+      return null;
+    }
+    return newCustomer;
   }
 
   async delete(customer: Customer): Promise<void> {

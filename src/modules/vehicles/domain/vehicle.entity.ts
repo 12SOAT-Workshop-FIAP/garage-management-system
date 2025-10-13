@@ -25,8 +25,8 @@ export class Vehicle {
   @Column({ type: 'int' })
   year!: number;
 
-  @ManyToOne(() => CustomerEntity, { onDelete: 'CASCADE' })
-  customer!: CustomerEntity;
+  @Column({ type: 'int' })
+  customerId!: number;
 
   @CreateDateColumn()
   created_at!: Date;

@@ -19,14 +19,21 @@ type DBVehicleRow = {
   brand: string;
   model: string;
   year: number;
-  customer_id: number;
+  customerId: number;
   created_at?: Date;
   updated_at?: Date;
 };
 
 export class VehicleRepositoryAdapter implements VehicleRepositoryPort {
-  update(vehicle: Vehicle): Promise<void> {
-    throw new Error('Method not implemented.');
+  async update(vehicle: Vehicle): Promise<void> {
+    const v = vehicle.toPrimitives();
+    const query = `
+      UPDATE vehicles 
+      SET plate = $1, brand = $2, model = $3, year = $4, "customerId" = $5
+      WHERE id = $6
+    `;
+    const values = [v.plate, v.brand, v.model, v.year, v.customerId, vehicle.id];
+    await pool.query(query, values);
   }
   async findById(id: number): Promise<Vehicle | null> {
     const res = await pool.query('SELECT * FROM vehicles WHERE id = $1', [id]);
@@ -38,7 +45,7 @@ export class VehicleRepositoryAdapter implements VehicleRepositoryPort {
       brand: row.brand,
       model: row.model,
       year: row.year,
-      customerId: row.customer_id,
+      customerId: row.customerId,
     });
   }
 
@@ -52,7 +59,7 @@ export class VehicleRepositoryAdapter implements VehicleRepositoryPort {
       brand: row.brand,
       model: row.model,
       year: row.year,
-      customerId: row.customer_id,
+      customerId: row.customerId,
     });
   }
 
@@ -65,7 +72,7 @@ export class VehicleRepositoryAdapter implements VehicleRepositoryPort {
         brand: any;
         model: any;
         year: any;
-        customer_id: any;
+        customerId: any;
         color: any;
       }) =>
         Vehicle.restore(row.id, {
@@ -73,7 +80,7 @@ export class VehicleRepositoryAdapter implements VehicleRepositoryPort {
           brand: row.brand,
           model: row.model,
           year: row.year,
-          customerId: row.customer_id,
+          customerId: row.customerId,
         }),
     );
   }
@@ -86,7 +93,7 @@ export class VehicleRepositoryAdapter implements VehicleRepositoryPort {
   async save(vehicle: Vehicle): Promise<number> {
     const v = vehicle.toPrimitives();
     const query = `
-    INSERT INTO vehicles (plate, brand, model, year, customer_id)
+    INSERT INTO vehicles (plate, brand, model, year, "customerId")
     VALUES ($1, $2, $3, $4, $5)
     RETURNING id;
   `;
