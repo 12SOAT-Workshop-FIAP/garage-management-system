@@ -4,6 +4,7 @@ import { faker } from '@faker-js/faker';
 import { PartOrmEntity } from '@modules/parts/infrastructure/entities/part-orm.entity';
 import { type FactorizedAttrs, Factory } from '@jorgebodega/typeorm-factory';
 import { Part as PartDomain } from '@modules/parts/domain/entities/part.entity';
+import { PartMapper } from '@modules/parts/infrastructure/mappers/part.mapper';
 
 export class PartsFactory extends Factory<PartOrmEntity> {
   protected entity = PartOrmEntity;
@@ -44,7 +45,7 @@ export class PartsFactory extends Factory<PartOrmEntity> {
     const stockQuantity = faker.number.int({ min: 0, max: 100 });
     const minStockLevel = faker.number.int({ min: 1, max: 10 });
 
-    const unit = faker.helpers.arrayElement(['piece', 'bottle', 'litre', 'kit', 'box']);
+    const unit = faker.helpers.arrayElement(['PC', 'KG', 'L', 'BOX', 'M']);
     const supplier = faker.company.name();
     const active = faker.number.int({ min: 1, max: 100 }) <= 95;
 
@@ -62,6 +63,8 @@ export class PartsFactory extends Factory<PartOrmEntity> {
       active,
     });
 
-    return newPart as unknown as PartOrmEntity;
+    const OrmNewPart = PartMapper.toOrm(newPart);
+
+    return OrmNewPart as unknown as PartOrmEntity;
   }
 }

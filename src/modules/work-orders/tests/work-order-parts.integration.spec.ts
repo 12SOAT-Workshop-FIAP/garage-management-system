@@ -38,7 +38,7 @@ describe('WorkOrder Parts Integration', () => {
       imports: [
         TypeOrmModule.forRoot({
           type: 'postgres',
-          host: process.env.POSTGRES_HOST || 'host.docker.internal',
+          host: 'host.docker.internal',
           port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
           username: process.env.POSTGRES_USER || 'postgres',
           password: process.env.POSTGRES_PASSWORD || 'postgres',
@@ -54,7 +54,12 @@ describe('WorkOrder Parts Integration', () => {
           synchronize: true,
           dropSchema: true,
         }),
-        TypeOrmModule.forFeature([WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM, PartOrmEntity]),
+        TypeOrmModule.forFeature([
+          WorkOrderORM,
+          WorkOrderServiceORM,
+          WorkOrderPartORM,
+          PartOrmEntity,
+        ]),
       ],
       providers: [
         AddPartToWorkOrderService,
@@ -179,7 +184,11 @@ describe('WorkOrder Parts Integration', () => {
       const updateQuantityDto: UpdatePartQuantityDto = {
         quantity: 4,
       };
-      await updatePartQuantityService.execute(workOrder.id, part.id!.value.toString(), updateQuantityDto);
+      await updatePartQuantityService.execute(
+        workOrder.id,
+        part.id!.value.toString(),
+        updateQuantityDto,
+      );
 
       const updatedWorkOrder = await workOrderRepository.findById(workOrder.id);
       expect(updatedWorkOrder!.parts[0].quantity).toBe(4);

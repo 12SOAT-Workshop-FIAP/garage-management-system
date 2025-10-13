@@ -17,7 +17,7 @@ export class CustomerFactory extends Factory<CustomerEntity> {
     const genereatedDocument =
       personType === 'INDIVIDUAL' ? cpf.generate(false) : cnpj.generate(false);
 
-    const phone = faker.helpers.replaceSymbols('(##) 9####-####');
+    const phone = faker.helpers.replaceSymbols('+55##9########');
 
     return {
       name: personType === 'INDIVIDUAL' ? `${firstName} ${lastName}` : faker.company.name(),

@@ -12,7 +12,9 @@ import { FindAllPartsQuery } from '../../application/queries/find-all-parts.quer
 import { FindPartByIdQuery } from '../../application/queries/find-part-by-id.query';
 import { DeletePartCommand } from '../../application/commands/delete-part.command';
 import { UpdateStockCommand } from '../../application/commands/update-stock.command';
+import { Controller } from '@nestjs/common';
 
+@Controller('parts')
 export class PartController {
   constructor(
     private readonly createPart: CreatePartUseCase,

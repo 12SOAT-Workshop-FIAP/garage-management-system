@@ -5,10 +5,12 @@ import { PartRepository } from '../../../domain/repositories/part.repository';
 import { Part } from '../../../domain/entities/part.entity';
 import { PartEntity } from '../../entities/part.entity';
 import { PartMapper } from '../../mappers/part.mapper';
+import { PartOrmEntity } from '../../entities/part-orm.entity';
 
 @Injectable()
 export class PartTypeOrmRepository extends PartRepository {
   constructor(
+    @InjectRepository(PartOrmEntity)
     private readonly ormRepository: Repository<PartEntity>,
   ) {
     super();
@@ -34,7 +36,7 @@ export class PartTypeOrmRepository extends PartRepository {
       .createQueryBuilder('part')
       .where('part.stockQuantity <= part.minStockLevel')
       .getMany();
-    
+
     return PartMapper.toDomainList(parts);
   }
 
@@ -56,7 +58,7 @@ export class PartTypeOrmRepository extends PartRepository {
 
     const ormEntity = PartMapper.toOrm(newPart);
     ormEntity.id = oldPart.id.value;
-    
+
     const updatedEntity = await this.ormRepository.save(ormEntity);
     return PartMapper.toDomain(updatedEntity);
   }
@@ -65,7 +67,7 @@ export class PartTypeOrmRepository extends PartRepository {
     if (!part.id) {
       throw new Error('Cannot delete part without ID');
     }
-    
+
     await this.ormRepository.delete(part.id.value);
   }
 
