@@ -13,14 +13,15 @@ export class CustomerTypeOrmRepository implements CustomerRepository {
     private readonly repository: Repository<CustomerEntity>,
   ) {}
 
-  async findAll(): Promise<Customer[] | null> {
+  async findAll(): Promise<CustomerEntity[] | null> {
     const entities = await this.repository.find({
       where: { status: true },
       order: {
         id: 'ASC',
       },
     });
-    return entities.map(CustomerMapper.toDomain);
+    // return entities.map(CustomerMapper.toDomain);
+    return entities;
   }
 
   async findById(id: number): Promise<Customer | null> {

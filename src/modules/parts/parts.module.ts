@@ -11,9 +11,11 @@ import { UpdateStockUseCase } from './application/use-cases/update-stock.use-cas
 import { DeletePartUseCase } from './application/use-cases/delete-part.use-case';
 import { PartRepository } from './domain/repositories/part.repository';
 import { PartTypeOrmRepository } from './infrastructure/adapters/repositories/part-typeorm.repository';
+import { PartOrmEntity } from './infrastructure/entities/part-orm.entity';
+import { UpdatePartUseCase } from './application/use-cases/update-part.use-case';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PartEntity])],
+  imports: [TypeOrmModule.forFeature([PartOrmEntity])],
   controllers: [PartController],
   providers: [
     // Use Cases
@@ -24,6 +26,7 @@ import { PartTypeOrmRepository } from './infrastructure/adapters/repositories/pa
     FindLowStockPartsUseCase,
     UpdateStockUseCase,
     DeletePartUseCase,
+    UpdatePartUseCase,
     // Ports and Adapters
     { provide: PartRepository, useClass: PartTypeOrmRepository },
   ],

@@ -36,10 +36,11 @@ import { PartsModule } from '../../parts/parts.module';
 import { CustomersModule } from '@modules/customers/customers.module';
 import { EmailModule } from '@modules/email/email.module';
 import { VehiclesModule } from '@modules/vehicles/presentation/vehicles.module';
+import { PartOrmEntity } from '@modules/parts/infrastructure/entities/part-orm.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM]),
+    TypeOrmModule.forFeature([WorkOrderORM, WorkOrderServiceORM, WorkOrderPartORM, PartOrmEntity]),
     CustomersModule,
     VehiclesModule,
     ServicesModule,

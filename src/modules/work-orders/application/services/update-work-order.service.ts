@@ -5,7 +5,7 @@ import { WorkOrder } from '../../domain/work-order.entity';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 import { WorkOrderEmailNotificationService } from '@modules/email/application/services/work-order-email-notification.service';
 import { CustomerRepository } from '@modules/customers/domain/repositories/customer.repository';
-import { FindByIdVehicleService } from '@modules/vehicles/application/services/find-by-id-vehicle.service';
+import { FindVehicleByIdUseCase } from '@modules/vehicles/application/use-cases/find-vehicle-by-id.usecase';
 
 /**
  * UpdateWorkOrderService (Serviço de atualização de Ordem de Serviço)
@@ -17,7 +17,7 @@ export class UpdateWorkOrderService {
     private readonly workOrderRepository: WorkOrderRepository,
     private readonly workOrderEmailNotificationService: WorkOrderEmailNotificationService,
     private readonly customerRepository: CustomerRepository,
-    private readonly findByIdVehicleService: FindByIdVehicleService,
+    private readonly findByIdVehicleUseCase: FindVehicleByIdUseCase,
   ) {}
 
   async execute(id: string, dto: UpdateWorkOrderDto): Promise<WorkOrder> {
@@ -102,7 +102,7 @@ export class UpdateWorkOrderService {
       }
 
       // Fetch vehicle data
-      const vehicle = await this.findByIdVehicleService.execute(parseInt(workOrder.vehicleId));
+      const vehicle = await this.findByIdVehicleUseCase.execute(parseInt(workOrder.vehicleId));
       if (!vehicle) {
         console.warn(`Vehicle ${workOrder.vehicleId} not found for work order ${workOrder.id}`);
         return;
@@ -117,7 +117,7 @@ export class UpdateWorkOrderService {
         customerEmail: customer.email?.value || '',
         vehicleBrand: vehicle.brand || 'N/A',
         vehicleModel: vehicle.model || 'N/A',
-        vehiclePlate: vehicle.plate || 'N/A',
+        vehiclePlate: vehicle.plate.value || 'N/A',
         status: workOrder.status,
         updatedAt: workOrder.updatedAt,
         estimatedCompletion: workOrder.estimatedCompletionDate,

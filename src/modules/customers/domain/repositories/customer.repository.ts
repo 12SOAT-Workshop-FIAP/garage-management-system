@@ -1,7 +1,8 @@
+import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
 import { Customer } from '../entities/customer.entity';
 
 export abstract class CustomerRepository {
-  abstract findAll(): Promise<Customer[] | null>;
+  abstract findAll(): Promise<CustomerEntity[] | null>;
   abstract findById(id: number): Promise<Customer | null>;
   abstract findByDocument(document: string): Promise<Customer | null>;
   abstract create(customer: Customer): Promise<Customer>;
