@@ -57,6 +57,8 @@ jobs:
       - run: npm install
 
       - name: 5. Run Automated Tests
+        env:
+          POSTGRES_HOST: postgres
         run: npm test
 
       - name: 6. Build and Push Docker Image

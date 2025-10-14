@@ -24,7 +24,7 @@ describe('WorkOrder Integration (e2e)', () => {
         WorkOrdersModule,
         TypeOrmModule.forRoot({
           type: 'postgres',
-          host: 'host.docker.internal',
+          host: process.env.POSTGRES_HOST || 'host.docker.internal',
           port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
           username: process.env.POSTGRES_USER || 'postgres',
           password: process.env.POSTGRES_PASSWORD || 'postgres',
