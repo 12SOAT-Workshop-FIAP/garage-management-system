@@ -106,3 +106,5 @@ jobs:
           kubectl apply -f k8s/api.yaml
           kubectl apply -f k8s/api-service.yaml
           kubectl apply -f k8s/hpa.yaml
+
+          kubectl rollout restart deployment/garage-api -n fiap-garage
