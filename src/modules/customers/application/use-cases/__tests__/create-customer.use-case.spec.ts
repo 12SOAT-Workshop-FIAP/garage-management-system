@@ -45,16 +45,11 @@ describe('CreateCustomerUseCase', () => {
       email: 'joao@example.com',
     });
 
-    mockCryptographyPort.encryptSensitiveData.mockResolvedValue({
-      encryptedValue: '11144477735',
-      getMaskedValue: () => '***.***.***-**',
-    } as any);
-
     mockRepository.create.mockResolvedValue(createdCustomer);
 
     const result = await useCase.execute(command);
 
-    expect(mockCryptographyPort.encryptSensitiveData).toHaveBeenCalledWith('11144477735', 'cpf');
+    // Encryption now happens in the repository layer, not in use case
     expect(mockRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         name: expect.any(Object),
@@ -84,19 +79,11 @@ describe('CreateCustomerUseCase', () => {
       email: 'contato@acme.com',
     });
 
-    mockCryptographyPort.encryptSensitiveData.mockResolvedValue({
-      encryptedValue: '11222333000181',
-      getMaskedValue: () => '**.***.***/****-**',
-    } as any);
-
     mockRepository.create.mockResolvedValue(createdCustomer);
 
     const result = await useCase.execute(command);
 
-    expect(mockCryptographyPort.encryptSensitiveData).toHaveBeenCalledWith(
-      '11222333000181',
-      'cnpj',
-    );
+    // Encryption now happens in the repository layer, not in use case
     expect(result).toBeInstanceOf(Customer);
   });
 
