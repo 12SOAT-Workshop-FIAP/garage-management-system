@@ -1,6 +1,5 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { join } from 'path';
-import * as dotenv from 'dotenv';
 import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
 import { Service } from '@modules/services/infrastructure/entities/service.entity';
 import { User } from '@modules/users/infrastructure/entities/user.entity';
@@ -9,8 +8,6 @@ import { WorkOrderServiceORM } from '@modules/work-orders/infrastructure/entitie
 import { WorkOrderPartORM } from '@modules/work-orders/infrastructure/entities/work-order-part.entity';
 import { PartOrmEntity } from '@modules/parts/infrastructure/entities/part-orm.entity';
 import { VehicleOrmEntity } from '@modules/vehicles/infrastructure/entities/vehicle-orm.entity';
-
-// dotenv.config();
 
 export const ormconfig: DataSourceOptions = {
   type: 'postgres',
