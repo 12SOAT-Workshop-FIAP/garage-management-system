@@ -53,12 +53,12 @@
     "swagger-ui-express": "^5.0.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typeorm": "^0.3.25",
-    "@faker-js/faker": "^9.9.0",
-    "@jorgebodega/typeorm-factory": "^2.1.0",
-    "@jorgebodega/typeorm-seeding": "^7.1.0"
+    "typeorm": "^0.3.25"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.9.0",
+    "@jorgebodega/typeorm-factory": "^2.1.0",
+    "@jorgebodega/typeorm-seeding": "^7.1.0",
     "@nestjs/cli": "^11.0.7",
     "@nestjs/schematics": "^11.0.5",
     "@nestjs/testing": "^11.1.5",

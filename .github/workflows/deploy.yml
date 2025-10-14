@@ -114,15 +114,3 @@ jobs:
           kubectl apply -f k8s/hpa.yaml
 
           kubectl rollout restart deployment/garage-api -n fiap-garage
-
-      - name: 10. Run Database Migrations and Seeds (if selected)
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_migrations == 'true'
-        run: |
-          echo "--- Preparing Job Manifests ---"
-          sed -i 's|image: fiap-garage-api:latest|image: ${{ steps.build-image.outputs.image }}|g' k8s/migration-job.yaml
-
-          echo "--- Running Migration Job ---"
-          kubectl delete job migration-runner-job -n fiap-garage --ignore-not-found
-          kubectl apply -f k8s/migration-job.yaml
-          kubectl wait --for=condition=complete job/migration-runner-job -n fiap-garage --timeout=5m
-          echo "Migration Job completed."
