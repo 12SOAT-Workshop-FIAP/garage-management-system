@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: garage-migration
+  namespace: fiap-garage
+  annotations:
+    description: "Executa migrations do TypeORM no banco de dados"
+spec:
+  # Remove o Job automaticamente após conclusão (opcional)
+  ttlSecondsAfterFinished: 100
+  backoffLimit: 3  # Tenta até 3 vezes em caso de falha
+  template:
+    metadata:
+      labels:
+        app: garage-migration
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migration
+        image: 451156287371.dkr.ecr.us-east-1.amazonaws.com/garagemanagement:latest
+        imagePullPolicy: Always
+        command: ["npm", "run", "migration:run:js"]
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: fiap-garage-secret
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: fiap-garage-secret
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: fiap-garage-secret
+              key: POSTGRES_DB
+        - name: POSTGRES_HOST
+          valueFrom:
+            secretKeyRef:
+              name: fiap-garage-secret
+              key: POSTGRES_HOST
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: fiap-garage-config
+              key: POSTGRES_PORT
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"

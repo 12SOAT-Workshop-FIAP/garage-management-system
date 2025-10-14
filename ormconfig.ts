@@ -28,7 +28,7 @@ export const ormconfig: DataSourceOptions = {
     PartOrmEntity,
   ],
   // validar melhor forma de utilizar entities: [join(__dirname, 'src', '**', '*.entity.ts')],
-  migrations: [join(__dirname, 'src', 'migrations', '*.ts')],
+  migrations: [join(__dirname, 'src', 'migrations', '*.js')],
 
   synchronize: false,
   logging: true,

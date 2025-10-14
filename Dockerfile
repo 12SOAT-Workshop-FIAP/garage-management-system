@@ -19,7 +19,7 @@ FROM node:22-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/package*.json ./
-RUN npm install --only=production
+RUN npm ci
 COPY --from=builder /app/dist ./dist
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
