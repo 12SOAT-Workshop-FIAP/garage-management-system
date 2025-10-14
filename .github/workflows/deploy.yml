@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       run_migrations:
-        description: 'Rodar migrations e seeds? (run-migrations-and-seeds)'
+        description: 'Rodar migrations? (run-migrations)'
         required: true
         type: boolean
         default: false
@@ -127,9 +127,3 @@ jobs:
           kubectl apply -f k8s/migration-job.yaml
           kubectl wait --for=condition=complete job/migration-runner-job -n fiap-garage --timeout=5m
           echo "Migration Job completed."
-
-          echo "--- Running Seed Job ---"
-          kubectl delete job seed-runner-job -n fiap-garage --ignore-not-found
-          kubectl apply -f k8s/seed-job.yaml
-          kubectl wait --for=condition=complete job/seed-runner-job -n fiap-garage --timeout=5m
-          echo "Seed Job completed."
