@@ -6,6 +6,10 @@ import { IsString, IsOptional, IsNumber, Length, Min, IsInt, IsArray } from 'cla
  * Data Transfer Object for creating a work order (Ordem de Serviço).
  */
 export class CreateWorkOrderDto {
+  @ApiProperty({ description: 'Customer ID', example: 1 })
+  @IsInt()
+  customerId!: number;
+  
   @ApiProperty({ description: 'Vehicle ID', example: 1 })
   @IsInt()
   vehicleId!: number;

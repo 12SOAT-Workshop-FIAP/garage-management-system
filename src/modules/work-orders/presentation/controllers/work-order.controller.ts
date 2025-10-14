@@ -56,7 +56,7 @@ export class WorkOrderController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
   async create(@Body() dto: CreateWorkOrderDto): Promise<WorkOrderResponseDto> {
     const command = new CreateWorkOrderCommand(
-      dto.vehicleId,
+      dto.customerId,
       dto.vehicleId,
       dto.description,
       dto.estimatedCost,
