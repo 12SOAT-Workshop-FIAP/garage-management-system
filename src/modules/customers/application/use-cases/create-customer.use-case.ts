@@ -12,6 +12,7 @@ export class CreateCustomerUseCase {
   ) {}
 
   async execute(command: CreateCustomerCommand): Promise<Customer> {
+    // Create domain entity with plain document (validation happens here)
     const customer = Customer.create({
       name: command.name,
       personType: command.personType,
@@ -20,24 +21,7 @@ export class CreateCustomerUseCase {
       email: command.email,
     });
 
-    const documentType = customer.document.type;
-    const documentVo = await this.cryptographyPort.encryptSensitiveData(
-      customer.document.value,
-      documentType,
-    );
-
-    const customerWithEncryptedDocument = Customer.restore({
-      id: 0,
-      name: customer.name.value,
-      personType: customer.personType.value,
-      document: documentVo.encryptedValue,
-      phone: customer.phone.value,
-      email: customer.email?.value,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      status: true,
-    });
-
-    return await this.customerRepository.create(customerWithEncryptedDocument);
+    // Repository will handle encryption in the mapper layer before persistence
+    return await this.customerRepository.create(customer);
   }
 }

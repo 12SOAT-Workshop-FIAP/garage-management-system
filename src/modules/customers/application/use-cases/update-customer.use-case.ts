@@ -21,6 +21,7 @@ export class UpdateCustomerUseCase {
       throw new Error('Customer cannot be updated');
     }
 
+    // Create updated domain entity with plain document (validation happens here)
     const updatedCustomer = Customer.restore({
       id: existingCustomer.id?.value || command.id,
       name: command.name || existingCustomer.name.value,
@@ -34,36 +35,7 @@ export class UpdateCustomerUseCase {
       vehicleIds: existingCustomer.vehicleIds,
     });
 
-    if (command.document) {
-      const documentType = updatedCustomer.document.type;
-      const documentVo = await this.cryptographyPort.encryptSensitiveData(
-        updatedCustomer.document.value,
-        documentType,
-      );
-
-      const customerWithEncryptedDocument = Customer.restore({
-        id: updatedCustomer.id?.value || command.id,
-        name: updatedCustomer.name.value,
-        personType: updatedCustomer.personType.value,
-        document: documentVo.encryptedValue,
-        phone: updatedCustomer.phone.value,
-        email: updatedCustomer.email?.value,
-        createdAt: updatedCustomer.createdAt,
-        updatedAt: updatedCustomer.updatedAt,
-        status: updatedCustomer.status.value,
-        vehicleIds: updatedCustomer.vehicleIds,
-      });
-
-      const result = await this.customerRepository.update(
-        existingCustomer,
-        customerWithEncryptedDocument,
-      );
-      if (!result) {
-        throw new Error('Failed to update customer');
-      }
-      return result;
-    }
-
+    // Repository will handle encryption in the mapper layer before persistence
     const result = await this.customerRepository.update(existingCustomer, updatedCustomer);
     if (!result) {
       throw new Error('Failed to update customer');
