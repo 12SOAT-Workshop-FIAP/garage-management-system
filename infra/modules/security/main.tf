@@ -22,13 +22,11 @@ resource "aws_security_group" "rds" {
   description = "Permite acesso ao banco de dados RDS."
   vpc_id      = var.vpc_id
 
-  # Regra de entrada: A REGRA MAIS IMPORTANTE!
-  # Permite que SOMENTE os nodes do EKS acessem o banco na porta do PostgreSQL (5432)
   ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_nodes.id]
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = var.private_subnet_cidrs # Permite tráfego das sub-redes privadas
   }
 
   # Regra de saída: permite que o RDS acesse a internet.
