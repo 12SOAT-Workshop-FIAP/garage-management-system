@@ -3,7 +3,7 @@ name: CI/CD - Deploy to Amazon EKS
 on:
   push:
     branches:
-      - test-deploy
+      - main
   workflow_dispatch:
     inputs:
       run_migrations:
