@@ -135,6 +135,10 @@ export class WorkOrderController {
       dto.status,
       dto.diagnosis,
       dto.technicianNotes,
+      dto.estimatedCost,
+      dto.laborCost,
+      dto.partsCost,
+      dto.customerApproval,
       dto.estimatedCompletionDate,
     );
     const workOrder = await this.updateWorkOrderUseCase.execute(command);

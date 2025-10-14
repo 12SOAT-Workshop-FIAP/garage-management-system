@@ -271,6 +271,33 @@ export class WorkOrder {
   }
 
   /**
+   * Update estimated cost manually
+   */
+  updateEstimatedCostManually(cost: number): void {
+    this._estimatedCost = Money.create(cost);
+    this._updatedAt = new Date();
+  }
+
+  /**
+   * Update estimated completion date
+   */
+  updateEstimatedCompletionDate(date: Date): void {
+    this._estimatedCompletionDate = date;
+    this._updatedAt = new Date();
+  }
+
+  /**
+   * Update customer approval
+   */
+  updateCustomerApproval(approved: boolean): void {
+    this._customerApproval = approved;
+    if (approved && this._status === WorkOrderStatus.PENDING) {
+      this._status = WorkOrderStatus.APPROVED;
+    }
+    this._updatedAt = new Date();
+  }
+
+  /**
    * Check if work order is ready to start
    */
   isReadyToStart(): boolean {
