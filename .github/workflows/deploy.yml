@@ -3,7 +3,7 @@ name: CI/CD - Deploy to Amazon EKS
 on:
   push:
     branches:
-      - main
+      - test-deploy
   workflow_dispatch:
 
 env:
@@ -56,8 +56,8 @@ jobs:
           cache: 'npm'
       - run: npm install
 
-      # - name: 5. Run Automated Tests
-      #   run: npm test
+      - name: 5. Run Automated Tests
+        run: npm test
 
       - name: 6. Build and Push Docker Image
         id: build-image
