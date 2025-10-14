@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migration-runner-job
+  namespace: fiap-garage
+spec:
+  template:
+    spec:
+      containers:
+        - name: migration-runner
+          image: fiap-garage-api:latest
+          command: ['npm', 'run', 'migration:run:js']
+          envFrom:
+            - configMapRef:
+                name: fiap-garage-config
+            - secretRef:
+                name: fiap-garage-secret
+      restartPolicy: Never
+  backoffLimit: 2
