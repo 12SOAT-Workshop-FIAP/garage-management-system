@@ -120,7 +120,6 @@ jobs:
         run: |
           echo "--- Preparing Job Manifests ---"
           sed -i 's|image: fiap-garage-api:latest|image: ${{ steps.build-image.outputs.image }}|g' k8s/migration-job.yaml
-          sed -i 's|image: fiap-garage-api:latest|image: ${{ steps.build-image.outputs.image }}|g' k8s/seed-job.yaml
 
           echo "--- Running Migration Job ---"
           kubectl delete job migration-runner-job -n fiap-garage --ignore-not-found
