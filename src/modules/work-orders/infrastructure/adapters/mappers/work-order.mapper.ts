@@ -18,10 +18,16 @@ export class WorkOrderMapper {
       vehicleId: orm.vehicleId,
       description: orm.description,
       status: orm.status,
-      estimatedCost: orm.estimatedCost,
-      actualCost: orm.actualCost,
-      laborCost: orm.laborCost,
-      partsCost: orm.partsCost,
+      estimatedCost: typeof orm.estimatedCost === 'string' ? parseFloat(orm.estimatedCost) : orm.estimatedCost,
+      actualCost: orm.actualCost !== null && orm.actualCost !== undefined 
+        ? (typeof orm.actualCost === 'string' ? parseFloat(orm.actualCost) : orm.actualCost)
+        : undefined,
+      laborCost: orm.laborCost !== null && orm.laborCost !== undefined
+        ? (typeof orm.laborCost === 'string' ? parseFloat(orm.laborCost) : orm.laborCost)
+        : undefined,
+      partsCost: orm.partsCost !== null && orm.partsCost !== undefined
+        ? (typeof orm.partsCost === 'string' ? parseFloat(orm.partsCost) : orm.partsCost)
+        : undefined,
       diagnosis: orm.diagnosis,
       technicianNotes: orm.technicianNotes,
       customerApproval: orm.customerApproval,
@@ -35,7 +41,9 @@ export class WorkOrderMapper {
           serviceName: serviceORM.serviceName,
           serviceDescription: serviceORM.serviceDescription,
           quantity: serviceORM.quantity,
-          unitPrice: serviceORM.unitPrice,
+          unitPrice: typeof serviceORM.unitPrice === 'string' 
+            ? parseFloat(serviceORM.unitPrice) 
+            : serviceORM.unitPrice,
           estimatedDuration: serviceORM.estimatedDuration,
           technicianNotes: serviceORM.technicianNotes,
         });
@@ -53,7 +61,9 @@ export class WorkOrderMapper {
           partORM.partDescription,
           partORM.partNumber,
           partORM.quantity,
-          partORM.unitPrice,
+          typeof partORM.unitPrice === 'string'
+            ? parseFloat(partORM.unitPrice)
+            : partORM.unitPrice,
           partORM.notes,
           partORM.isApproved,
           partORM.appliedAt,

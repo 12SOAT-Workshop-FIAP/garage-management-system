@@ -74,8 +74,8 @@ export class WorkOrderController {
     type: [WorkOrderResponseDto],
   })
   @ApiQuery({ name: 'status', enum: WorkOrderStatus, required: false })
-  @ApiQuery({ name: 'customerId', type: 'string', required: false })
-  @ApiQuery({ name: 'vehicleId', type: 'string', required: false })
+  @ApiQuery({ name: 'customerId', type: 'number', required: false })
+  @ApiQuery({ name: 'vehicleId', type: 'number', required: false })
   async findAll(
     @Query('status') status?: WorkOrderStatus,
     @Query('customerId') customerId?: number,
