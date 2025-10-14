@@ -8,7 +8,7 @@ import { WorkOrderRepository } from '../../../domain/repositories/work-order.rep
 import { WorkOrderStatus } from '../../../domain/work-order-status.enum';
 import { WorkOrderMapper } from '../mappers/work-order.mapper';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
+import { VehicleOrmEntity } from '@modules/vehicles/infrastructure/entities/vehicle-orm.entity';
 import { WorkOrderId } from '../../../domain/value-objects';
 
 /**
@@ -186,7 +186,7 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
 
   async findCustomerByVehicleId(vehicleId: string): Promise<string | null> {
     const dataSource = this.repository.manager.connection;
-    const vehicleRepository = dataSource.getRepository(Vehicle);
+    const vehicleRepository = dataSource.getRepository(VehicleOrmEntity);
     const vehicle = await vehicleRepository.findOne({
       where: { id: parseInt(vehicleId) },
       relations: ['customer'],
@@ -197,7 +197,7 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
 
   async findCustomerByLicensePlate(licensePlate: string): Promise<string | null> {
     const dataSource = this.repository.manager.connection;
-    const vehicleRepository = dataSource.getRepository(Vehicle);
+    const vehicleRepository = dataSource.getRepository(VehicleOrmEntity);
     const vehicle = await vehicleRepository.findOne({
       where: { plate: licensePlate },
       relations: ['customer'],

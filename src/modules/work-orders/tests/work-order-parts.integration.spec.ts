@@ -6,8 +6,9 @@ import { WorkOrderServiceORM } from '../infrastructure/entities/work-order-servi
 import { WorkOrderPartORM } from '../infrastructure/entities/work-order-part.entity';
 import { PartOrmEntity } from '../../parts/infrastructure/entities/part-orm.entity';
 import { CustomerEntity } from '../../customers/infrastructure/customer.entity';
-import { Vehicle } from '../../vehicles/domain/vehicle.entity';
+import { VehicleOrmEntity } from '../../vehicles/infrastructure/entities/vehicle-orm.entity';
 import { WorkOrderTypeOrmRepository } from '../infrastructure/repositories/work-order.typeorm.repository';
+import { WorkOrderMapper } from '../infrastructure/work-order.mapper';
 import { WorkOrderRepository } from '../domain/work-order.repository';
 import { AddPartToWorkOrderService } from '../application/services/add-part-to-work-order.service';
 import { RemovePartFromWorkOrderService } from '../application/services/remove-part-from-work-order.service';
@@ -49,7 +50,7 @@ describe('WorkOrder Parts Integration', () => {
             WorkOrderPartORM,
             PartOrmEntity,
             CustomerEntity,
-            Vehicle,
+            VehicleOrmEntity,
           ],
           synchronize: true,
           dropSchema: true,
@@ -114,26 +115,32 @@ describe('WorkOrder Parts Integration', () => {
       await customerRepository.save(customer);
 
       // Create vehicle using repository
-      const vehicleRepository = dataSource.getRepository(Vehicle);
+      const vehicleRepository = dataSource.getRepository(VehicleOrmEntity);
       const vehicle = vehicleRepository.create({
         brand: 'Toyota',
         model: 'Corolla',
         plate: 'ABC1234',
         year: 2020,
-        customer: customer,
+        customerId: customer.id,
       });
       await vehicleRepository.save(vehicle);
 
-      // Create a work order
-      workOrder = new WorkOrder({
-        customerId: customer.id.toString(),
-        vehicleId: vehicle.id.toString(),
-        description: 'Test work order for parts integration',
-      });
-      await workOrderRepository.save(workOrder);
+      // Create a work order using ORM entity
+      const workOrderOrm = new WorkOrderORM();
+      workOrderOrm.customerId = customer.id;
+      workOrderOrm.vehicleId = vehicle.id;
+      workOrderOrm.description = 'Test work order for parts integration';
+      workOrderOrm.status = WorkOrderStatus.PENDING;
+      workOrderOrm.estimatedCompletionDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+
+      const workOrderRepositoryOrm = dataSource.getRepository(WorkOrderORM);
+      const savedWorkOrderOrm = await workOrderRepositoryOrm.save(workOrderOrm);
+
+      // Convert to domain entity for testing
+      workOrder = WorkOrderMapper.toDomain(savedWorkOrderOrm);
 
       // Create a part
-      part = new PartDomain({
+      const newPart = new PartDomain({
         name: 'Brake Pad Set',
         description: 'Front brake pads for sedans',
         partNumber: 'BP-001',
@@ -142,11 +149,11 @@ describe('WorkOrder Parts Integration', () => {
         costPrice: 100.0,
         stockQuantity: 10,
         minStockLevel: 2,
-        unit: 'set',
+        unit: 'SET', // Use valid unit
         supplier: 'Brake Masters Inc',
         active: true,
       });
-      await partRepository.create(part);
+      part = await partRepository.create(newPart);
     });
 
     it('should add part to work order successfully', async () => {
@@ -164,9 +171,9 @@ describe('WorkOrder Parts Integration', () => {
 
       const addedPart = updatedWorkOrder!.parts[0];
       expect(addedPart.partId).toBe(part.id?.value?.toString() || '');
-      expect(addedPart.partName).toBe(part.name);
+      expect(addedPart.partName).toBe(part.name.value);
       expect(addedPart.quantity).toBe(2);
-      expect(parseFloat(addedPart.unitPrice.toString())).toBe(part.price);
+      expect(parseFloat(addedPart.unitPrice.toString())).toBe(part.price.value);
       expect(parseFloat(addedPart.totalPrice.toString())).toBe(300.0); // 2 * 150.00
       expect(addedPart.notes).toBe('Replace worn brake pads');
       expect(addedPart.isApproved).toBe(false);
@@ -264,7 +271,7 @@ describe('WorkOrder Parts Integration', () => {
 
     it('should handle multiple parts correctly', async () => {
       // Create another part
-      const part2 = new PartDomain({
+      const newPart2 = new PartDomain({
         name: 'Oil Filter',
         description: 'Engine oil filter',
         partNumber: 'OF-001',
@@ -273,11 +280,11 @@ describe('WorkOrder Parts Integration', () => {
         costPrice: 15.0,
         stockQuantity: 20,
         minStockLevel: 5,
-        unit: 'piece',
+        unit: 'PC',
         supplier: 'Engine Parts Co',
         active: true,
       });
-      await partRepository.create(part2);
+      const part2 = await partRepository.create(newPart2);
 
       // Add first part
       await addPartService.execute(workOrder.id, {

@@ -45,12 +45,14 @@ describe('PublicWorkOrderController', () => {
   it('should return public status when document matches work order customer', async () => {
     findWorkOrderService.findById.mockResolvedValue(mockWorkOrder);
     // Return customer with id matching workOrder.customerId
-    findByDocumentCustomerService.execute.mockResolvedValue({ id: customerId });
+    findByDocumentCustomerService.execute.mockResolvedValue({ id: { value: customerId } });
 
     const result = await controller.getStatus(workOrderId, '123.456.789-09');
 
     expect(findWorkOrderService.findById).toHaveBeenCalledWith(workOrderId);
-    expect(findByDocumentCustomerService.execute).toHaveBeenCalledWith('123.456.789-09');
+    expect(findByDocumentCustomerService.execute).toHaveBeenCalledWith({
+      document: '123.456.789-09',
+    });
     expect(result).toMatchObject({
       id: workOrderId,
       status: WorkOrderStatus.PENDING,

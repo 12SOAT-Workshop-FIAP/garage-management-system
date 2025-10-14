@@ -8,7 +8,7 @@ import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 import { WorkOrderMapper } from '../work-order.mapper';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Vehicle } from '@modules/vehicles/domain/vehicle.entity';
+import { VehicleOrmEntity } from '@modules/vehicles/infrastructure/entities/vehicle-orm.entity';
 
 /**
  * WorkOrderTypeOrmRepository (Repositório TypeORM de Ordem de Serviço)
@@ -52,7 +52,7 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
     return WorkOrderMapper.toDomainArray(entities);
   }
 
-  async findByCustomerId(customerId: string): Promise<WorkOrderDomain[]> {
+  async findByCustomerId(customerId: number): Promise<WorkOrderDomain[]> {
     const entities = await this.repository.find({
       where: { customerId },
       relations: ['services', 'parts'],
@@ -62,7 +62,7 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
     return WorkOrderMapper.toDomainArray(entities);
   }
 
-  async findByVehicleId(vehicleId: string): Promise<WorkOrderDomain[]> {
+  async findByVehicleId(vehicleId: number): Promise<WorkOrderDomain[]> {
     const entities = await this.repository.find({
       where: { vehicleId },
       relations: ['services', 'parts'],
@@ -190,24 +190,22 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
   async findCustomerByVehicleId(vehicleId: string): Promise<string | null> {
     // Use DataSource to query Vehicle entity directly to get its customer
     const dataSource = this.repository.manager.connection;
-    const vehicleRepository = dataSource.getRepository(Vehicle);
+    const vehicleRepository = dataSource.getRepository(VehicleOrmEntity);
     const vehicle = await vehicleRepository.findOne({
       where: { id: parseInt(vehicleId) },
-      relations: ['customer'],
     });
 
-    return vehicle?.customer?.id?.toString() || null;
+    return vehicle?.customerId?.toString() || null;
   }
 
   // Buscar cliente por placa do veículo
   async findCustomerByLicensePlate(licensePlate: string): Promise<string | null> {
     const dataSource = this.repository.manager.connection;
-    const vehicleRepository = dataSource.getRepository(Vehicle);
+    const vehicleRepository = dataSource.getRepository(VehicleOrmEntity);
     const vehicle = await vehicleRepository.findOne({
       where: { plate: licensePlate },
-      relations: ['customer'],
     });
 
-    return vehicle?.customer?.id?.toString() || null;
+    return vehicle?.customerId?.toString() || null;
   }
 }

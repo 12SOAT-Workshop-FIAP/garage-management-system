@@ -13,8 +13,8 @@ export class WorkOrderMapper {
   static toDomain(orm: WorkOrderORM): WorkOrder {
     const workOrder = new WorkOrder(
       {
-        customerId: orm.customerId,
-        vehicleId: orm.vehicleId,
+        customerId: orm.customerId.toString(),
+        vehicleId: orm.vehicleId.toString(),
         description: orm.description,
         estimatedCost: orm.estimatedCost,
         diagnosis: orm.diagnosis,
@@ -34,7 +34,7 @@ export class WorkOrderMapper {
 
     // Map services if loaded
     if (orm.services) {
-      workOrder.services = orm.services.map(serviceORM => {
+      workOrder.services = orm.services.map((serviceORM) => {
         const service = new WorkOrderService({
           serviceId: serviceORM.serviceId,
           serviceName: serviceORM.serviceName,
@@ -44,30 +44,31 @@ export class WorkOrderMapper {
           estimatedDuration: serviceORM.estimatedDuration,
           technicianNotes: serviceORM.technicianNotes,
         });
-        
+
         // Set additional properties
         service.status = serviceORM.status as any;
         service.startedAt = serviceORM.startedAt;
         service.completedAt = serviceORM.completedAt;
-        
+
         return service;
       });
     }
 
     // Map parts if loaded
     if (orm.parts) {
-      workOrder.parts = orm.parts.map(partORM => 
-        new WorkOrderPart(
-          partORM.partId,
-          partORM.partName,
-          partORM.partDescription,
-          partORM.partNumber,
-          partORM.quantity,
-          partORM.unitPrice,
-          partORM.notes,
-          partORM.isApproved,
-          partORM.appliedAt,
-        )
+      workOrder.parts = orm.parts.map(
+        (partORM) =>
+          new WorkOrderPart(
+            partORM.partId,
+            partORM.partName,
+            partORM.partDescription,
+            partORM.partNumber,
+            partORM.quantity,
+            partORM.unitPrice,
+            partORM.notes,
+            partORM.isApproved,
+            partORM.appliedAt,
+          ),
       );
     }
 
@@ -76,10 +77,10 @@ export class WorkOrderMapper {
 
   static toORM(domain: WorkOrder): WorkOrderORM {
     const orm = new WorkOrderORM();
-    
+
     orm.id = domain.id;
-    orm.customerId = domain.customerId;
-    orm.vehicleId = domain.vehicleId;
+    orm.customerId = parseInt(domain.customerId);
+    orm.vehicleId = parseInt(domain.vehicleId);
     orm.description = domain.description;
     orm.status = domain.status;
     orm.estimatedCost = domain.estimatedCost;
@@ -94,7 +95,7 @@ export class WorkOrderMapper {
 
     // Map services
     if (domain.services && domain.services.length > 0) {
-      orm.services = domain.services.map(service => {
+      orm.services = domain.services.map((service) => {
         const serviceORM = new WorkOrderServiceORM();
         serviceORM.workOrderId = domain.id;
         serviceORM.serviceId = service.serviceId;
@@ -114,7 +115,7 @@ export class WorkOrderMapper {
 
     // Map parts
     if (domain.parts && domain.parts.length > 0) {
-      orm.parts = domain.parts.map(part => {
+      orm.parts = domain.parts.map((part) => {
         const partORM = new WorkOrderPartORM();
         partORM.workOrderId = domain.id;
         partORM.partId = part.partId;
@@ -135,6 +136,6 @@ export class WorkOrderMapper {
   }
 
   static toDomainArray(ormArray: WorkOrderORM[]): WorkOrder[] {
-    return ormArray.map(orm => this.toDomain(orm));
+    return ormArray.map((orm) => this.toDomain(orm));
   }
 }

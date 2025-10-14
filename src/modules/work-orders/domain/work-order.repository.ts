@@ -8,8 +8,8 @@ import { WorkOrderStatus } from './work-order-status.enum';
 export abstract class WorkOrderRepository {
   abstract findById(id: string): Promise<WorkOrder | null>;
   abstract findAll(): Promise<WorkOrder[]>;
-  abstract findByCustomerId(customerId: string): Promise<WorkOrder[]>;
-  abstract findByVehicleId(vehicleId: string): Promise<WorkOrder[]>;
+  abstract findByCustomerId(customerId: number): Promise<WorkOrder[]>;
+  abstract findByVehicleId(vehicleId: number): Promise<WorkOrder[]>;
   abstract findByStatus(status: WorkOrderStatus): Promise<WorkOrder[]>;
   abstract findByDateRange(startDate: Date, endDate: Date): Promise<WorkOrder[]>;
   abstract save(workOrder: WorkOrder): Promise<WorkOrder>;

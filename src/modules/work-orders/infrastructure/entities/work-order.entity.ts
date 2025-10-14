@@ -1,9 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 import { WorkOrderServiceORM } from './work-order-service.entity';
 import { WorkOrderPartORM } from './work-order-part.entity';
 import { CustomerEntity } from '../../../customers/infrastructure/customer.entity';
-import { Vehicle } from '../../../vehicles/domain/vehicle.entity';
 
 /**
  * WorkOrderORM (Entidade TypeORM de Ordem de Serviço)
@@ -14,18 +22,18 @@ export class WorkOrderORM {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column('uuid')
-  customerId!: string;
+  @Column('int')
+  customerId!: number;
 
-  @Column('uuid')
-  vehicleId!: string;
+  @Column('int')
+  vehicleId!: number;
 
   @Column('text')
   description!: string;
 
-  @Column('varchar', { 
+  @Column('varchar', {
     length: 20,
-    default: 'PENDING'
+    default: 'PENDING',
   })
   status!: WorkOrderStatus;
 
@@ -69,10 +77,6 @@ export class WorkOrderORM {
   @ManyToOne(() => CustomerEntity, { eager: false })
   @JoinColumn({ name: 'customerId' })
   customer?: CustomerEntity;
-
-  @ManyToOne(() => Vehicle, { eager: false })
-  @JoinColumn({ name: 'vehicleId' })
-  vehicle?: Vehicle;
 
   // Relacionamento com serviços da ordem de serviço
   @OneToMany(() => WorkOrderServiceORM, (service) => service.workOrder, {

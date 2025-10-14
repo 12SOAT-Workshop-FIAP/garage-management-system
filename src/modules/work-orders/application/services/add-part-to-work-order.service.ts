@@ -24,7 +24,7 @@ export class AddPartToWorkOrderService {
     }
 
     // Buscar informações da peça
-    const part = await this.partRepository.findById(parseInt(dto.partId));
+    const part = await this.partRepository.findById(dto.partId);
     if (!part) {
       throw new NotFoundException(`Part with ID ${dto.partId} not found`);
     }

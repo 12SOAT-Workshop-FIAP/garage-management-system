@@ -136,7 +136,7 @@ describe('AddPartToWorkOrderService', () => {
 
     it('should throw BadRequestException when part is not active', async () => {
       const inactivePart = Part.restore({
-        id: 1,
+        id: '1',
         name: 'Brake Pad',
         description: 'Front brake pads',
         partNumber: 'BP-001',
