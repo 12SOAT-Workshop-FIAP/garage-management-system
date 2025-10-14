@@ -14,11 +14,11 @@ export class WorkOrderResponseDto {
 
   @ApiProperty({ description: 'Customer ID' })
   @Expose()
-  customerId!: string;
+  customerId!: number;
 
   @ApiProperty({ description: 'Vehicle ID' })
   @Expose()
-  vehicleId!: string;
+  vehicleId!: number;
 
   @ApiProperty({ description: 'Work order description' })
   @Expose()
@@ -74,7 +74,7 @@ export class WorkOrderResponseDto {
 
   static fromDomain(workOrder: WorkOrder): WorkOrderResponseDto {
     const dto = new WorkOrderResponseDto();
-    
+
     dto.id = workOrder.id.value;
     dto.customerId = workOrder.customerId;
     dto.vehicleId = workOrder.vehicleId;

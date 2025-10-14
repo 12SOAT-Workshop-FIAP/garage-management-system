@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, Query, ParseUUIDPipe, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Delete,
+  Query,
+  ParseUUIDPipe,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateWorkOrderDto } from '../../application/dtos/create-work-order.dto';
 import { UpdateWorkOrderDto } from '../../application/dtos/update-work-order.dto';
@@ -37,12 +48,16 @@ export class WorkOrderController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new work order' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Work order created successfully', type: WorkOrderResponseDto })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Work order created successfully',
+    type: WorkOrderResponseDto,
+  })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
   async create(@Body() dto: CreateWorkOrderDto): Promise<WorkOrderResponseDto> {
     const command = new CreateWorkOrderCommand(
-      dto.vehicleId.toString(),
-      dto.vehicleId.toString(),
+      dto.vehicleId,
+      dto.vehicleId,
       dto.description,
       dto.estimatedCost,
       dto.diagnosis,
@@ -53,14 +68,18 @@ export class WorkOrderController {
 
   @Get()
   @ApiOperation({ summary: 'Get all work orders' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Work orders retrieved successfully', type: [WorkOrderResponseDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Work orders retrieved successfully',
+    type: [WorkOrderResponseDto],
+  })
   @ApiQuery({ name: 'status', enum: WorkOrderStatus, required: false })
   @ApiQuery({ name: 'customerId', type: 'string', required: false })
   @ApiQuery({ name: 'vehicleId', type: 'string', required: false })
   async findAll(
     @Query('status') status?: WorkOrderStatus,
-    @Query('customerId') customerId?: string,
-    @Query('vehicleId') vehicleId?: string,
+    @Query('customerId') customerId?: number,
+    @Query('vehicleId') vehicleId?: number,
   ): Promise<WorkOrderResponseDto[]> {
     let workOrders;
 
@@ -78,13 +97,17 @@ export class WorkOrderController {
       workOrders = await this.getAllWorkOrdersUseCase.execute(query);
     }
 
-    return workOrders.map(workOrder => WorkOrderResponseDto.fromDomain(workOrder));
+    return workOrders.map((workOrder) => WorkOrderResponseDto.fromDomain(workOrder));
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get work order by ID' })
   @ApiParam({ name: 'id', description: 'Work order ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Work order retrieved successfully', type: WorkOrderResponseDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Work order retrieved successfully',
+    type: WorkOrderResponseDto,
+  })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<WorkOrderResponseDto> {
     const query = new GetWorkOrderByIdQuery(id);
@@ -95,10 +118,17 @@ export class WorkOrderController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update work order' })
   @ApiParam({ name: 'id', description: 'Work order ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Work order updated successfully', type: WorkOrderResponseDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Work order updated successfully',
+    type: WorkOrderResponseDto,
+  })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
-  async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateWorkOrderDto): Promise<WorkOrderResponseDto> {
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateWorkOrderDto,
+  ): Promise<WorkOrderResponseDto> {
     const command = new UpdateWorkOrderCommand(
       id,
       dto.description,

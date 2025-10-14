@@ -27,7 +27,10 @@ export class WorkOrderServiceResponseDto {
   @ApiProperty({ description: 'Estimated duration in minutes' })
   estimatedDuration!: number;
 
-  @ApiProperty({ description: 'Service status', enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] })
+  @ApiProperty({
+    description: 'Service status',
+    enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+  })
   status!: string;
 
   @ApiProperty({ description: 'When service was started', required: false })
@@ -66,10 +69,10 @@ export class WorkOrderDetailedResponseDto {
   id!: string;
 
   @ApiProperty({ description: 'Customer ID' })
-  customerId!: string;
+  customerId!: number;
 
   @ApiProperty({ description: 'Vehicle ID' })
-  vehicleId!: string;
+  vehicleId!: number;
 
   @ApiProperty({ description: 'Description' })
   description!: string;
@@ -110,7 +113,10 @@ export class WorkOrderDetailedResponseDto {
   @ApiProperty({ description: 'Updated at' })
   updatedAt!: Date;
 
-  @ApiProperty({ description: 'Services included in this work order', type: [WorkOrderServiceResponseDto] })
+  @ApiProperty({
+    description: 'Services included in this work order',
+    type: [WorkOrderServiceResponseDto],
+  })
   services!: WorkOrderServiceResponseDto[];
 
   @ApiProperty({ description: 'Services summary' })
@@ -142,9 +148,9 @@ export class WorkOrderDetailedResponseDto {
     this.completedAt = workOrder.completedAt;
     this.createdAt = workOrder.createdAt;
     this.updatedAt = workOrder.updatedAt;
-    
-    this.services = workOrder.services.map(service => new WorkOrderServiceResponseDto(service));
-    
+
+    this.services = workOrder.services.map((service) => new WorkOrderServiceResponseDto(service));
+
     this.servicesSummary = {
       totalServices: workOrder.services.length,
       pendingServices: workOrder.getServicesByStatus('PENDING').length,
@@ -178,8 +184,8 @@ export class WorkOrderCostBreakdownResponseDto {
 
   constructor(workOrder: WorkOrder) {
     this.workOrderId = workOrder.id.value;
-    this.services = workOrder.services.map(service => new WorkOrderServiceResponseDto(service));
-    
+    this.services = workOrder.services.map((service) => new WorkOrderServiceResponseDto(service));
+
     this.costSummary = {
       totalServicesCost: workOrder.getTotalServicesCost(),
       partsCost: workOrder.partsCost?.value || 0,

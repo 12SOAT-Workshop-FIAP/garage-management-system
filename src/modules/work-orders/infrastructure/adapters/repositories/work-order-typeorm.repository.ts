@@ -53,7 +53,7 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
     return WorkOrderMapper.toDomainArray(entities);
   }
 
-  async findByCustomerId(customerId: string): Promise<WorkOrderDomain[]> {
+  async findByCustomerId(customerId: number): Promise<WorkOrderDomain[]> {
     const entities = await this.repository.find({
       where: { customerId },
       relations: ['services', 'parts'],
@@ -63,7 +63,7 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
     return WorkOrderMapper.toDomainArray(entities);
   }
 
-  async findByVehicleId(vehicleId: string): Promise<WorkOrderDomain[]> {
+  async findByVehicleId(vehicleId: number): Promise<WorkOrderDomain[]> {
     const entities = await this.repository.find({
       where: { vehicleId },
       relations: ['services', 'parts'],
@@ -184,15 +184,15 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
     await this.repository.delete(id.value);
   }
 
-  async findCustomerByVehicleId(vehicleId: string): Promise<string | null> {
+  async findCustomerByVehicleId(vehicleId: number): Promise<number | null> {
     const dataSource = this.repository.manager.connection;
     const vehicleRepository = dataSource.getRepository(VehicleOrmEntity);
     const vehicle = await vehicleRepository.findOne({
-      where: { id: parseInt(vehicleId) },
+      where: { id: vehicleId },
       relations: ['customer'],
     });
 
-    return vehicle?.customer?.id?.toString() || null;
+    return vehicle?.customerId || null;
   }
 
   async findCustomerByLicensePlate(licensePlate: string): Promise<string | null> {
@@ -203,6 +203,6 @@ export class WorkOrderTypeOrmRepository implements WorkOrderRepository {
       relations: ['customer'],
     });
 
-    return vehicle?.customer?.id?.toString() || null;
+    return vehicle?.customerId?.toString() || null;
   }
 }

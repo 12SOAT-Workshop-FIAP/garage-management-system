@@ -9,9 +9,7 @@ import { WorkOrderStatus } from '../../domain/work-order-status.enum';
  */
 @Injectable()
 export class FindWorkOrderService {
-  constructor(
-    private readonly workOrderRepository: WorkOrderRepository,
-  ) {}
+  constructor(private readonly workOrderRepository: WorkOrderRepository) {}
 
   async findById(id: string): Promise<WorkOrder> {
     const workOrder = await this.workOrderRepository.findById(id);
@@ -25,11 +23,11 @@ export class FindWorkOrderService {
     return await this.workOrderRepository.findAll();
   }
 
-  async findByCustomerId(customerId: string): Promise<WorkOrder[]> {
+  async findByCustomerId(customerId: number): Promise<WorkOrder[]> {
     return await this.workOrderRepository.findByCustomerId(customerId);
   }
 
-  async findByVehicleId(vehicleId: string): Promise<WorkOrder[]> {
+  async findByVehicleId(vehicleId: number): Promise<WorkOrder[]> {
     return await this.workOrderRepository.findByVehicleId(vehicleId);
   }
 

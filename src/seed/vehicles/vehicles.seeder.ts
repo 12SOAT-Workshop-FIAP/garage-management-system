@@ -20,7 +20,7 @@ export default class VehiclesSeeder extends Seeder {
     const vehicles = await Promise.all(
       Array.from({ length: 10 }).map(() =>
         new VehiclesFactory().create({
-          customer: faker.helpers.arrayElement(customers),
+          customerId: faker.helpers.arrayElement(customers).id,
         }),
       ),
     );

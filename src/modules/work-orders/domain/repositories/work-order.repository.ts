@@ -10,12 +10,12 @@ import { WorkOrderId } from '../value-objects';
 export abstract class WorkOrderRepository {
   abstract findById(id: WorkOrderId): Promise<WorkOrder | null>;
   abstract findAll(): Promise<WorkOrder[]>;
-  abstract findByCustomerId(customerId: string): Promise<WorkOrder[]>;
-  abstract findByVehicleId(vehicleId: string): Promise<WorkOrder[]>;
+  abstract findByCustomerId(customerId: number): Promise<WorkOrder[]>;
+  abstract findByVehicleId(vehicleId: number): Promise<WorkOrder[]>;
   abstract findByStatus(status: WorkOrderStatus): Promise<WorkOrder[]>;
   abstract findByDateRange(startDate: Date, endDate: Date): Promise<WorkOrder[]>;
   abstract save(workOrder: WorkOrder): Promise<WorkOrder>;
   abstract delete(id: WorkOrderId): Promise<void>;
-  abstract findCustomerByVehicleId(vehicleId: string): Promise<string | null>;
+  abstract findCustomerByVehicleId(vehicleId: number): Promise<number | null>;
   abstract findCustomerByLicensePlate(licensePlate: string): Promise<string | null>;
 }

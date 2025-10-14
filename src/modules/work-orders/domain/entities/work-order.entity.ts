@@ -16,8 +16,8 @@ import {
  */
 export class WorkOrder {
   private readonly _id: WorkOrderId;
-  private readonly _customerId: string;
-  private readonly _vehicleId: string;
+  private readonly _customerId: number;
+  private readonly _vehicleId: number;
   private _description: WorkOrderDescription;
   private _status: WorkOrderStatus;
   private _estimatedCost: Money;
@@ -36,8 +36,8 @@ export class WorkOrder {
 
   private constructor(props: {
     id: WorkOrderId;
-    customerId: string;
-    vehicleId: string;
+    customerId: number;
+    vehicleId: number;
     description: WorkOrderDescription;
     status?: WorkOrderStatus;
     estimatedCost?: Money;
@@ -75,8 +75,8 @@ export class WorkOrder {
   }
 
   static create(props: {
-    customerId: string;
-    vehicleId: string;
+    customerId: number;
+    vehicleId: number;
     description: string;
     estimatedCost?: number;
     diagnosis?: string;
@@ -97,8 +97,8 @@ export class WorkOrder {
 
   static reconstitute(props: {
     id: string;
-    customerId: string;
-    vehicleId: string;
+    customerId: number;
+    vehicleId: number;
     description: string;
     status: WorkOrderStatus;
     estimatedCost: number;
@@ -126,7 +126,9 @@ export class WorkOrder {
       laborCost: props.laborCost !== undefined ? Money.create(props.laborCost) : undefined,
       partsCost: props.partsCost !== undefined ? Money.create(props.partsCost) : undefined,
       diagnosis: props.diagnosis ? WorkOrderDiagnosis.create(props.diagnosis) : undefined,
-      technicianNotes: props.technicianNotes ? TechnicianNotes.create(props.technicianNotes) : undefined,
+      technicianNotes: props.technicianNotes
+        ? TechnicianNotes.create(props.technicianNotes)
+        : undefined,
       customerApproval: props.customerApproval,
       estimatedCompletionDate: props.estimatedCompletionDate,
       completedAt: props.completedAt,
@@ -142,11 +144,11 @@ export class WorkOrder {
     return this._id;
   }
 
-  get customerId(): string {
+  get customerId(): number {
     return this._customerId;
   }
 
-  get vehicleId(): string {
+  get vehicleId(): number {
     return this._vehicleId;
   }
 
@@ -216,7 +218,7 @@ export class WorkOrder {
   updateStatus(status: WorkOrderStatus): void {
     this._status = status;
     this._updatedAt = new Date();
-    
+
     if (status === WorkOrderStatus.COMPLETED) {
       this._completedAt = new Date();
     }
@@ -288,11 +290,11 @@ export class WorkOrder {
   getEstimatedHours(): number {
     if (this._services.length > 0) {
       const totalMinutes = this._services.reduce((total, service) => {
-        return total + (service.estimatedDuration * service.quantity);
+        return total + service.estimatedDuration * service.quantity;
       }, 0);
       return Math.ceil(totalMinutes / 60);
     }
-    
+
     return Math.ceil(this._estimatedCost.value / 100);
   }
 
@@ -300,11 +302,11 @@ export class WorkOrder {
    * Add service to work order
    */
   addService(service: WorkOrderService): void {
-    const existingService = this._services.find(s => s.serviceId === service.serviceId);
+    const existingService = this._services.find((s) => s.serviceId === service.serviceId);
     if (existingService) {
       throw new Error(`Service ${service.serviceName} is already added to this work order`);
     }
-    
+
     this._services.push(service);
     this.updateEstimatedCost();
     this._updatedAt = new Date();
@@ -314,11 +316,11 @@ export class WorkOrder {
    * Remove service from work order
    */
   removeService(serviceId: string): void {
-    const serviceIndex = this._services.findIndex(s => s.serviceId === serviceId);
+    const serviceIndex = this._services.findIndex((s) => s.serviceId === serviceId);
     if (serviceIndex === -1) {
       throw new Error('Service not found in this work order');
     }
-    
+
     this._services.splice(serviceIndex, 1);
     this.updateEstimatedCost();
     this._updatedAt = new Date();
@@ -327,8 +329,11 @@ export class WorkOrder {
   /**
    * Update service in work order
    */
-  updateService(serviceId: string, updates: { quantity?: number; unitPrice?: number; technicianNotes?: string }): void {
-    const service = this._services.find(s => s.serviceId === serviceId);
+  updateService(
+    serviceId: string,
+    updates: { quantity?: number; unitPrice?: number; technicianNotes?: string },
+  ): void {
+    const service = this._services.find((s) => s.serviceId === serviceId);
     if (!service) {
       throw new Error('Service not found in this work order');
     }
@@ -336,11 +341,11 @@ export class WorkOrder {
     if (updates.quantity !== undefined) {
       service.updateQuantity(updates.quantity);
     }
-    
+
     if (updates.unitPrice !== undefined) {
       service.updateUnitPrice(updates.unitPrice);
     }
-    
+
     if (updates.technicianNotes !== undefined) {
       service.technicianNotes = updates.technicianNotes;
     }
@@ -353,11 +358,11 @@ export class WorkOrder {
    * Start service execution
    */
   startService(serviceId: string): void {
-    const service = this._services.find(s => s.serviceId === serviceId);
+    const service = this._services.find((s) => s.serviceId === serviceId);
     if (!service) {
       throw new Error('Service not found in this work order');
     }
-    
+
     service.start();
     this._updatedAt = new Date();
   }
@@ -366,11 +371,11 @@ export class WorkOrder {
    * Complete service execution
    */
   completeService(serviceId: string, technicianNotes?: string): void {
-    const service = this._services.find(s => s.serviceId === serviceId);
+    const service = this._services.find((s) => s.serviceId === serviceId);
     if (!service) {
       throw new Error('Service not found in this work order');
     }
-    
+
     service.complete(technicianNotes);
     this.updateActualCost();
     this._updatedAt = new Date();
@@ -384,11 +389,11 @@ export class WorkOrder {
    * Cancel service
    */
   cancelService(serviceId: string): void {
-    const service = this._services.find(s => s.serviceId === serviceId);
+    const service = this._services.find((s) => s.serviceId === serviceId);
     if (!service) {
       throw new Error('Service not found in this work order');
     }
-    
+
     service.cancel();
     this.updateEstimatedCost();
     this._updatedAt = new Date();
@@ -398,14 +403,16 @@ export class WorkOrder {
    * Get service by ID
    */
   getService(serviceId: string): WorkOrderService | undefined {
-    return this._services.find(s => s.serviceId === serviceId);
+    return this._services.find((s) => s.serviceId === serviceId);
   }
 
   /**
    * Get all services by status
    */
-  getServicesByStatus(status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'): WorkOrderService[] {
-    return this._services.filter(s => s.status === status);
+  getServicesByStatus(
+    status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED',
+  ): WorkOrderService[] {
+    return this._services.filter((s) => s.status === status);
   }
 
   /**
@@ -413,7 +420,7 @@ export class WorkOrder {
    */
   getTotalServicesCost(): number {
     return this._services
-      .filter(s => s.status !== 'CANCELLED')
+      .filter((s) => s.status !== 'CANCELLED')
       .reduce((total, service) => total + service.totalPrice, 0);
   }
 
@@ -422,7 +429,7 @@ export class WorkOrder {
    */
   areAllServicesCompleted(): boolean {
     if (this._services.length === 0) return false;
-    return this._services.every(s => s.status === 'COMPLETED' || s.status === 'CANCELLED');
+    return this._services.every((s) => s.status === 'COMPLETED' || s.status === 'CANCELLED');
   }
 
   /**
@@ -430,8 +437,8 @@ export class WorkOrder {
    */
   getCompletionPercentage(): number {
     if (this._services.length === 0) return 0;
-    
-    const completedServices = this._services.filter(s => s.status === 'COMPLETED').length;
+
+    const completedServices = this._services.filter((s) => s.status === 'COMPLETED').length;
     return Math.round((completedServices / this._services.length) * 100);
   }
 
@@ -449,11 +456,11 @@ export class WorkOrder {
    */
   private updateActualCost(): void {
     const completedServicesCost = this._services
-      .filter(s => s.status === 'COMPLETED')
+      .filter((s) => s.status === 'COMPLETED')
       .reduce((total, service) => total + service.totalPrice, 0);
-    
+
     const appliedPartsCost = this.getAppliedPartsCost();
-    
+
     this._actualCost = Money.create(completedServicesCost + appliedPartsCost);
     this._laborCost = Money.create(completedServicesCost);
     this._partsCost = Money.create(appliedPartsCost);
@@ -463,8 +470,8 @@ export class WorkOrder {
    * Add a part to the work order
    */
   addPart(part: WorkOrderPart): void {
-    const existingPartIndex = this._parts.findIndex(p => p.partId === part.partId);
-    
+    const existingPartIndex = this._parts.findIndex((p) => p.partId === part.partId);
+
     if (existingPartIndex >= 0) {
       const existingPart = this._parts[existingPartIndex];
       const newQuantity = existingPart.quantity + part.quantity;
@@ -472,7 +479,7 @@ export class WorkOrder {
     } else {
       this._parts.push(part);
     }
-    
+
     this._updatedAt = new Date();
     this.updateEstimatedCost();
   }
@@ -481,7 +488,7 @@ export class WorkOrder {
    * Remove a part from the work order
    */
   removePart(partId: string): void {
-    this._parts = this._parts.filter(part => part.partId !== partId);
+    this._parts = this._parts.filter((part) => part.partId !== partId);
     this._updatedAt = new Date();
     this.updateEstimatedCost();
   }
@@ -490,8 +497,8 @@ export class WorkOrder {
    * Update part quantity
    */
   updatePartQuantity(partId: string, newQuantity: number): void {
-    const partIndex = this._parts.findIndex(p => p.partId === partId);
-    
+    const partIndex = this._parts.findIndex((p) => p.partId === partId);
+
     if (partIndex === -1) {
       throw new Error(`Part with ID ${partId} not found in work order`);
     }
@@ -510,8 +517,8 @@ export class WorkOrder {
    * Approve a part for use
    */
   approvePart(partId: string): void {
-    const partIndex = this._parts.findIndex(p => p.partId === partId);
-    
+    const partIndex = this._parts.findIndex((p) => p.partId === partId);
+
     if (partIndex === -1) {
       throw new Error(`Part with ID ${partId} not found in work order`);
     }
@@ -524,8 +531,8 @@ export class WorkOrder {
    * Mark a part as applied
    */
   applyPart(partId: string): void {
-    const partIndex = this._parts.findIndex(p => p.partId === partId);
-    
+    const partIndex = this._parts.findIndex((p) => p.partId === partId);
+
     if (partIndex === -1) {
       throw new Error(`Part with ID ${partId} not found in work order`);
     }
@@ -551,7 +558,7 @@ export class WorkOrder {
    */
   getAppliedPartsCost(): number {
     return this._parts
-      .filter(part => part.appliedAt)
+      .filter((part) => part.appliedAt)
       .reduce((total, part) => total + part.totalPrice, 0);
   }
 
@@ -559,13 +566,13 @@ export class WorkOrder {
    * Get parts by approval status
    */
   getPartsByApprovalStatus(isApproved: boolean): WorkOrderPart[] {
-    return this._parts.filter(part => part.isApproved === isApproved);
+    return this._parts.filter((part) => part.isApproved === isApproved);
   }
 
   /**
    * Check if all parts are approved
    */
   areAllPartsApproved(): boolean {
-    return this._parts.length > 0 && this._parts.every(part => part.isApproved);
+    return this._parts.length > 0 && this._parts.every((part) => part.isApproved);
   }
 }

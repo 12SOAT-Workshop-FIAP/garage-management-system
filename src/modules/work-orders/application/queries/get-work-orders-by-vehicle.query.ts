@@ -1,3 +1,3 @@
 export class GetWorkOrdersByVehicleQuery {
-  constructor(public readonly vehicleId: string) {}
+  constructor(public readonly vehicleId: number) {}
 }

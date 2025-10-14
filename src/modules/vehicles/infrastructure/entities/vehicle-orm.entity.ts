@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 
 @Entity('vehicles')
 export class VehicleOrmEntity {
@@ -19,6 +28,10 @@ export class VehicleOrmEntity {
 
   @Column({ type: 'int' })
   customerId!: number;
+
+  @ManyToOne(() => CustomerEntity)
+  @JoinColumn({ name: 'customerId' })
+  customer!: CustomerEntity;
 
   @CreateDateColumn()
   createdAt!: Date;

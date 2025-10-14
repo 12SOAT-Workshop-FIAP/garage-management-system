@@ -1,3 +1,3 @@
 export class GetWorkOrdersByCustomerQuery {
-  constructor(public readonly customerId: string) {}
+  constructor(public readonly customerId: number) {}
 }
