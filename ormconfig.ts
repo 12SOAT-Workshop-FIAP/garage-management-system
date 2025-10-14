@@ -32,6 +32,16 @@ export const ormconfig: DataSourceOptions = {
 
   synchronize: false,
   logging: true,
+  ...(process.env.NODE_ENV !== 'development'
+    ? {
+        ssl: true,
+        extra: {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        },
+      }
+    : {}),
 };
 
 export const dataSource = new DataSource(ormconfig);
