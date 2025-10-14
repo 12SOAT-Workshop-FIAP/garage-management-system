@@ -9,3 +9,8 @@ output "public_subnet_ids" {
 output "private_subnet_ids" {
   value = [aws_subnet.private_a.id, aws_subnet.private_b.id]
 }
+
+output "private_subnet_cidrs" {
+  description = "CIDR blocks of the private subnets."
+  value       = var.private_subnet_cidrs
+}

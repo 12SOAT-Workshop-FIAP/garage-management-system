@@ -1,6 +1,5 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { join } from 'path';
-import * as dotenv from 'dotenv';
 import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
 import { Service } from '@modules/services/infrastructure/entities/service.entity';
 import { User } from '@modules/users/infrastructure/entities/user.entity';
@@ -10,11 +9,9 @@ import { WorkOrderPartORM } from '@modules/work-orders/infrastructure/entities/w
 import { PartOrmEntity } from '@modules/parts/infrastructure/entities/part-orm.entity';
 import { VehicleOrmEntity } from '@modules/vehicles/infrastructure/entities/vehicle-orm.entity';
 
-dotenv.config();
-
 export const ormconfig: DataSourceOptions = {
   type: 'postgres',
-  host: process.env.POSTGRES_HOST || 'host.docker.internal',
+  host: process.env.POSTGRES_HOST,
   port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD || 'postgres',
@@ -35,6 +32,16 @@ export const ormconfig: DataSourceOptions = {
 
   synchronize: false,
   logging: true,
+  ...(process.env.NODE_ENV !== 'development'
+    ? {
+        ssl: true,
+        extra: {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        },
+      }
+    : {}),
 };
 
 export const dataSource = new DataSource(ormconfig);

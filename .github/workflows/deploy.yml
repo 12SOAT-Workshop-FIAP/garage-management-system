@@ -5,6 +5,12 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      run_migrations:
+        description: 'Rodar migrations? (run-migrations)'
+        required: true
+        type: boolean
+        default: false
 
 env:
   AWS_REGION: us-east-1
@@ -56,8 +62,14 @@ jobs:
           cache: 'npm'
       - run: npm install
 
-      # - name: 5. Run Automated Tests
-      #   run: npm test
+      - name: 5. Run Automated Tests
+        env:
+          POSTGRES_TEST_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: garage
+        run: npm test
 
       - name: 6. Build and Push Docker Image
         id: build-image
@@ -91,7 +103,7 @@ jobs:
             --from-literal=JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} \
             --from-literal=BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
 
-      - name: 10. Deploy Application to EKS
+      - name: 9. Deploy Application to EKS
         run: |
           sed -i 's|image: fiap-garage-api:latest|image: ${{ steps.build-image.outputs.image }}|g' k8s/api.yaml
 
@@ -100,3 +112,5 @@ jobs:
           kubectl apply -f k8s/api.yaml
           kubectl apply -f k8s/api-service.yaml
           kubectl apply -f k8s/hpa.yaml
+
+          kubectl rollout restart deployment/garage-api -n fiap-garage
