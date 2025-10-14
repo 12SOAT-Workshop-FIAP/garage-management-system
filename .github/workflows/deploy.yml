@@ -56,7 +56,15 @@ jobs:
           cache: 'npm'
       - run: npm install
 
-      - name: 5. Run Automated Tests
+      - name: 5. Wait for PostgreSQL
+        run: |
+          echo "⏳ Waiting for Postgres to be ready..."
+          until nc -z postgres 5432; do
+            sleep 1
+          done
+          echo "✅ Postgres is ready!"
+
+      - name: 6. Run Automated Tests
         env:
           POSTGRES_TEST_HOST: postgres
           POSTGRES_PORT: 5432
@@ -65,7 +73,7 @@ jobs:
           POSTGRES_DB: garage
         run: npm test
 
-      - name: 6. Build and Push Docker Image
+      - name: 7. Build and Push Docker Image
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -76,10 +84,10 @@ jobs:
           docker push $FULL_IMAGE_NAME
           echo "image=$FULL_IMAGE_NAME" >> $GITHUB_OUTPUT
 
-      - name: 7. Connect to EKS Cluster
+      - name: 8. Connect to EKS Cluster
         run: aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
 
-      - name: 8. Create/Update Kubernetes Secrets
+      - name: 9. Create/Update Kubernetes Secrets
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
