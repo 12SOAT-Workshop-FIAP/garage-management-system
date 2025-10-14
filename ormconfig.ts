@@ -10,11 +10,11 @@ import { WorkOrderPartORM } from '@modules/work-orders/infrastructure/entities/w
 import { PartOrmEntity } from '@modules/parts/infrastructure/entities/part-orm.entity';
 import { VehicleOrmEntity } from '@modules/vehicles/infrastructure/entities/vehicle-orm.entity';
 
-dotenv.config();
+// dotenv.config();
 
 export const ormconfig: DataSourceOptions = {
   type: 'postgres',
-  host: process.env.POSTGRES_HOST || 'host.docker.internal',
+  host: process.env.POSTGRES_HOST,
   port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD || 'postgres',
