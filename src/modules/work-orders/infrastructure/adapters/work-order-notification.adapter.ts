@@ -1,32 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { SendEmailNotificationService } from './send-email-notification.service';
-import { WorkOrderStatus } from '@modules/work-orders/domain/work-order-status.enum';
+import {
+  WorkOrderNotificationPort,
+  WorkOrderStatusChangeData,
+} from '../../domain/ports/work-order-notification.port';
+import { SendEmailNotificationPort } from '@modules/email/ports/send-email-notification.port';
+import { WorkOrderStatus } from '../../domain/work-order-status.enum';
 
-export interface WorkOrderEmailData {
-  workOrderId: string;
-  customerName: string;
-  customerEmail: string;
-  vehicleBrand: string;
-  vehicleModel: string;
-  vehiclePlate: string;
-  status: WorkOrderStatus;
-  updatedAt: Date;
-  estimatedCompletion?: Date;
-  totalValue?: number;
-  statusMessage?: string;
-}
+export class WorkOrderNotificationAdapter implements WorkOrderNotificationPort {
+  constructor(private readonly sendEmailPort: SendEmailNotificationPort) {}
 
-/**
- * WorkOrderEmailNotificationService
- * @deprecated Use WorkOrderNotificationPort in work-orders module instead
- * Legacy service maintained for backward compatibility
- * This will be removed in a future version
- */
-@Injectable()
-export class WorkOrderEmailNotificationService {
-  constructor(private readonly sendEmailNotificationService: SendEmailNotificationService) {}
-
-  async sendStatusChangeNotification(data: WorkOrderEmailData): Promise<void> {
+  async sendStatusChangeNotification(data: WorkOrderStatusChangeData): Promise<void> {
     try {
       const subject = `Atualização da Ordem de Serviço #${data.workOrderId}`;
 
@@ -46,14 +28,11 @@ export class WorkOrderEmailNotificationService {
           minute: '2-digit',
         }),
         estimatedCompletion: data.estimatedCompletion?.toLocaleDateString('pt-BR'),
-        totalValue: data.totalValue?.toLocaleString('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-        }),
+        totalValue: data.totalValue,
         statusMessage: data.statusMessage || this.getDefaultStatusMessage(data.status),
       };
 
-      await this.sendEmailNotificationService.execute({
+      await this.sendEmailPort.execute({
         recipients: [
           {
             email: data.customerEmail,
@@ -65,10 +44,10 @@ export class WorkOrderEmailNotificationService {
         templateData,
       });
 
-      console.log(`Work order status notification sent for order #${data.workOrderId}`);
+      console.log(`✅ Work order notification sent for order #${data.workOrderId}`);
     } catch (error) {
       console.error(
-        `Failed to send work order notification for order #${data.workOrderId}:`,
+        `❌ Error sending work order notification for order #${data.workOrderId}:`,
         error,
       );
       throw error;

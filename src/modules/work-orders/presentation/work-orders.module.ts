@@ -37,6 +37,15 @@ import { CustomersModule } from '@modules/customers/customers.module';
 import { EmailModule } from '@modules/email/email.module';
 import { VehiclesModule } from '@modules/vehicles/vehicles.module';
 import { PartOrmEntity } from '@modules/parts/infrastructure/entities/part-orm.entity';
+import { CustomerReaderPort, VehicleReaderPort, WorkOrderNotificationPort } from '../domain/ports';
+import {
+  CustomerReaderAdapter,
+  VehicleReaderAdapter,
+  WorkOrderNotificationAdapter,
+} from '../infrastructure/adapters';
+import { CustomerRepository } from '@modules/customers/domain/repositories/customer.repository';
+import { FindVehicleByIdUseCase } from '@modules/vehicles/application/use-cases/find-vehicle-by-id.usecase';
+import { SendEmailNotificationPort } from '@modules/email/ports/send-email-notification.port';
 
 @Module({
   imports: [
@@ -65,16 +74,99 @@ import { PartOrmEntity } from '@modules/parts/infrastructure/entities/part-orm.e
     // Hexagonal architecture repositories
     { provide: WorkOrderRepository, useClass: WorkOrderTypeOrmRepository },
     { provide: OldWorkOrderRepository, useClass: OldWorkOrderTypeOrmRepository },
-    // Use Cases
-    CreateWorkOrderUseCase,
-    UpdateWorkOrderUseCase,
+    {
+      provide: CustomerReaderPort,
+      useFactory: (customerRepository: CustomerRepository) => {
+        return new CustomerReaderAdapter(customerRepository);
+      },
+      inject: [CustomerRepository],
+    },
+    {
+      provide: VehicleReaderPort,
+      useFactory: (findByIdVehicleService: FindVehicleByIdUseCase) => {
+        return new VehicleReaderAdapter(findByIdVehicleService);
+      },
+      inject: [FindVehicleByIdUseCase],
+    },
+    {
+      provide: WorkOrderNotificationPort,
+      useFactory: (sendEmailPort: SendEmailNotificationPort) => {
+        return new WorkOrderNotificationAdapter(sendEmailPort);
+      },
+      inject: [SendEmailNotificationPort],
+    },
+    {
+      provide: CreateWorkOrderUseCase,
+      useFactory: (
+        workOrderRepository: WorkOrderRepository,
+        customerReader: CustomerReaderPort,
+        vehicleReader: VehicleReaderPort,
+        notificationService: WorkOrderNotificationPort,
+      ) => {
+        return new CreateWorkOrderUseCase(
+          workOrderRepository,
+          customerReader,
+          vehicleReader,
+          notificationService,
+        );
+      },
+      inject: [
+        WorkOrderRepository,
+        CustomerReaderPort,
+        VehicleReaderPort,
+        WorkOrderNotificationPort,
+      ],
+    },
+    {
+      provide: UpdateWorkOrderUseCase,
+      useFactory: (
+        workOrderRepository: WorkOrderRepository,
+        customerReader: CustomerReaderPort,
+        vehicleReader: VehicleReaderPort,
+        notificationService: WorkOrderNotificationPort,
+      ) => {
+        return new UpdateWorkOrderUseCase(
+          workOrderRepository,
+          customerReader,
+          vehicleReader,
+          notificationService,
+        );
+      },
+      inject: [
+        WorkOrderRepository,
+        CustomerReaderPort,
+        VehicleReaderPort,
+        WorkOrderNotificationPort,
+      ],
+    },
     DeleteWorkOrderUseCase,
     GetWorkOrderByIdUseCase,
     GetAllWorkOrdersUseCase,
     GetWorkOrdersByCustomerUseCase,
     GetWorkOrdersByStatusUseCase,
     GetWorkOrdersByVehicleUseCase,
-    ApproveWorkOrderUseCase,
+    {
+      provide: ApproveWorkOrderUseCase,
+      useFactory: (
+        workOrderRepository: WorkOrderRepository,
+        customerReader: CustomerReaderPort,
+        vehicleReader: VehicleReaderPort,
+        notificationService: WorkOrderNotificationPort,
+      ) => {
+        return new ApproveWorkOrderUseCase(
+          workOrderRepository,
+          customerReader,
+          vehicleReader,
+          notificationService,
+        );
+      },
+      inject: [
+        WorkOrderRepository,
+        CustomerReaderPort,
+        VehicleReaderPort,
+        WorkOrderNotificationPort,
+      ],
+    },
   ],
   exports: [
     // Legacy services exports
@@ -87,6 +179,7 @@ import { PartOrmEntity } from '@modules/parts/infrastructure/entities/part-orm.e
     // Use Cases exports
     CreateWorkOrderUseCase,
     UpdateWorkOrderUseCase,
+    ApproveWorkOrderUseCase,
     GetWorkOrderByIdUseCase,
     GetAllWorkOrdersUseCase,
   ],

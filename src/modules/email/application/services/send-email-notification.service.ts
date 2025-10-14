@@ -5,7 +5,9 @@ import { SendEmailNotificationDto } from '../dtos/send-email-notification.dto';
 
 /**
  * SendEmailNotificationService
- * Application service for sending email notifications.
+ * @deprecated Use SendEmailNotificationPort with dependency injection instead
+ * Legacy service maintained for backward compatibility
+ * This will be removed in a future version
  */
 @Injectable()
 export class SendEmailNotificationService {

@@ -31,6 +31,8 @@ import { GetAllWorkOrdersQuery } from '../../application/queries/get-all-work-or
 import { GetWorkOrdersByCustomerQuery } from '../../application/queries/get-work-orders-by-customer.query';
 import { GetWorkOrdersByStatusQuery } from '../../application/queries/get-work-orders-by-status.query';
 import { GetWorkOrdersByVehicleQuery } from '../../application/queries/get-work-orders-by-vehicle.query';
+import { ApproveWorkOrderCommand } from '@modules/work-orders/application/commands/approve-work-order.command';
+import { ApproveWorkOrderUseCase } from '@modules/work-orders/application/use-cases/approve-work-order.use-case';
 
 @ApiTags('work-orders')
 @Controller('work-orders')
@@ -44,6 +46,7 @@ export class WorkOrderController {
     private readonly getWorkOrdersByStatusUseCase: GetWorkOrdersByStatusUseCase,
     private readonly getWorkOrdersByVehicleUseCase: GetWorkOrdersByVehicleUseCase,
     private readonly deleteWorkOrderUseCase: DeleteWorkOrderUseCase,
+    private readonly approveWorkOrderUseCase: ApproveWorkOrderUseCase,
   ) {}
 
   @Post()
@@ -142,6 +145,17 @@ export class WorkOrderController {
       dto.estimatedCompletionDate,
     );
     const workOrder = await this.updateWorkOrderUseCase.execute(command);
+    return WorkOrderResponseDto.fromDomain(workOrder);
+  }
+
+  @Post(':id/approve')
+  @ApiOperation({ summary: 'Approve work order' })
+  @ApiParam({ name: 'id', description: 'Work order ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Work order approved successfully' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Work order not found' })
+  async approve(@Param('id', ParseUUIDPipe) id: string): Promise<WorkOrderResponseDto> {
+    const command = new ApproveWorkOrderCommand(id);
+    const workOrder = await this.approveWorkOrderUseCase.execute(command);
     return WorkOrderResponseDto.fromDomain(workOrder);
   }
 
