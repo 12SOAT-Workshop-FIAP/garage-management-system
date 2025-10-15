@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: garage-api
-        image: 451156287371.dkr.ecr.us-east-1.amazonaws.com/garagemanagement:latest
+        image: fiap-garage-api:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
