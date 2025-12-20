@@ -46,6 +46,8 @@ import {
 import { CustomerRepository } from '@modules/customers/domain/repositories/customer.repository';
 import { FindVehicleByIdUseCase } from '@modules/vehicles/application/use-cases/find-vehicle-by-id.usecase';
 import { SendEmailNotificationPort } from '@modules/email/ports/send-email-notification.port';
+import { NewRelicService } from '@shared/infrastructure/new-relic.service';
+import { WinstonLoggerService } from '@shared/infrastructure/winston-logger.service';
 
 @Module({
   imports: [
@@ -124,12 +126,16 @@ import { SendEmailNotificationPort } from '@modules/email/ports/send-email-notif
         customerReader: CustomerReaderPort,
         vehicleReader: VehicleReaderPort,
         notificationService: WorkOrderNotificationPort,
+        newRelic: NewRelicService,
+        logger: WinstonLoggerService,
       ) => {
         return new UpdateWorkOrderUseCase(
           workOrderRepository,
           customerReader,
           vehicleReader,
           notificationService,
+          newRelic,
+          logger,
         );
       },
       inject: [
@@ -137,6 +143,8 @@ import { SendEmailNotificationPort } from '@modules/email/ports/send-email-notif
         CustomerReaderPort,
         VehicleReaderPort,
         WorkOrderNotificationPort,
+        NewRelicService,
+        WinstonLoggerService,
       ],
     },
     DeleteWorkOrderUseCase,
