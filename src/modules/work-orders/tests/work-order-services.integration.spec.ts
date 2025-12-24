@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from '../../../app.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WorkOrderORM } from '../infrastructure/entities/work-order.entity';
 import { WorkOrderPartORM } from '../infrastructure/entities/work-order-part.entity';
@@ -10,6 +9,8 @@ import { PartOrmEntity } from '@modules/parts/infrastructure/entities/part-orm.e
 import { CustomerEntity } from '@modules/customers/infrastructure/customer.entity';
 import { WorkOrdersModule } from '../presentation/work-orders.module';
 import { VehicleOrmEntity } from '@modules/vehicles/infrastructure/entities/vehicle-orm.entity';
+import { NewRelicService } from '@shared/infrastructure/new-relic.service';
+import { WinstonLoggerService } from '@shared/infrastructure/winston-logger.service';
 
 describe('WorkOrder Integration (e2e)', () => {
   let app: INestApplication;
@@ -42,6 +43,27 @@ describe('WorkOrder Integration (e2e)', () => {
           logging: false,
         }),
       ],
+      providers: [
+        {
+          provide: NewRelicService,
+          useValue: {
+            recordEvent: jest.fn(),
+            recordMetric: jest.fn(),
+            recordError: jest.fn(),
+          },
+        },
+        {
+          provide: WinstonLoggerService,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+            setContext: jest.fn(),
+            logBusinessEvent: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -49,7 +71,9 @@ describe('WorkOrder Integration (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   describe('WorkOrder Endpoints', () => {
