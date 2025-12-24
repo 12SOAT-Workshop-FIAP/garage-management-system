@@ -33,6 +33,8 @@ import { GetWorkOrdersByStatusQuery } from '../../application/queries/get-work-o
 import { GetWorkOrdersByVehicleQuery } from '../../application/queries/get-work-orders-by-vehicle.query';
 import { ApproveWorkOrderCommand } from '@modules/work-orders/application/commands/approve-work-order.command';
 import { ApproveWorkOrderUseCase } from '@modules/work-orders/application/use-cases/approve-work-order.use-case';
+import { WinstonLoggerService } from '@shared/infrastructure/winston-logger.service';
+import { NewRelicService } from '@shared/infrastructure/new-relic.service';
 
 @ApiTags('work-orders')
 @Controller('work-orders')
@@ -47,7 +49,11 @@ export class WorkOrderController {
     private readonly getWorkOrdersByVehicleUseCase: GetWorkOrdersByVehicleUseCase,
     private readonly deleteWorkOrderUseCase: DeleteWorkOrderUseCase,
     private readonly approveWorkOrderUseCase: ApproveWorkOrderUseCase,
-  ) {}
+    private readonly logger: WinstonLoggerService,
+    private readonly newRelic: NewRelicService,
+  ) {
+    this.logger.setContext('WorkOrderController');
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new work order' })
@@ -58,15 +64,81 @@ export class WorkOrderController {
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
   async create(@Body() dto: CreateWorkOrderDto): Promise<WorkOrderResponseDto> {
-    const command = new CreateWorkOrderCommand(
-      dto.customerId,
-      dto.vehicleId,
-      dto.description,
-      dto.estimatedCost,
-      dto.diagnosis,
-    );
-    const workOrder = await this.createWorkOrderUseCase.execute(command);
-    return WorkOrderResponseDto.fromDomain(workOrder);
+    const startTime = Date.now();
+
+    this.logger.log('Creating new work order', undefined, {
+      customerId: dto.customerId,
+      vehicleId: dto.vehicleId,
+      estimatedCost: dto.estimatedCost,
+    });
+
+    this.newRelic.addCustomAttributes({
+      customerId: dto.customerId,
+      vehicleId: dto.vehicleId,
+      estimatedCost: dto.estimatedCost || 0,
+    });
+
+    try {
+      const command = new CreateWorkOrderCommand(
+        dto.customerId,
+        dto.vehicleId,
+        dto.description,
+        dto.estimatedCost,
+        dto.diagnosis,
+      );
+      const workOrder = await this.createWorkOrderUseCase.execute(command);
+      const response = WorkOrderResponseDto.fromDomain(workOrder);
+
+      const duration = Date.now() - startTime;
+
+      this.logger.log('Work order created successfully', undefined, {
+        orderId: workOrder.id,
+        duration,
+      });
+
+      this.newRelic.incrementMetric('Custom/WorkOrders/Created');
+      this.newRelic.recordMetric('Custom/WorkOrders/TotalValue', dto.estimatedCost || 0);
+
+      this.newRelic.recordEvent('WorkOrderCreated', {
+        orderId: workOrder.id,
+        customerId: dto.customerId,
+        vehicleId: dto.vehicleId,
+        estimatedCost: dto.estimatedCost || 0,
+        status: workOrder.status,
+        createdAt: new Date().toISOString(),
+        processingTimeMs: duration,
+      });
+
+      this.logger.logBusinessEvent('work_order_created', {
+        orderId: workOrder.id,
+        customerId: dto.customerId,
+        vehicleId: dto.vehicleId,
+        estimatedCost: dto.estimatedCost || 0,
+        status: workOrder.status,
+      });
+
+      return response;
+    } catch (err) {
+      const error = err as Error;
+      this.logger.error(
+        'Failed to create work order',
+        error.stack,
+        undefined,
+        {
+          customerId: dto.customerId,
+          vehicleId: dto.vehicleId,
+          error: error.message,
+        },
+      );
+
+      this.newRelic.noticeError(error, {
+        customerId: dto.customerId,
+        vehicleId: dto.vehicleId,
+        estimatedCost: dto.estimatedCost || 0,
+      });
+
+      throw error;
+    }
   }
 
   @Get()

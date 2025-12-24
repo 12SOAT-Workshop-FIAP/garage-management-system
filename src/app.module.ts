@@ -12,6 +12,7 @@ import { JwtAuthGuard } from './modules/auth/presentation/guards/jwt-auth.guard'
 import { ConfigModule } from '@nestjs/config';
 import { ormconfig } from '../ormconfig';
 import { CustomersModule } from '@modules/customers/customers.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CustomersModule } from '@modules/customers/customers.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(ormconfig),
+    SharedModule,
     AuthModule,
     UsersModule,
     CustomersModule,

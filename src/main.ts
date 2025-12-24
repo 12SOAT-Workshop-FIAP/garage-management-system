@@ -4,9 +4,15 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import { WinstonLoggerService } from './shared/infrastructure/winston-logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new WinstonLoggerService();
+  logger.setContext('Bootstrap');
+
+  const app = await NestFactory.create(AppModule, {
+    logger: logger,
+  });
 
   // Enable cookie parser middleware
   app.use(cookieParser());

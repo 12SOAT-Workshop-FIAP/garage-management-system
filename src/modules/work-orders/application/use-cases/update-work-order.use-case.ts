@@ -10,6 +10,8 @@ import {
   VehicleReaderPort,
   WorkOrderNotificationPort,
 } from '../../domain/ports';
+import { NewRelicService } from '@shared/infrastructure/new-relic.service';
+import { WinstonLoggerService } from '@shared/infrastructure/winston-logger.service';
 
 /**
  * 🏗️ UpdateWorkOrderUseCase (Hexagonal Architecture)
@@ -24,12 +26,17 @@ export class UpdateWorkOrderUseCase {
     private readonly customerReader: CustomerReaderPort,
     private readonly vehicleReader: VehicleReaderPort,
     private readonly notificationService: WorkOrderNotificationPort,
-  ) {}
+    private readonly newRelic: NewRelicService,
+    private readonly logger: WinstonLoggerService,
+  ) {
+    this.logger.setContext('UpdateWorkOrderUseCase');
+  }
 
   async execute(command: UpdateWorkOrderCommand): Promise<WorkOrder> {
     const workOrderId = WorkOrderId.create(command.id);
     const workOrder = await this.workOrderRepository.findById(workOrderId);
     const originalStatus = workOrder?.status;
+    const statusChangedAt = workOrder?.updatedAt;
 
     if (!workOrder) {
       throw new NotFoundException(`Work order with ID ${command.id} not found`);
@@ -71,7 +78,14 @@ export class UpdateWorkOrderUseCase {
 
     const updatedWorkOrder = await this.workOrderRepository.save(workOrder);
 
-    if (originalStatus !== updatedWorkOrder.status) {
+    // Track status change for New Relic dashboards
+    if (originalStatus && statusChangedAt && originalStatus !== updatedWorkOrder.status) {
+      this.trackStatusChange(
+        updatedWorkOrder,
+        originalStatus,
+        updatedWorkOrder.status,
+        statusChangedAt,
+      );
       await this.sendStatusChangeNotification(updatedWorkOrder, command.technicianNotes);
     }
 
@@ -127,6 +141,67 @@ export class UpdateWorkOrderUseCase {
         error,
       );
       // Don't throw - notification failure shouldn't fail the update
+    }
+  }
+
+  /**
+   * 📊 Track status change for New Relic monitoring
+   * Records time spent in previous status for dashboard metrics
+   */
+  private trackStatusChange(
+    workOrder: WorkOrder,
+    previousStatus: WorkOrderStatus,
+    newStatus: WorkOrderStatus,
+    statusChangedAt: Date,
+  ): void {
+    try {
+      const now = new Date();
+      const timeInPreviousStatusMs = now.getTime() - statusChangedAt.getTime();
+
+      // Record custom event for New Relic dashboards
+      this.newRelic.recordEvent('WorkOrderStatusChanged', {
+        orderId: workOrder.id.value,
+        customerId: workOrder.customerId,
+        vehicleId: workOrder.vehicleId,
+        previousStatus,
+        newStatus,
+        timeInPreviousStatusMs,
+        timeInPreviousStatusHours: Math.round(timeInPreviousStatusMs / 1000 / 60 / 60 * 100) / 100,
+        timestamp: now.toISOString(),
+      });
+
+      // Log business event
+      this.logger.logBusinessEvent('work_order_status_changed', {
+        orderId: workOrder.id.value,
+        previousStatus,
+        newStatus,
+        timeInPreviousStatusMs,
+      });
+
+      // Record metric for status transition
+      this.newRelic.recordMetric(
+        `Custom/WorkOrders/StatusTransition/${previousStatus}_to_${newStatus}`,
+        1,
+      );
+
+      this.logger.log(
+        `Work order status changed: ${previousStatus} → ${newStatus}`,
+        undefined,
+        {
+          orderId: workOrder.id.value,
+          timeInPreviousStatusMs,
+        },
+      );
+    } catch (error) {
+      this.logger.error(
+        'Failed to track status change',
+        (error as Error).stack,
+        undefined,
+        {
+          orderId: workOrder.id.value,
+          error: (error as Error).message,
+        },
+      );
     }
   }
 }
