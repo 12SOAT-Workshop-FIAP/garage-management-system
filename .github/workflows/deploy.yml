@@ -101,7 +101,8 @@ jobs:
             --from-literal=POSTGRES_DB=${{ secrets.DB_NAME }} \
             --from-literal=JWT_SECRET=${{ secrets.JWT_SECRET }} \
             --from-literal=JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} \
-            --from-literal=BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+            --from-literal=BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}\
+            --from-literal=NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }}
 
       - name: 9. Deploy Application to EKS
         run: |
