@@ -2,6 +2,7 @@
 FROM node:22-alpine AS base
 WORKDIR /app
 COPY package*.json ./
+COPY newrelic.js ./
 RUN npm install
 
 # Estagio 2: Desenvolvimento
