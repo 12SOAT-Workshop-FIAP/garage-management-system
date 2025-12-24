@@ -16,7 +16,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: seed
-        image: 451156287371.dkr.ecr.us-east-1.amazonaws.com/garagemanagement:latest
+        image: 908171677883.dkr.ecr.us-east-1.amazonaws.com/garagemanagement:latest
         imagePullPolicy: Always
         command: ["npm", "run", "seed:run:js"]
         env:
