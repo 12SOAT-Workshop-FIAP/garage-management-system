@@ -1,5 +1,18 @@
+jest.mock('newrelic', () => ({
+  noticeError: jest.fn(),
+  recordMetric: jest.fn(),
+  recordCustomEvent: jest.fn(),
+  addCustomAttribute: jest.fn(),
+  addCustomAttributes: jest.fn(),
+  setTransactionName: jest.fn(),
+  getTransaction: jest.fn(() => ({ ignore: jest.fn() })),
+  startSegment: jest.fn((name, record, handler) => handler()),
+  startBackgroundTransaction: jest.fn((name, handler) => handler()),
+  getTraceMetadata: jest.fn(() => ({ traceId: 'mock-trace', spanId: 'mock-span' })),
+}));
+
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, Module, Global } from '@nestjs/common';
 import * as request from 'supertest';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WorkOrderORM } from '../infrastructure/entities/work-order.entity';
@@ -20,8 +33,39 @@ describe('WorkOrder Integration (e2e)', () => {
     process.env.EMAIL_SENDER = 'test@example.com';
     process.env.SENDER_NAME = 'Test Sender';
 
+    @Global()
+    @Module({
+      providers: [
+        {
+          provide: NewRelicService,
+          useValue: {
+            recordEvent: jest.fn(),
+            recordMetric: jest.fn(),
+            incrementMetric: jest.fn(),
+            addCustomAttributes: jest.fn(),
+            noticeError: jest.fn(),
+            recordError: jest.fn(),
+          },
+        },
+        {
+          provide: WinstonLoggerService,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+            setContext: jest.fn(),
+            logBusinessEvent: jest.fn(),
+          },
+        },
+      ],
+      exports: [NewRelicService, WinstonLoggerService],
+    })
+    class MockSharedModule {}
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
+        MockSharedModule,
         WorkOrdersModule,
         TypeOrmModule.forRoot({
           type: 'postgres',
@@ -42,27 +86,6 @@ describe('WorkOrder Integration (e2e)', () => {
           dropSchema: true,
           logging: false,
         }),
-      ],
-      providers: [
-        {
-          provide: NewRelicService,
-          useValue: {
-            recordEvent: jest.fn(),
-            recordMetric: jest.fn(),
-            recordError: jest.fn(),
-          },
-        },
-        {
-          provide: WinstonLoggerService,
-          useValue: {
-            log: jest.fn(),
-            error: jest.fn(),
-            warn: jest.fn(),
-            debug: jest.fn(),
-            setContext: jest.fn(),
-            logBusinessEvent: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
