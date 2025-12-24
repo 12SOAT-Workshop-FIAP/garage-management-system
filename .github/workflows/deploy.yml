@@ -109,7 +109,7 @@ jobs:
 
           # Aplica todos os manifestos necessários
           kubectl apply -f k8s/configmap.yaml
-          kubectl apply -f k8s/instrumentation.yamlß
+          kubectl apply -f k8s/instrumentation.yaml
           kubectl apply -f k8s/api.yaml
           kubectl apply -f k8s/api-service.yaml
           kubectl apply -f k8s/hpa.yaml
