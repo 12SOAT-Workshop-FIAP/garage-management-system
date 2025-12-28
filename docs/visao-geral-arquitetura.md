@@ -48,7 +48,7 @@ graph TB
             end
             
             RDS[(RDS PostgreSQL<br/>Primary)]
-            RDS_Replica[(RDS PostgreSQL<br/>Read Replica<br/>Futuro]
+            RDS_Replica[(RDS PostgreSQL<br/>Read Replica<br/>Futuro)]
         end
         
         ECR[ECR Container Registry]
