@@ -1,0 +1,32 @@
+sequenceDiagram
+    autonumber
+
+    actor Client as Client / Frontend
+    participant APIGW as API Gateway
+    participant Auth as Auth Lambda
+    participant API as Garage API (NestJS)
+    participant DB as RDS PostgreSQL
+    participant WO as Work Orders Domain
+    participant INV as Parts & Inventory Domain
+
+    %% Authentication flow
+    Client ->> APIGW: Login request (credentials)
+    APIGW ->> Auth: Invoke auth function
+    Auth ->> DB: Query user & password hash
+    DB -->> Auth: User data / not found
+    Auth -->> APIGW: JWT token / auth error
+    APIGW -->> Client: Auth response (JWT / error)
+
+    %% Create Work Order flow
+    Client ->> APIGW: Create Work Order (JWT + payload)
+    APIGW ->> API: Forward request (validated JWT)
+
+    API ->> WO: Create Work Order (domain call)
+    WO ->> DB: Insert Work Order
+
+    WO ->> INV: Reserve parts / decrement stock
+    INV ->> DB: Update stock & check minimum level
+
+    WO -->> API: Work Order created
+    API -->> APIGW: Work Order created
+    APIGW -->> Client: 201 Created + Work Order details
