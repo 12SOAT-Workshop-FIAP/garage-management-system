@@ -1,47 +1,34 @@
-graph LR
-    %% External
+flowchart LR
     Client[Client / Frontend]
+    APIGW[API Gateway]
+    Auth[Auth Lambda]
+    API[Garage API NestJS]
 
-    %% AWS Boundary
-    subgraph AWS
-        subgraph GarageSystem[Garage Management System]
+    Vehicles[Vehicles Domain]
+    Customers[Customers Domain]
+    WorkOrders[Work Orders Domain]
+    Inventory[Parts and Inventory Domain]
 
-            APIGW[API Gateway]
-            Auth[Auth Lambda]
-            API[Garage API (NestJS)]
+    DB[(RDS PostgreSQL)]
+    NewRelic[New Relic]
+    ECR[ECR Images]
 
-            Vehicles[Vehicles Domain]
-            WorkOrders[Work Orders Domain]
-            Customers[Customers Domain]
-            Inventory[Parts & Inventory Domain]
-
-            DB[(RDS PostgreSQL)]
-        end
-
-        NewRelic[New Relic]
-        ECR[ECR Images]
-    end
-
-    %% Client flow
     Client --> APIGW
-    APIGW -->|JWT Verification| Auth
+    APIGW --> Auth
+    Auth --> DB
+    Auth --> APIGW
+
     APIGW --> API
 
-    %% API to Domains
-    API -->|IVehicleService| Vehicles
-    API -->|IWorkOrderService| WorkOrders
-    API -->|ICustomerService| Customers
-    API -->|IInventoryService| Inventory
+    API --> Vehicles
+    API --> Customers
+    API --> WorkOrders
+    WorkOrders --> Inventory
 
-    %% Persistence
     Vehicles --> DB
-    WorkOrders --> DB
     Customers --> DB
+    WorkOrders --> DB
     Inventory --> DB
 
-    %% Cross-domain interaction
-    WorkOrders -->|Reserve parts / decrement stock| Inventory
-
-    %% Observability & Infra
-    API -->|Telemetry| NewRelic
-    API -->|Image Pull| ECR
+    API --> NewRelic
+    API --> ECR
