@@ -15,7 +15,7 @@ export const ormconfig: DataSourceOptions = {
   port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD || 'postgres',
-  database: process.env.POSTGRES_DB || 'garage',
+  database: process.env.POSTGRES_DB || 'garagemanagement',
 
   entities: [
     VehicleOrmEntity,
@@ -32,16 +32,22 @@ export const ormconfig: DataSourceOptions = {
 
   synchronize: false,
   logging: true,
-  ...(process.env.NODE_ENV !== 'development'
-    ? {
-        ssl: true,
-        extra: {
-          ssl: {
-            rejectUnauthorized: false,
-          },
-        },
-      }
-    : {}),
+  // ...(process.env.NODE_ENV !== 'development'
+  //   ? {
+  //       ssl: true,
+  //       extra: {
+  //         ssl: {
+  //           rejectUnauthorized: false,
+  //         },
+  //       },
+  //     }
+  //   : {}),
+  ssl: true,
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
 };
 
 export const dataSource = new DataSource(ormconfig);

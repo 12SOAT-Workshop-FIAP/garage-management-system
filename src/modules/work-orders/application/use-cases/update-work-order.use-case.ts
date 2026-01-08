@@ -157,6 +157,9 @@ export class UpdateWorkOrderUseCase {
     try {
       const now = new Date();
       const timeInPreviousStatusMs = now.getTime() - statusChangedAt.getTime();
+      const timeInPreviousStatusSeconds = Math.floor(timeInPreviousStatusMs / 1000);
+      const timeInPreviousStatusMinutes = Math.floor(timeInPreviousStatusMs / 1000 / 60);
+      const timeInPreviousStatusHours = Math.floor(timeInPreviousStatusMs / 1000 / 60 / 60);
 
       // Record custom event for New Relic dashboards
       this.newRelic.recordEvent('WorkOrderStatusChanged', {
@@ -166,7 +169,9 @@ export class UpdateWorkOrderUseCase {
         previousStatus,
         newStatus,
         timeInPreviousStatusMs,
-        timeInPreviousStatusHours: Math.round(timeInPreviousStatusMs / 1000 / 60 / 60 * 100) / 100,
+        timeInPreviousStatusSeconds,
+        timeInPreviousStatusMinutes,
+        timeInPreviousStatusHours,
         timestamp: now.toISOString(),
       });
 
