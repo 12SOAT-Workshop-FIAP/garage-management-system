@@ -170,6 +170,13 @@ sequenceDiagram
    - Refresh Token: 7 dias
    - Secrets configuráveis via environment variables
 
+4. **Notificações por Email**:
+   - **Provedor**: Brevo (anteriormente Sendinblue)
+   - **Adapter**: `BrevoAdapter` implementa port de email
+   - **Templates**: Handlebars para templates HTML
+   - **Variável de Ambiente**: `BREVO_API_KEY` necessária
+   - **Uso**: Notificações de mudança de status de ordens de serviço
+
 ## Impacto
 
 ### Impactos Positivos
@@ -205,6 +212,8 @@ sequenceDiagram
 - [JWT.io](https://jwt.io/)
 - [Passport.js JWT Strategy](http://www.passportjs.org/packages/passport-jwt/)
 - [NestJS Authentication](https://docs.nestjs.com/security/authentication)
+- [Brevo API Documentation](https://developers.brevo.com/)
 - Código Lambda Auth: `garage-management-auth/`
 - Código NestJS Auth: `garage-management-system/src/modules/auth/`
+- Código Email Module: `garage-management-system/src/modules/email/`
 
