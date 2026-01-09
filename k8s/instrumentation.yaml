@@ -12,12 +12,6 @@ spec:
     # Values supported: newrelic-java-init:latest, newrelic-dotnet-init:latest, newrelic-node-init:latest, newrelic-python-init:latest, newrelic-ruby-init:latest, newrelic-php-init:latest, newrelic-php-init:musl
     image: newrelic/newrelic-node-init:latest
     env:
-      # Configure New Relic License Key
-      - name: NEW_RELIC_LICENSE_KEY
-        valueFrom:
-          secretKeyRef:
-            name: newrelic-bundle-newrelic-infrastructure
-            key: license
       # Configure App Name
       - name: NEW_RELIC_APP_NAME
         value: "garage-api"
