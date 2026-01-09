@@ -8,7 +8,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { WorkOrdersModule } from './modules/work-orders/presentation/work-orders.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { JwtAuthGuard } from './modules/auth/presentation/guards/jwt-auth.guard';
+import { ExternalJwtAuthGuard } from './modules/auth/presentation/guards/external-jwt-auth.guard';
 import { ConfigModule } from '@nestjs/config';
 import { ormconfig } from '../ormconfig';
 import { CustomersModule } from '@modules/customers/customers.module';
@@ -33,7 +33,7 @@ import { SharedModule } from './shared/shared.module';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: ExternalJwtAuthGuard,
     },
   ],
 })
