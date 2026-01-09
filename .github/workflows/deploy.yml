@@ -104,8 +104,17 @@ jobs:
             --from-literal=JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} \
             --from-literal=BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}\
             --from-literal=NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }}
+      
+      - name: 09. Helm Packaging Installing
+        run: |
+          helm repo add newrelic https://helm-charts.newrelic.com
+          helm repo update
+          helm upgrade --install newrelic-bundle newrelic/nri-bundle \
+            -f values.yaml \
+            --namespace newrelic \
+            --create-namespace
 
-      - name: 9. Deploy Application to EKS
+      - name: 10. Deploy Application to EKS
         run: |
           sed -i 's|image: fiap-garage-api:latest|image: ${{ steps.build-image.outputs.image }}|g' k8s/api.yaml
 
@@ -114,5 +123,6 @@ jobs:
           kubectl apply -f k8s/api.yaml
           kubectl apply -f k8s/api-service.yaml
           kubectl apply -f k8s/hpa.yaml
+          kubectl apply -f ./instrumentation.yaml -n newrelic
 
           kubectl rollout restart deployment/garage-api -n fiap-garage
