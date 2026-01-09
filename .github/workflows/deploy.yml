@@ -123,6 +123,6 @@ jobs:
           kubectl apply -f k8s/api.yaml
           kubectl apply -f k8s/api-service.yaml
           kubectl apply -f k8s/hpa.yaml
-          kubectl apply -f ./instrumentation.yaml -n newrelic
+          kubectl apply -f k8s/instrumentation.yaml -n newrelic
 
           kubectl rollout restart deployment/garage-api -n fiap-garage
