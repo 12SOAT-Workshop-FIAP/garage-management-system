@@ -104,18 +104,17 @@ jobs:
             --from-literal=JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} \
             --from-literal=BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}\
             --from-literal=NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }}
-      
-      - name: 09. Helm Packaging Installing
+
+      - name: 09. Deploy Application to EKS
         run: |
           helm repo add newrelic https://helm-charts.newrelic.com
           helm repo update
           helm upgrade --install newrelic-bundle newrelic/nri-bundle \
             -f values.yaml \
             --namespace newrelic \
-            --create-namespace
+            --create-namespace \
+            --wait
 
-      - name: 10. Deploy Application to EKS
-        run: |
           sed -i 's|image: fiap-garage-api:latest|image: ${{ steps.build-image.outputs.image }}|g' k8s/api.yaml
 
           # Aplica todos os manifestos necessários
@@ -123,6 +122,16 @@ jobs:
           kubectl apply -f k8s/api.yaml
           kubectl apply -f k8s/api-service.yaml
           kubectl apply -f k8s/hpa.yaml
+
+          echo "Aguardando operador do New Relic..."
+
+          kubectl rollout status deployment/newrelic-bundle-k8s-agents-operator -n newrelic
+          
+          kubectl wait --for=condition=available --timeout=60s \
+          deployment/newrelic-bundle-k8s-agents-operator -n newrelic || true
+
+          sleep 20
+
           kubectl apply -f k8s/instrumentation.yaml -n newrelic
 
           kubectl rollout restart deployment/garage-api -n fiap-garage
