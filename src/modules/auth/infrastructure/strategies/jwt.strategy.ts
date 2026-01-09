@@ -14,18 +14,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
         (request: Request) => {
           const token = request?.cookies?.['access_token'];
           if (!token) {
             return null;
           }
-
           return token;
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey:
-        configService.get<string>('JWT_SECRET') || 'your-secret-key-change-in-production',
+      secretOrKey: configService.get<string>('JWT_SECRET') || 'secret-key-1234',
+      passReqToCallback: true,
     });
   }
 

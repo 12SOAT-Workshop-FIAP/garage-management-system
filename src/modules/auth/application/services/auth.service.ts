@@ -57,9 +57,7 @@ export class AuthService {
     if (refreshToken) {
       try {
         const payload = this.jwtService.verify(refreshToken, {
-          secret:
-            this.configService.get<string>('JWT_REFRESH_SECRET') ||
-            'your-refresh-secret-change-in-production',
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'secret-key-1234',
         }) as RefreshTokenPayload;
 
         // Remove the specific refresh token
@@ -81,9 +79,7 @@ export class AuthService {
     try {
       // Verify refresh token
       const payload = this.jwtService.verify(refreshToken, {
-        secret:
-          this.configService.get<string>('JWT_REFRESH_SECRET') ||
-          'your-refresh-secret-change-in-production',
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'secret-key-1234',
       }) as RefreshTokenPayload;
 
       // Check if refresh token exists in our store
@@ -122,15 +118,12 @@ export class AuthService {
     };
 
     const accessToken = this.jwtService.sign(accessPayload, {
-      secret:
-        this.configService.get<string>('JWT_SECRET') || 'your-secret-key-change-in-production',
+      secret: this.configService.get<string>('JWT_SECRET') || 'secret-key-1234',
       expiresIn: '900s', // 15 minutes
     });
 
     const refreshToken = this.jwtService.sign(refreshPayload, {
-      secret:
-        this.configService.get<string>('JWT_REFRESH_SECRET') ||
-        'your-refresh-secret-change-in-production',
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'secret-key-1234',
       expiresIn: '7d', // 7 days
     });
 

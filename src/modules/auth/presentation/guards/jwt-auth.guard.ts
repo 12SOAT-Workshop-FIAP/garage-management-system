@@ -23,7 +23,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
-    // For protected routes, user is required
     if (err || !user) {
       throw err || new UnauthorizedException('Access token is invalid or expired');
     }

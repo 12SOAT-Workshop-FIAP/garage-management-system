@@ -6,11 +6,8 @@ import { ConfigService } from '@nestjs/config';
 import { AuthController } from './presentation/controllers/auth.controller';
 import { AuthService } from './application/services/auth.service';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
-import { ExternalJwtStrategy } from './infrastructure/strategies/external-jwt.strategy';
 import { JwtAuthGuard } from './presentation/guards/jwt-auth.guard';
-import { ExternalJwtAuthGuard } from './presentation/guards/external-jwt-auth.guard';
 import { CpfValidationGuard } from './presentation/guards/cpf-validation.guard';
-import { AuthClient } from './infrastructure/clients/auth.client';
 import { UsersModule } from '../users/users.module';
 
 @Module({
@@ -19,7 +16,7 @@ import { UsersModule } from '../users/users.module';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'your-secret-key-change-in-production',
+        secret: configService.get<string>('JWT_SECRET') || 'secret-key-1234',
         signOptions: { expiresIn: '900s' },
       }),
       inject: [ConfigService],
@@ -27,23 +24,7 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    ExternalJwtStrategy,
-    JwtAuthGuard,
-    ExternalJwtAuthGuard,
-    CpfValidationGuard,
-    AuthClient,
-  ],
-  exports: [
-    AuthService,
-    JwtAuthGuard,
-    ExternalJwtAuthGuard,
-    CpfValidationGuard,
-    JwtStrategy,
-    ExternalJwtStrategy,
-    AuthClient,
-  ],
+  providers: [AuthService, JwtStrategy, JwtAuthGuard, CpfValidationGuard],
+  exports: [AuthService, JwtAuthGuard, CpfValidationGuard, JwtStrategy],
 })
 export class AuthModule {}
