@@ -197,9 +197,34 @@ graph TB
 4. ✅ **RDS PostgreSQL**: Instância de banco de dados (implementado)
 5. ✅ **API Gateway**: Roteamento HTTP API (implementado)
 6. ✅ **Lambda Auth**: Função serverless para autenticação (implementado)
-7. ⚠️ **CI/CD**: GitHub Actions para deploy automatizado (parcialmente implementado)
+7. ✅ **CI/CD**: GitHub Actions para deploy automatizado (implementado)
 8. ⚠️ **Monitoramento**: Dashboards CloudWatch e alertas (pendente configuração completa)
 9. ⚠️ **Produção Hardening**: Remover `publicly_accessible` do RDS, habilitar Multi-AZ (pendente)
+
+### CI/CD Implementado
+
+O sistema possui **GitHub Actions** configurado para deploy automatizado:
+
+#### Pipeline Principal (`garage-management-system`)
+- **Build**: Compilação da aplicação NestJS
+- **Testes**: Execução de testes automatizados com PostgreSQL em container
+- **Docker**: Build e push de imagem para Amazon ECR
+- **Deploy**: Deploy automatizado para EKS com atualização de secrets
+- **Migrations**: Suporte opcional para execução de migrations via `workflow_dispatch`
+
+#### Pipeline de Infraestrutura (`garage-management-infra`)
+- **Terraform Validate**: Validação de sintaxe e formatação
+- **Terraform Plan**: Planejamento de mudanças
+- **Terraform Apply**: Aplicação automatizada de mudanças
+
+#### Pipeline de Banco de Dados (`garage-management-database`)
+- **Terraform Validate**: Validação de configuração
+- **Terraform Plan**: Planejamento de mudanças no RDS
+- **Terraform Apply**: Aplicação automatizada
+
+#### Helm Charts
+- **Metrics Server**: Instalado via Helm Chart (versão 3.12.1) para suportar HPA
+- Configuração via Terraform no módulo EKS
 
 ## Referências
 

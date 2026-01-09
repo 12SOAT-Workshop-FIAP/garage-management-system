@@ -124,6 +124,29 @@ resource "aws_eks_node_group" "main" {
 }
 ```
 
+### Metrics Server (Helm Chart)
+
+O Metrics Server é instalado via Helm Chart para fornecer métricas de CPU e memória necessárias para o HPA:
+
+```hcl
+resource "helm_release" "metrics_server" {
+  name       = "metrics-server"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+  namespace  = "kube-system"
+  version    = "3.12.1"
+}
+```
+
+### Namespace Kubernetes
+
+O sistema utiliza o namespace **`fiap-garage`** para isolamento de recursos:
+- Deployment: `garage-api`
+- Service: `garage-api-service`
+- HPA: `garage-api-hpa`
+- Secrets: `fiap-garage-secret`
+- ConfigMap: `garage-api-config`
+
 ### Health Checks
 
 ```yaml
@@ -219,6 +242,9 @@ graph TB
 
 - [Kubernetes HPA Documentation](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
 - [AWS EKS Best Practices](https://aws.github.io/aws-eks-best-practices/)
+- [Kubernetes Metrics Server](https://github.com/kubernetes-sigs/metrics-server)
+- [Helm Documentation](https://helm.sh/docs/)
 - Configuração EKS: `garage-management-infra/modules/eks/main.tf`
 - HPA Config: `garage-management-system/k8s/hpa.yaml`
+- Namespace: `fiap-garage`
 

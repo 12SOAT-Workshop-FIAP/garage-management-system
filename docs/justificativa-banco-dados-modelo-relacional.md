@@ -339,7 +339,7 @@ erDiagram
     work_orders {
         uuid id PK
         integer customerId FK
-        integer vehicleId
+        integer vehicleId "referência lógica"
         text description
         varchar status
         decimal estimatedCost
@@ -349,7 +349,7 @@ erDiagram
         text diagnosis
         text technicianNotes
         boolean customerApproval
-        uuid assignedTechnicianId
+        uuid assignedTechnicianId "referência lógica"
         timestamp estimatedCompletionDate
         timestamp completedAt
         timestamp createdAt
@@ -424,11 +424,18 @@ erDiagram
 
 **Cardinalidade**: Um veículo pode ter **múltiplas ordens de serviço** (diferentes serviços ao longo do tempo), mas cada ordem referencia **um único veículo**.
 
-**Implementação**: Campo `work_orders.vehicleId` referencia `vehicles.id` (sem foreign key explícita na migration atual, mas logicamente relacionado).
+**Implementação**: Campo `work_orders.vehicleId` referencia `vehicles.id` como **referência lógica** (sem foreign key explícita no banco de dados).
+
+**Decisão Arquitetural**: A foreign key explícita para `vehicleId` não foi implementada na migration inicial por:
+- **Flexibilidade**: Permite criar ordens de serviço mesmo se o veículo for temporariamente indisponível no sistema
+- **Histórico**: Preserva histórico de ordens mesmo se o veículo for removido (soft delete)
+- **Validação na Aplicação**: A validação de existência do veículo é feita na camada de aplicação (use cases), garantindo integridade lógica sem restrições rígidas no banco
+
+**Nota**: Esta é uma decisão consciente de design. Para ambientes de produção com requisitos mais rígidos de integridade referencial, pode-se considerar adicionar a FK explícita em futuras migrations.
 
 **Exemplo Prático**: O veículo Gol ABC-1234 já passou por 5 serviços: 2 trocas de óleo, 1 alinhamento, 1 substituição de freios e 1 revisão completa.
 
-**Regra de Negócio**: Cada ordem de serviço deve estar associada a um veículo específico para rastreabilidade.
+**Regra de Negócio**: Cada ordem de serviço deve estar associada a um veículo específico para rastreabilidade. A validação é garantida pela camada de aplicação.
 
 #### 4.1.4 Ordem de Serviço → Serviços (N:N via `work_order_services`)
 
@@ -461,7 +468,15 @@ erDiagram
 
 **Cardinalidade**: Um técnico (usuário) pode atender **múltiplas ordens de serviço**, e uma ordem pode ter **um técnico atribuído** (opcional).
 
-**Implementação**: Campo `work_orders.assignedTechnicianId` referencia `users.id` (sem foreign key explícita na migration atual).
+**Implementação**: Campo `work_orders.assignedTechnicianId` referencia `users.id` como **referência lógica** (sem foreign key explícita no banco de dados).
+
+**Decisão Arquitetural**: A foreign key explícita para `assignedTechnicianId` não foi implementada na migration inicial por:
+- **Opcionalidade**: Uma ordem pode não ter técnico atribuído inicialmente (status PENDING), e FKs não-nulláveis complicariam esse fluxo
+- **Flexibilidade Operacional**: Permite atribuir técnicos mesmo se o usuário estiver temporariamente inativo no sistema
+- **Histórico**: Preserva histórico de ordens mesmo se o técnico for removido (soft delete)
+- **Validação na Aplicação**: A validação de existência e status ativo do técnico é feita na camada de aplicação (use cases), garantindo integridade lógica
+
+**Nota**: Esta é uma decisão consciente de design. Para ambientes de produção com requisitos mais rígidos de integridade referencial, pode-se considerar adicionar a FK explícita em futuras migrations.
 
 **Exemplo Prático**: O técnico "Carlos Mendes" está atribuído a 3 ordens de serviço ativas atualmente.
 
@@ -469,10 +484,32 @@ erDiagram
 - Uma ordem pode não ter técnico atribuído inicialmente (status PENDING)
 - Quando um técnico é atribuído, a ordem muda para IN_PROGRESS
 - Notas do técnico são armazenadas em `technicianNotes`
+- A validação de existência e status ativo do técnico é garantida pela camada de aplicação
 
 ### 4.2 Padrões de Design Aplicados
 
-#### 4.2.1 Snapshot Pattern (Tabelas `work_order_services` e `work_order_parts`)
+#### 4.2.1 Referências Lógicas vs. Foreign Keys Explícitas
+
+**Motivação**: Alguns relacionamentos no modelo utilizam referências lógicas (sem FK explícita) em vez de foreign keys rígidas no banco de dados.
+
+**Implementação**: 
+- `work_orders.vehicleId`: Referência lógica a `vehicles.id` (sem FK explícita)
+- `work_orders.assignedTechnicianId`: Referência lógica a `users.id` (sem FK explícita)
+
+**Racional**:
+- **Flexibilidade Operacional**: Permite criar registros mesmo quando entidades relacionadas estão temporariamente indisponíveis
+- **Preservação de Histórico**: Mantém histórico completo mesmo se entidades relacionadas forem removidas (soft delete)
+- **Validação na Aplicação**: Garante integridade lógica através de use cases, permitindo regras de negócio mais complexas que simples constraints de banco
+- **Opcionalidade**: Facilita relacionamentos opcionais (ex: ordem sem técnico atribuído)
+
+**Trade-off**: 
+- ✅ **Vantagem**: Maior flexibilidade e preservação de histórico
+- ⚠️ **Desvantagem**: Integridade referencial mais fraca (depende da aplicação)
+- **Mitigação**: Validação rigorosa na camada de aplicação (use cases) e testes automatizados
+
+**Nota**: Esta é uma decisão arquitetural consciente. Para ambientes com requisitos mais rígidos de integridade referencial, pode-se considerar adicionar FKs explícitas em futuras migrations.
+
+#### 4.2.2 Snapshot Pattern (Tabelas `work_order_services` e `work_order_parts`)
 
 **Motivação**: Preservar histórico imutável de preços e descrições mesmo se o catálogo for alterado.
 
@@ -584,9 +621,9 @@ CREATE INDEX idx_work_orders_created_at ON work_orders(createdAt DESC);
 
 ## 8. Referências
 
-- Migration atual: `garage-management-system/src/migrations/1760472426975-migration.ts`
-- ORM Config: `garage-management-system/ormconfig.ts`
-- Entidades TypeORM: `garage-management-system/src/modules/*/infrastructure/entities/`
+- **Migrations**: `garage-management-system/src/migrations/` (migration inicial: `1760472426975-migration.ts`)
+- **ORM Config**: `garage-management-system/ormconfig.ts`
+- **Entidades TypeORM**: `garage-management-system/src/modules/*/infrastructure/entities/`
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [TypeORM Entity Documentation](https://typeorm.io/#/entities)
 

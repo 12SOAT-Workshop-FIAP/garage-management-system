@@ -103,12 +103,13 @@ graph TB
 
 ### Backend
 
-- **Runtime**: Node.js 20.x
+- **Runtime**: Node.js 20.x (aplicação), Node.js 22 (CI/CD)
 - **Framework**: NestJS 11.x
 - **Linguagem**: TypeScript
 - **ORM**: TypeORM 0.3.x
 - **Banco de Dados**: PostgreSQL 17
 - **Autenticação**: JWT (Passport.js)
+- **Email**: Brevo (Sendinblue) via `@getbrevo/brevo`
 
 ### Infraestrutura
 
@@ -120,14 +121,16 @@ graph TB
 - **API Gateway**: AWS API Gateway (HTTP API)
 - **Load Balancer**: Application Load Balancer (ALB)
 - **IaC**: Terraform
-- **CI/CD**: GitHub Actions (parcialmente implementado)
+- **CI/CD**: GitHub Actions (implementado)
 
 ### Observabilidade
 
 - **APM**: New Relic
-- **Logging**: Winston + CloudWatch
-- **Métricas**: CloudWatch + Kubernetes Metrics Server
-- **Health Checks**: Endpoints `/health` em cada serviço
+- **Logging**: Winston (estruturado em JSON) + CloudWatch
+- **Métricas**: CloudWatch + Kubernetes Metrics Server (Helm Chart 3.12.1)
+- **Health Checks**: Endpoint `/health` com verificação de banco de dados e integração New Relic
+- **Custom Metrics**: NewRelicService para métricas e eventos customizados
+- **Logger Service**: WinstonLoggerService com correlação New Relic (trace.id, span.id)
 
 ## Arquitetura da Aplicação (Hexagonal Architecture)
 
@@ -237,13 +240,21 @@ graph TB
    - Validação de documentos brasileiros
 
 8. **Email**
-   - Envio de notificações por email
-   - Templates HTML
+   - Envio de notificações por email via Brevo (Sendinblue)
+   - Templates HTML usando Handlebars
+   - Arquitetura hexagonal com ports e adapters
+   - Adapter: `BrevoAdapter` implementa port de email
 
 9. **Auth**
    - Autenticação JWT
    - Validação de tokens
    - Refresh tokens
+
+10. **Shared**
+    - Módulo global compartilhado entre todos os módulos
+    - `WinstonLoggerService`: Logger estruturado com integração New Relic
+    - `NewRelicService`: Wrapper para métricas e eventos customizados
+    - `HealthController`: Endpoint `/health` com verificação de banco de dados
 
 ## Fluxo de Requisição
 
@@ -381,34 +392,64 @@ Ver documentação completa em: `justificativa-banco-dados-modelo-relacional.md`
 
 ## Deploy e CI/CD
 
-### Processo de Deploy (Atual)
+### Processo de Deploy (Implementado)
 
 1. **Desenvolvimento Local**: Docker Compose
-2. **Build**: Docker build da aplicação NestJS
-3. **Registry**: Push para Amazon ECR
-4. **Kubernetes**: Deploy via kubectl ou Helm (futuro)
-5. **Migrations**: Job Kubernetes para executar migrações
+2. **CI/CD**: GitHub Actions automatizado
+3. **Build**: Docker build da aplicação NestJS
+4. **Testes**: Execução de testes automatizados com PostgreSQL em container
+5. **Registry**: Push para Amazon ECR
+6. **Kubernetes**: Deploy automatizado para EKS
+7. **Migrations**: Suporte opcional via `workflow_dispatch`
+8. **Secrets**: Gerenciamento automatizado de secrets do Kubernetes
 
-### CI/CD (Futuro)
+### Pipeline CI/CD
 
-- GitHub Actions para pipeline automatizado
-- Testes automatizados antes do deploy
-- Deploy automatizado para staging/production
-- Rollback automático em caso de falha
+#### Pipeline Principal (`garage-management-system`)
+- **Trigger**: Push para branch `main` ou `workflow_dispatch`
+- **Etapas**:
+  1. Checkout do código
+  2. Configuração de credenciais AWS
+  3. Login no Amazon ECR
+  4. Setup Node.js 22 e instalação de dependências
+  5. Execução de testes automatizados
+  6. Build e push de imagem Docker para ECR
+  7. Conexão ao cluster EKS
+  8. Criação/atualização de secrets do Kubernetes
+  9. Deploy da aplicação para EKS
+- **Namespace**: `fiap-garage`
+
+#### Pipeline de Infraestrutura (`garage-management-infra`)
+- **Trigger**: Push para branch `main` ou mudanças em `garage-management-infra/**`
+- **Etapas**: Terraform init, validate, plan e apply
+
+#### Pipeline de Banco de Dados (`garage-management-database`)
+- **Trigger**: Push para branch `main` ou mudanças em `garage-management-database/**`
+- **Etapas**: Terraform init, validate, plan e apply
 
 ## Observabilidade
 
 ### Logging
 
-- **Winston**: Logger estruturado
-- **CloudWatch**: Agregação de logs
+- **Winston**: Logger estruturado em JSON
+- **WinstonLoggerService**: Serviço compartilhado com:
+  - Formato JSON para fácil parsing
+  - Integração automática com New Relic (trace.id, span.id)
+  - Suporte a eventos de negócio customizados
+  - Contexto configurável por classe/módulo
+- **CloudWatch**: Agregação de logs (via stdout)
 - **New Relic**: APM e logging adicional
 
 ### Métricas
 
-- **Kubernetes Metrics Server**: CPU/memória dos pods
+- **Kubernetes Metrics Server**: CPU/memória dos pods (instalado via Helm Chart 3.12.1)
 - **CloudWatch**: Métricas de infraestrutura
 - **New Relic APM**: Métricas de aplicação
+- **NewRelicService**: Métricas e eventos customizados:
+  - Métricas numéricas (ex: `Custom/WorkOrders/Created`)
+  - Eventos estruturados (ex: `WorkOrderCompleted`)
+  - Atributos customizados em transações
+  - Rastreamento de erros
 
 ### Alertas
 
