@@ -118,6 +118,10 @@ jobs:
 
           sed -i 's|image: fiap-garage-api:latest|image: ${{ steps.build-image.outputs.image }}|g' k8s/api.yaml
 
+          # Deploya RabbitMQ (dependência dos microserviços)
+          kubectl apply -f k8s/rabbitmq.yaml
+          kubectl wait --for=condition=ready pod -l app=rabbitmq -n fiap-garage --timeout=120s || true
+
           # Aplica todos os manifestos necessários
           kubectl apply -f k8s/configmap.yaml
           kubectl apply -f k8s/api.yaml
