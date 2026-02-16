@@ -1,5 +1,6 @@
 import { CreateWorkOrderService } from '../application/services/create-work-order.service';
 import { WorkOrderRepository } from '../domain/work-order.repository';
+import { MessagingService } from '@shared/messaging/messaging.service';
 
 describe('CreateWorkOrderService', () => {
   it('should be defined', () => {
@@ -15,6 +16,7 @@ describe('CreateWorkOrderService', () => {
       findCustomerByVehicleId: jest.fn(),
       findCustomerByLicensePlate: jest.fn()
     };
-    expect(new CreateWorkOrderService(mockRepository)).toBeDefined();
+    const mockMessaging = { publish: jest.fn(), subscribe: jest.fn() } as unknown as MessagingService;
+    expect(new CreateWorkOrderService(mockRepository, mockMessaging)).toBeDefined();
   });
 });

@@ -30,13 +30,13 @@ export class MessagingService implements OnModuleInit {
         setTimeout(() => this.connect(), 5000);
       });
 
-      this.connection.on('error', (err) => {
+      this.connection.on('error', (err: any) => {
         this.isConnected = false;
         this.logger.error('RabbitMQ connection error:', err.message);
       });
     } catch (error) {
       this.isConnected = false;
-      this.logger.error('Failed to connect to RabbitMQ:', error.message);
+      this.logger.error('Failed to connect to RabbitMQ:', (error as any).message);
       setTimeout(() => this.connect(), 5000);
     }
   }
@@ -61,14 +61,14 @@ export class MessagingService implements OnModuleInit {
     await this.channel.assertQueue(queue, { durable: true });
     await this.channel.bindQueue(queue, exchange, routingKey);
 
-    this.channel.consume(queue, async (msg) => {
+    this.channel.consume(queue, async (msg: any) => {
       if (msg) {
         try {
           const content = JSON.parse(msg.content.toString());
           await handler(content);
           this.channel.ack(msg);
         } catch (error) {
-          this.logger.error(`Error processing message from ${routingKey}:`, error.message);
+          this.logger.error(`Error processing message from ${routingKey}:`, (error as any).message);
           this.channel.nack(msg, false, false);
         }
       }
