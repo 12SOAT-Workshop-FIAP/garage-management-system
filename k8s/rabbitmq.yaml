@@ -1,11 +1,10 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: rabbitmq
   labels:
     app: rabbitmq
 spec:
-  serviceName: rabbitmq
   replicas: 1
   selector:
     matchLabels:
@@ -54,14 +53,9 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
-  volumeClaimTemplates:
-  - metadata:
-      name: rabbitmq-data
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 1Gi
+      volumes:
+      - name: rabbitmq-data
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
