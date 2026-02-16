@@ -24,6 +24,7 @@ import { WorkOrdersModule } from '../presentation/work-orders.module';
 import { VehicleOrmEntity } from '@modules/vehicles/infrastructure/entities/vehicle-orm.entity';
 import { NewRelicService } from '@shared/infrastructure/new-relic.service';
 import { WinstonLoggerService } from '@shared/infrastructure/winston-logger.service';
+import { MessagingService } from '@shared/messaging/messaging.service';
 
 describe('WorkOrder Integration (e2e)', () => {
   let app: INestApplication;
@@ -58,8 +59,17 @@ describe('WorkOrder Integration (e2e)', () => {
             logBusinessEvent: jest.fn(),
           },
         },
+        {
+          provide: MessagingService,
+          useValue: {
+            publish: jest.fn(),
+            subscribe: jest.fn(),
+            getConnectionStatus: jest.fn().mockReturnValue(true),
+            onModuleInit: jest.fn(),
+          },
+        },
       ],
-      exports: [NewRelicService, WinstonLoggerService],
+      exports: [NewRelicService, WinstonLoggerService, MessagingService],
     })
     class MockSharedModule {}
 
