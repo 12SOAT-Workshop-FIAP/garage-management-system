@@ -4,8 +4,8 @@ import * as amqp from 'amqplib';
 @Injectable()
 export class MessagingService implements OnModuleInit {
   private readonly logger = new Logger(MessagingService.name);
-  private connection: amqp.Connection;
-  private channel: amqp.Channel;
+  private connection: any;
+  private channel: any;
   private isConnected = false;
 
   async onModuleInit() {
