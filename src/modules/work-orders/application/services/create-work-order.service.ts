@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { WorkOrderRepository } from '../../domain/work-order.repository';
 import { CreateWorkOrderDto } from '../dtos/create-work-order.dto';
 import { WorkOrder } from '../../domain/work-order.entity';
+import { MessagingService } from '@shared/messaging/messaging.service';
 
 /**
  * CreateWorkOrderService (Serviço de criação de Ordem de Serviço)
@@ -9,8 +10,11 @@ import { WorkOrder } from '../../domain/work-order.entity';
  */
 @Injectable()
 export class CreateWorkOrderService {
+  private readonly logger = new Logger(CreateWorkOrderService.name);
+
   constructor(
     private readonly workOrderRepository: WorkOrderRepository,
+    private readonly messagingService: MessagingService,
   ) {}
 
   async execute(dto: CreateWorkOrderDto): Promise<WorkOrder> {
@@ -50,6 +54,14 @@ export class CreateWorkOrderService {
 
       // Save work order
       const savedWorkOrder = await this.workOrderRepository.save(workOrder);
+
+      // Publicar evento para iniciar saga
+      await this.messagingService.publish('work-order.created', {
+        workOrderId: savedWorkOrder.id,
+        customerId: savedWorkOrder.customerId,
+        vehicleId: savedWorkOrder.vehicleId,
+      });
+      this.logger.log(`Published work-order.created for WO ${savedWorkOrder.id}`);
 
       return savedWorkOrder;
     } catch (error) {
