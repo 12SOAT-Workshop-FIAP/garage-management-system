@@ -15,47 +15,49 @@ spec:
         app: rabbitmq
     spec:
       containers:
-      - name: rabbitmq
-        image: rabbitmq:3.12-management-alpine
-        ports:
-        - containerPort: 5672
-          name: amqp
-        - containerPort: 15672
-          name: management
-        env:
-        - name: RABBITMQ_DEFAULT_USER
-          valueFrom:
-            secretKeyRef:
-              name: rabbitmq-secrets
-              key: rabbitmq-user
-        - name: RABBITMQ_DEFAULT_PASS
-          valueFrom:
-            secretKeyRef:
-              name: rabbitmq-secrets
-              key: rabbitmq-password
-        volumeMounts:
-        - name: rabbitmq-data
-          mountPath: /var/lib/rabbitmq
-        livenessProbe:
-          exec:
-            command: ["rabbitmq-diagnostics", "check_running"]
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command: ["rabbitmq-diagnostics", "check_running"]
-          initialDelaySeconds: 15
-          periodSeconds: 5
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: rabbitmq
+          image: rabbitmq:3.12-management-alpine
+          ports:
+            - containerPort: 5672
+              name: amqp
+            - containerPort: 15672
+              name: management
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secrets
+                  key: rabbitmq-user
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secrets
+                  key: rabbitmq-password
+          volumeMounts:
+            - name: rabbitmq-data
+              mountPath: /var/lib/rabbitmq
+          livenessProbe:
+            exec:
+              command: ['rabbitmq-diagnostics', 'check_running']
+            initialDelaySeconds: 45
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ['rabbitmq-diagnostics', 'check_running']
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '250m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
       volumes:
-      - name: rabbitmq-data
-        emptyDir: {}
+        - name: rabbitmq-data
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -65,14 +67,14 @@ spec:
   selector:
     app: rabbitmq
   ports:
-  - name: amqp
-    protocol: TCP
-    port: 5672
-    targetPort: 5672
-  - name: management
-    protocol: TCP
-    port: 15672
-    targetPort: 15672
+    - name: amqp
+      protocol: TCP
+      port: 5672
+      targetPort: 5672
+    - name: management
+      protocol: TCP
+      port: 15672
+      targetPort: 15672
   type: ClusterIP
 ---
 apiVersion: v1
